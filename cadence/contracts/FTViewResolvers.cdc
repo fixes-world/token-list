@@ -10,10 +10,6 @@ import "MetadataViews"
 import "ViewResolver"
 
 access(all) contract FTViewResolvers {
-    /* --- Events --- */
-
-    /// Event emitted when the contract is initialized
-    access(all) event ContractInitialized()
 
     /* --- Interfaces & Resources --- */
 
@@ -54,9 +50,8 @@ access(all) contract FTViewResolvers {
 
         access(self)
         fun borrowContractViewResolver(): &ViewResolver {
-            return getAccount(self.address).contracts
-                .borrow<&ViewResolver>(name: self.contractName)
-                ?? panic("ContractViewResolver not found")
+            return FTViewResolvers.borrowContractViewResolver(self.address, self.contractName)
+                ?? panic("Contract view resolver not found")
         }
     }
 
@@ -70,7 +65,10 @@ access(all) contract FTViewResolvers {
         return <- create ContractViewResolver(address: address, contractName: contractName)
     }
 
-    init() {
-        emit ContractInitialized()
+    /// Borrow a contract view resolver
+    ///
+    access(all)
+    fun borrowContractViewResolver(_ addr: Address, _ name: String): &ViewResolver? {
+        return getAccount(addr).contracts.borrow<&ViewResolver>(name: name)
     }
 }

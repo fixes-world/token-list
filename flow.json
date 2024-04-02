@@ -11,6 +11,12 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7"
 			}
+		},
+		"FTViewResolvers": {
+			"source": "./cadence/contracts/FTViewResolvers.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7"
+			}
 		}
 	},
 	"dependencies": {
@@ -86,7 +92,8 @@
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
-				"TokenList"
+				"TokenList",
+				"FTViewResolvers"
 			]
 		}
 	}
