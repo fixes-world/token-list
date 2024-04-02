@@ -27,11 +27,18 @@ access(all) contract TokenList {
         _ name: String,
         _ type: Type,
     )
+    /// Event emitted when a new Fungible Token is reviewed
+    access(all) event RegisteryReviewerWhitelisted(
+        _ address: Address,
+        _ value: Bool
+    )
 
     /* --- Variable, Enums and Structs --- */
 
     access(all) let registryStoragePath: StoragePath
     access(all) let registryPublicPath: PublicPath
+    access(all) let reviewerStoragePath: StoragePath
+    access(all) let reviewerPublicPath: PublicPath
 
     /* --- Interfaces & Resources --- */
 
@@ -253,10 +260,32 @@ access(all) contract TokenList {
         }
     }
 
+    /// Interface for the Fungible Token Reviewer
+    ///
+    access(all) resource interface FungibleTokenReviewerInterface {
+
+    }
+
     /// The resource for the FT Reviewer
     ///
-    access(all) resource FungibleTokenReviewer {
-        // TODO
+    access(all) resource FungibleTokenReviewer: FungibleTokenReviewerInterface {
+
+        init() {
+            // TODO
+        }
+
+        // --- Internal Methods ---
+        access(self)
+        fun borrowRegistry(): &TokenListRegistry{TokenListViewer, TokenListRegister} {
+            return TokenList.borrowRegistry()
+                .borrowWritableRegistry(self.borrowSelf())
+                ?? panic("Could not borrow the TokenListRegistry reference")
+        }
+
+        access(self)
+        fun borrowSelf(): &FungibleTokenReviewer {
+            return &self as &FungibleTokenReviewer
+        }
     }
 
     /// Interface for the Token List Viewer
@@ -280,9 +309,17 @@ access(all) contract TokenList {
         /// Get the Fungible Token Entry by the type
         access(all)
         fun borrowFungibleTokenEntry(_ tokenType: Type): &FungibleTokenEntry{FTEntryInterface}?
-        // --- Internal Methods ---
+        // --- Read Methods: for Reviewer ---
+        /// check if the reviewer is whitelisted
+        access(all) view
+        fun isWhitelistedReviewer(_ reviewer: &FungibleTokenReviewer): Bool
+        /// Borrow the writable registry
+        access(all)
+        fun borrowWritableRegistry(_ reviewer: &FungibleTokenReviewer): &TokenListRegistry{TokenListViewer, TokenListRegister}?
+        // --- Write Methods ---
+        /// Register a new standard Fungible Token Entry to the registry
         access(contract)
-        fun registerFungibleToken(_ ftEntry: @FungibleTokenEntry)
+        fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String)
     }
 
     /// Interface for the Token List Register
@@ -297,6 +334,9 @@ access(all) contract TokenList {
     /// The Token List Registry
     ///
     access(all) resource TokenListRegistry: TokenListViewer, TokenListRegister {
+        // Whitelisted Reviewers
+        access(self)
+        let whitelisted: {Address: Bool}
         // FT Type => FT Entry
         access(self)
         let entries: @{Type: FungibleTokenEntry}
@@ -308,6 +348,7 @@ access(all) contract TokenList {
         let symbolMapping: {String: [Type]}
 
         init() {
+            self.whitelisted = {}
             self.entries <- {}
             self.addressMapping = {}
             self.symbolMapping = {}
@@ -379,7 +420,39 @@ access(all) contract TokenList {
             return &self.entries[tokenType] as &FungibleTokenEntry?
         }
 
+        // ----- Methods: Register -----
+
+        /// check if the reviewer is whitelisted
+        ///
+        access(all) view
+        fun isWhitelistedReviewer(_ reviewer: &FungibleTokenReviewer): Bool {
+            if let reviewerAddr = reviewer.owner?.address {
+                return self.whitelisted[reviewerAddr] == true
+            }
+            return false
+        }
+
+        /// Borrow the writable registry
+        ///
+        access(all)
+        fun borrowWritableRegistry(_ reviewer: &FungibleTokenReviewer): &TokenListRegistry{TokenListViewer, TokenListRegister}? {
+            if self.isWhitelistedReviewer(reviewer) {
+                return &self as &TokenListRegistry{TokenListViewer, TokenListRegister}
+            }
+            return nil
+        }
+
         // ----- Write Methods -----
+
+        /// Register a new standard Fungible Token Entry to the registry
+        ///
+        access(contract)
+        fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
+            self.registerFungibleToken(
+                // Use the default view resolver
+                <- create FungibleTokenEntry(ftAddress, ftContractName, nil)
+            )
+        }
 
         /// Add a new Fungible Token Entry to the registry
         /// TODO: Change to entitlement in Cadence 1.0
@@ -418,6 +491,18 @@ access(all) contract TokenList {
             )
         }
 
+        // ----- Write Methods: Private -----
+
+        /// Update the whitelist
+        ///
+        access(all)
+        fun updateWhitelist(_ addr: Address, _ value: Bool) {
+            self.whitelisted[addr] = value
+
+            /// Emit the event
+            emit RegisteryReviewerWhitelisted(addr, value)
+        }
+
         // ----- Internal Methods -----
 
         /// Borrow the FT Entry Reference
@@ -441,13 +526,11 @@ access(all) contract TokenList {
 
     /* --- Methods --- */
 
-    /// Build the FT Vault Type
+    /// Create a new Fungible Token Reviewer
     ///
-    access(all) view
-    fun buildFTVaultType(_ address: Address, _ contractName: String): Type? {
-        let addrStr = address.toString()
-        let addrStrNo0x = addrStr.slice(from: 2, upTo: addrStr.length)
-        return CompositeType("A.".concat(addrStrNo0x).concat(".").concat(contractName).concat(".Vault"))
+    access(all)
+    fun createFungibleTokenReviewer(): @FungibleTokenReviewer {
+        return <- create FungibleTokenReviewer()
     }
 
     /// Borrow the public capability of  Token List Registry
@@ -460,19 +543,35 @@ access(all) contract TokenList {
             ?? panic("Could not borrow the TokenListRegistry reference")
     }
 
+    /// Build the FT Vault Type
+    ///
+    access(all) view
+    fun buildFTVaultType(_ address: Address, _ contractName: String): Type? {
+        let addrStr = address.toString()
+        let addrStrNo0x = addrStr.slice(from: 2, upTo: addrStr.length)
+        return CompositeType("A.".concat(addrStrNo0x).concat(".").concat(contractName).concat(".Vault"))
+    }
+
+    /// Check if the Fungible Token is registered
+    ///
+    access(all) view
+    fun isFungibleTokenRegistered(_ address: Address, _ contractName: String): Bool {
+        let registry = self.borrowRegistry()
+        if let ftType = self.buildFTVaultType(address, contractName) {
+            return registry.borrowFungibleTokenEntry(ftType) != nil
+        }
+        return false
+    }
+
     /// Register a new Fungible Token
     ///
     access(all)
     fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
         pre {
-            self.buildFTVaultType(ftAddress, ftContractName) != nil:
-                "Invalid Fungible Token contract"
+            self.isFungibleTokenRegistered(ftAddress, ftContractName) == false: "Fungible Token already registered"
         }
         let registry = self.borrowRegistry()
-        registry.registerFungibleToken(
-            // Use the default view resolver
-            <- create FungibleTokenEntry(ftAddress, ftContractName, nil)
-        )
+        registry.registerStandardFungibleToken(ftAddress, ftContractName)
     }
 
     init() {
@@ -481,10 +580,12 @@ access(all) contract TokenList {
         self.registryStoragePath = StoragePath(identifier: identifier.concat("_Registry"))!
         self.registryPublicPath = PublicPath(identifier: identifier.concat("_Registry"))!
 
+        self.reviewerStoragePath = StoragePath(identifier: identifier.concat("_Reviewer"))!
+        self.reviewerPublicPath = PublicPath(identifier: identifier.concat("_Reviewer"))!
+
         // Create the Token List Registry
         let registry <- create TokenListRegistry()
         self.account.save(<- registry, to: self.registryStoragePath)
-
         // link the public capability
         // @deprecated in Cadence 1.0
         self.account.link<&TokenListRegistry{TokenListViewer}>(self.registryPublicPath, target: self.registryStoragePath)
