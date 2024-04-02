@@ -337,6 +337,10 @@ access(all) contract TokenList {
         ///
         access(all) view
         fun getFTEntries(_ page: Int, _ size: Int): [Type] {
+            pre {
+                page >= 0: "Invalid page"
+                size > 0: "Invalid size"
+            }
             let max = self.getFTEntriesAmount()
             let start = page * size
             var end = start + size
