@@ -137,3 +137,6 @@ dist/
 
 # macOS-specific files
 .DS_Store
+
+# Flow Cadence dependencies
+imports/
