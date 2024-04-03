@@ -122,13 +122,17 @@ access(all) contract TokenList {
         ) {
             self.identity = FTViewUtils.FTIdentity(ftAddress, ftContractName)
             self.reviewers = {}
-            if viewResolver == nil && ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil {
+            if viewResolver == nil {
+                assert(
+                    ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil,
+                    message: "ViewResolver not found in the contract"
+                )
                 // If viewResolver is not provided, then create one using the ViewResolvers
                 self.viewResolver <- ViewResolvers.createContractViewResolver(address: ftAddress, contractName: ftContractName)
                 destroy viewResolver
             } else {
                 // If viewResolver is not provided, then panic
-                self.viewResolver <- viewResolver ?? panic("View Resolver not provided")
+                self.viewResolver <- viewResolver!
             }
             // ensure ftView exists
             self.getDisplay()
