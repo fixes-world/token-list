@@ -5,6 +5,13 @@ transaction(
     target: Address
 ) {
     prepare(acct: AuthAccount) {
+        assert(
+            acct.borrow<&TokenList.FungibleTokenReviewer>(
+                from: TokenList.reviewerStoragePath
+            ) != nil,
+            message: "Missing the reviewer capability"
+        )
+
         let maintainerId = TokenList.generateReviewMaintainerCapabilityId(target)
         // link the private cap
         let privatePath = PrivatePath(identifier: maintainerId)!

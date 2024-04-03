@@ -4,6 +4,11 @@ transaction(
     target: Address
 ) {
     prepare(acct: AuthAccount) {
+        assert(
+            acct.borrow<&TokenList.Registry>(from: TokenList.registryStoragePath) != nil,
+            message: "Missing TokenList.Registry"
+        )
+
         let reviewerCapId = TokenList.generateReviewerCapabilityId(target)
         // link the private cap
         let privatePath = PrivatePath(identifier: reviewerCapId)!
