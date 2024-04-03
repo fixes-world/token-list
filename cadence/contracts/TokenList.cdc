@@ -348,7 +348,7 @@ access(all) contract TokenList {
     ///
     access(all) resource FungibleTokenReviewer: FungibleTokenReviewMaintainer, FungibleTokenReviewerInterface, MetadataViews.ResolverCollection {
         access(self)
-        let writableRegistryCap: Capability<&TokenListRegistry{TokenListViewer, TokenListRegister}>
+        let writableRegistryCap: Capability<&Registry{TokenListViewer, TokenListRegister}>
         access(self)
         let storedIdMapping: {UInt64: Type}
         access(self)
@@ -357,7 +357,7 @@ access(all) contract TokenList {
         let reviewed: {Type: Evaluation}
 
         init(
-            _ cap: Capability<&TokenListRegistry{TokenListViewer, TokenListRegister}>
+            _ cap: Capability<&Registry{TokenListViewer, TokenListRegister}>
         ) {
             pre {
                 cap.check(): "Invalid capability"
@@ -556,9 +556,9 @@ access(all) contract TokenList {
         /// Borrow the Registry
         ///
         access(self)
-        fun _borrowRegistry(): &TokenListRegistry{TokenListViewer, TokenListRegister} {
+        fun _borrowRegistry(): &Registry{TokenListViewer, TokenListRegister} {
             return self.writableRegistryCap.borrow()
-                ?? panic("This reviewer cannot access writable TokenListRegistry reference.")
+                ?? panic("This reviewer cannot access writable Registry reference.")
         }
     }
 
@@ -655,7 +655,7 @@ access(all) contract TokenList {
 
     /// The Token List Registry
     ///
-    access(all) resource TokenListRegistry: TokenListViewer, TokenListRegister {
+    access(all) resource Registry: TokenListViewer, TokenListRegister {
         // FT Entry ID => FT Type
         access(self)
         let entriesIdMapping: {UInt64: Type}
@@ -827,7 +827,7 @@ access(all) contract TokenList {
     ///
     access(all)
     fun createFungibleTokenReviewer(
-        _ cap: Capability<&TokenListRegistry{TokenListViewer, TokenListRegister}>
+        _ cap: Capability<&Registry{TokenListViewer, TokenListRegister}>
     ): @FungibleTokenReviewer {
         return <- create FungibleTokenReviewer(cap)
     }
@@ -861,11 +861,11 @@ access(all) contract TokenList {
     /// Borrow the public capability of  Token List Registry
     ///
     access(all)
-    fun borrowRegistry(): &TokenListRegistry{TokenListViewer} {
+    fun borrowRegistry(): &Registry{TokenListViewer} {
         return getAccount(self.account.address)
-            .getCapability<&TokenListRegistry{TokenListViewer}>(self.registryPublicPath)
+            .getCapability<&Registry{TokenListViewer}>(self.registryPublicPath)
             .borrow()
-            ?? panic("Could not borrow the TokenListRegistry reference")
+            ?? panic("Could not borrow the Registry reference")
     }
 
     /// Check if the Fungible Token is registered
@@ -909,11 +909,11 @@ access(all) contract TokenList {
         self.maintainerStoragePath = StoragePath(identifier: identifier.concat("_Maintainer"))!
 
         // Create the Token List Registry
-        let registry <- create TokenListRegistry()
+        let registry <- create Registry()
         self.account.save(<- registry, to: self.registryStoragePath)
         // link the public capability
         // @deprecated in Cadence 1.0
-        self.account.link<&TokenListRegistry{TokenListViewer}>(self.registryPublicPath, target: self.registryStoragePath)
+        self.account.link<&Registry{TokenListViewer}>(self.registryPublicPath, target: self.registryStoragePath)
 
         // Emit the initialized event
         emit ContractInitialized()
