@@ -10,6 +10,7 @@ It will be used to store the list of all the Flow Standard Fungible Tokens (FTs)
 import "FungibleToken"
 import "MetadataViews"
 import "FungibleTokenMetadataViews"
+import "FTViewUtils"
 import "FTViewResolvers"
 
 /// Token List registry contract
@@ -45,12 +46,9 @@ access(all) contract TokenList {
     /// Interface for the FT Entry
     ///
     access(all) resource interface FTEntryInterface {
-        // ----- constants -----
-        access(all)
-        let address: Address
-        access(all)
-        let contractName: String
         // ----- View Methods -----
+        access(all) view
+        fun getIdentity(): FTViewUtils.FTIdentity
         /// Get the Fungible Token Symbol
         access(all) view
         fun getSymbol(): String
@@ -84,9 +82,7 @@ access(all) contract TokenList {
     ///
     access(all) resource FungibleTokenEntry: FTEntryInterface {
         access(all)
-        let address: Address
-        access(all)
-        let contractName: String
+        let identity: FTViewUtils.FTIdentity
         // ReviewerId => FTReview
         access(self)
         let reviewers: {UInt64: FTReview}
@@ -99,12 +95,11 @@ access(all) contract TokenList {
             _ ftContractName: String,
             _ viewResolver: @{MetadataViews.Resolver}?
         ) {
-            self.address = ftAddress
-            self.contractName = ftContractName
+            self.identity = FTViewUtils.FTIdentity(ftAddress, ftContractName)
             self.reviewers = {}
-            if viewResolver == nil && FTViewResolvers.borrowContractViewResolver(self.address, self.contractName) != nil {
+            if viewResolver == nil && FTViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil {
                 // If viewResolver is not provided, then create one using the FTViewResolvers
-                self.viewResolver <- FTViewResolvers.createContractViewResolver(address: self.address, contractName: self.contractName)
+                self.viewResolver <- FTViewResolvers.createContractViewResolver(address: ftAddress, contractName: ftContractName)
                 destroy viewResolver
             } else {
                 // If viewResolver is not provided, then panic
@@ -120,6 +115,13 @@ access(all) contract TokenList {
         }
 
         // ----- Implementing the FTMetadataInterface -----
+
+        /// Get the Fungible Token Identity
+        ///
+        access(all) view
+        fun getIdentity(): FTViewUtils.FTIdentity {
+            return self.identity
+        }
 
         /// Check if the Fungible Token is reviewed by some one
         ///
@@ -147,8 +149,7 @@ access(all) contract TokenList {
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type {
-            return TokenList.buildFTVaultType(self.address, self.contractName)
-                ?? panic("Could not build the FT Type")
+            return self.identity.buildType()
         }
 
         /// Get the Fungible Token Symbol
@@ -205,19 +206,17 @@ access(all) contract TokenList {
         ///
         access(contract)
         fun borrowFungibleTokenContract(): &FungibleToken {
-            return getAccount(self.address)
-                .contracts.borrow<&FungibleToken>(name: self.contractName)
-                ?? panic("Could not borrow the FungibleToken contract reference")
+            return self.identity.borrowFungibleTokenContract()
         }
     }
 
     /// The enum for the Evaluation
     ///
     access(all) enum Evaluation: UInt8 {
-        case UNVERIFIED
-        case PENDING
-        case VERIFIED
-        case FEATURED
+        access(all) case UNVERIFIED
+        access(all) case PENDING
+        access(all) case VERIFIED
+        access(all) case FEATURED
     }
 
     /// The struct for the Review Comment
@@ -266,15 +265,64 @@ access(all) contract TokenList {
 
     }
 
+    /// Maintainer interface for the Fungible Token Reviewer
+    ///
+    access(all) resource interface FungibleTokenReviewerMaintainer {
+
+    }
+
     /// The resource for the FT Reviewer
     ///
-    access(all) resource FungibleTokenReviewer: FungibleTokenReviewerInterface {
+    access(all) resource FungibleTokenReviewer: FungibleTokenReviewerMaintainer, FungibleTokenReviewerInterface, MetadataViews.ResolverCollection {
+        access(self)
+        let storedDatas: @{Type: FTViewUtils.EditableFTView}
+        access(self)
+        let idMapping: {UInt64: Type}
 
         init() {
-            // TODO
+            self.idMapping = {}
+            self.storedDatas <- {}
+        }
+
+        /// @deprecated in Cadence 1.0
+        destroy() {
+            destroy self.storedDatas
+        }
+
+        // --- Implement the FungibleTokenReviewerInterface ---
+
+        // --- Implement the MetadataViews.ResolverCollection ---
+
+        /// Get the IDs of the view resolvers
+        ///
+        access(all) view
+        fun getIDs(): [UInt64] {
+            return self.idMapping.keys
+        }
+
+        /// Borrow the view resolver
+        /// TODO: Update after Standard V2 is released
+        ///
+        access(all) view
+        fun borrowViewResolver(id: UInt64): &{MetadataViews.Resolver} {
+            var ret: &{MetadataViews.Resolver}? = nil
+            if let tokenType = self.idMapping[id] {
+                ret = self.borrowEditableFTView(tokenType)
+            }
+            return ret ?? panic("Failed to borrow the view resolver")
         }
 
         // --- Internal Methods ---
+
+        /// Borrow the Editable FT View
+        ///
+        access(self)
+        fun borrowEditableFTView(_ tokenType: Type): &FTViewUtils.EditableFTView? {
+            return &self.storedDatas[tokenType] as &FTViewUtils.EditableFTView?
+        }
+
+        /// Borrow the Registry
+        ///
         access(self)
         fun borrowRegistry(): &TokenListRegistry{TokenListViewer, TokenListRegister} {
             return TokenList.borrowRegistry()
@@ -282,6 +330,8 @@ access(all) contract TokenList {
                 ?? panic("Could not borrow the TokenListRegistry reference")
         }
 
+        /// Borrow the self reference
+        ///
         access(self)
         fun borrowSelf(): &FungibleTokenReviewer {
             return &self as &FungibleTokenReviewer
@@ -337,6 +387,9 @@ access(all) contract TokenList {
         // Whitelisted Reviewers
         access(self)
         let whitelisted: {Address: Bool}
+        // FT Entry ID => FT Type
+        access(self)
+        let entriesIdMapping: {UInt64: Type}
         // FT Type => FT Entry
         access(self)
         let entries: @{Type: FungibleTokenEntry}
@@ -349,6 +402,7 @@ access(all) contract TokenList {
 
         init() {
             self.whitelisted = {}
+            self.entriesIdMapping = {}
             self.entries <- {}
             self.addressMapping = {}
             self.symbolMapping = {}
@@ -397,7 +451,7 @@ access(all) contract TokenList {
         fun getFTEntriesByAddress(_ address: Address): [Type] {
             if let contracts = self.borrowAddressContractsRef(address) {
                 return contracts.map(fun(contractName: String): Type {
-                    return TokenList.buildFTVaultType(address, contractName)
+                    return FTViewUtils.buildFTVaultType(address, contractName)
                         ?? panic("Could not build the FT Type")
                 })
             }
@@ -462,16 +516,20 @@ access(all) contract TokenList {
             pre {
                 self.entries[ftEntry.getTokenType()] == nil:
                     "FungibleToken Entry already exists in the registry"
+                self.entriesIdMapping[ftEntry.uuid] == nil:
+                    "FungibleToken Entry ID already exists in the registry"
             }
             let tokenType = ftEntry.getTokenType()
             self.entries[tokenType] <-! ftEntry
 
             let ref = self.borrowFTEntryRef(tokenType)
+            // Add the ID mapping
+            self.entriesIdMapping[ref.uuid] = tokenType
             // Add the address mapping
-            if let addrRef = self.borrowAddressContractsRef(ref.address) {
-                addrRef.append(ref.contractName)
+            if let addrRef = self.borrowAddressContractsRef(ref.identity.address) {
+                addrRef.append(ref.identity.contractName)
             } else {
-                self.addressMapping[ref.address] = [ref.contractName]
+                self.addressMapping[ref.identity.address] = [ref.identity.contractName]
             }
 
             // Add the symbol mapping
@@ -483,8 +541,8 @@ access(all) contract TokenList {
 
             // emit the event
             emit FungibleTokenRegistered(
-                ref.address,
-                ref.contractName,
+                ref.identity.address,
+                ref.identity.contractName,
                 ref.getSymbol(),
                 ref.getName(),
                 tokenType
@@ -533,6 +591,17 @@ access(all) contract TokenList {
         return <- create FungibleTokenReviewer()
     }
 
+    /// Borrow the public capability of the Fungible Token Reviewer
+    ///
+    access(all)
+    fun borrowReviewerPublic(_ addr: Address): &FungibleTokenReviewer{FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}? {
+        return getAccount(addr)
+            .getCapability<&FungibleTokenReviewer{FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
+                self.reviewerPublicPath
+            )
+            .borrow()
+    }
+
     /// Borrow the public capability of  Token List Registry
     ///
     access(all)
@@ -543,21 +612,12 @@ access(all) contract TokenList {
             ?? panic("Could not borrow the TokenListRegistry reference")
     }
 
-    /// Build the FT Vault Type
-    ///
-    access(all) view
-    fun buildFTVaultType(_ address: Address, _ contractName: String): Type? {
-        let addrStr = address.toString()
-        let addrStrNo0x = addrStr.slice(from: 2, upTo: addrStr.length)
-        return CompositeType("A.".concat(addrStrNo0x).concat(".").concat(contractName).concat(".Vault"))
-    }
-
     /// Check if the Fungible Token is registered
     ///
     access(all) view
     fun isFungibleTokenRegistered(_ address: Address, _ contractName: String): Bool {
         let registry = self.borrowRegistry()
-        if let ftType = self.buildFTVaultType(address, contractName) {
+        if let ftType = FTViewUtils.buildFTVaultType(address, contractName) {
             return registry.borrowFungibleTokenEntry(ftType) != nil
         }
         return false
