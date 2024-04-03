@@ -11,7 +11,7 @@ import "ViewResolver"
 
 access(all) contract FTViewResolvers {
 
-    /* --- Interfaces & Resources --- */
+    /* --- Contract View Resolver --- */
 
     /// The contract view resolver
     ///
