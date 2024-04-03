@@ -1,11 +1,53 @@
 {
 	"contracts": {
-		"FlowToken": "./imports/1654653399040a61/FlowToken.cdc",
-		"FungibleToken": "./imports/f233dcee88fe0abe/FungibleToken.cdc",
-		"FungibleTokenMetadataViews": "./imports/f233dcee88fe0abe/FungibleTokenMetadataViews.cdc",
-		"MetadataViews": "./imports/1d7e57aa55817448/MetadataViews.cdc",
-		"NonFungibleToken": "./imports/1d7e57aa55817448/NonFungibleToken.cdc",
-		"ViewResolver": "./imports/1d7e57aa55817448/ViewResolver.cdc",
+		"FlowToken": {
+			"source": "./imports/1654653399040a61/FlowToken.cdc",
+			"aliases": {
+				"emulator": "0ae53cb6e3f42a79",
+				"mainnet": "1654653399040a61",
+				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FungibleToken": {
+			"source": "./imports/f233dcee88fe0abe/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"FungibleTokenMetadataViews": {
+			"source": "./imports/f233dcee88fe0abe/FungibleTokenMetadataViews.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"MetadataViews": {
+			"source": "./imports/1d7e57aa55817448/MetadataViews.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "./imports/1d7e57aa55817448/NonFungibleToken.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"ViewResolver": {
+			"source": "./imports/1d7e57aa55817448/ViewResolver.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
 		"TokenList": {
 			"source": "./cadence/contracts/TokenList.cdc",
 			"aliases": {
@@ -98,6 +140,7 @@
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
+				"FungibleTokenMetadataViews",
 				"ViewResolvers",
 				"FTViewUtils",
 				"TokenList"
