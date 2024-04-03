@@ -34,13 +34,13 @@ access(all) contract FTViewResolvers {
 
         // ---- Implementing the Resolver ----
 
-        access(all)
+        access(all) view
         fun getViews(): [Type] {
             let viewResolver = self.borrowContractViewResolver()
             return viewResolver.getViews()
         }
 
-        access(all)
+        access(all) view
         fun resolveView(_ view: Type): AnyStruct? {
             let viewResolver = self.borrowContractViewResolver()
             return viewResolver.resolveView(view)
@@ -70,5 +70,65 @@ access(all) contract FTViewResolvers {
     access(all)
     fun borrowContractViewResolver(_ addr: Address, _ name: String): &ViewResolver? {
         return getAccount(addr).contracts.borrow<&ViewResolver>(name: name)
+    }
+
+    /* --- Collection Resolver --- */
+
+    /// The collection view resolver
+    ///
+    access(all) resource CollectionViewResolver: MetadataViews.Resolver {
+        access(self)
+        let cap: Capability<&{MetadataViews.ResolverCollection}>
+        access(self)
+        let id: UInt64
+
+        init(
+            _ cap: Capability<&{MetadataViews.ResolverCollection}>,
+            id: UInt64
+        ) {
+            pre {
+                cap.check(): "Collection view resolver capability is invalid"
+            }
+            post {
+                self.borrowViewResolver() != nil: "Collection view resolver is invalid"
+            }
+            self.cap = cap
+            self.id = id
+            // Ensure the collection view resolver is valid
+            self.borrowViewResolver()
+        }
+
+        // ---- Implementing the Resolver ----
+
+        access(all) view
+        fun getViews(): [Type] {
+            let viewResolver = self.borrowViewResolver()
+            return viewResolver?.getViews() ?? []
+        }
+
+        access(all) view
+        fun resolveView(_ view: Type): AnyStruct? {
+            let viewResolver = self.borrowViewResolver()
+            return viewResolver?.resolveView(view)
+        }
+
+        // ---- Local Methods ----
+
+        access(self) view
+        fun borrowViewResolver(): &{MetadataViews.Resolver}? {
+            let ref = self.cap.borrow()
+                ?? panic("Collection view resolver not found")
+            return ref.borrowViewResolver(id: self.id)
+        }
+    }
+
+    /// Create a collection view resolver
+    ///
+    access(all)
+    fun createCollectionViewResolver(
+        _ cap: Capability<&{MetadataViews.ResolverCollection}>,
+        id: UInt64
+    ): @CollectionViewResolver {
+        return <- create CollectionViewResolver(cap, id: id)
     }
 }
