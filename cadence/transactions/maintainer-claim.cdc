@@ -8,6 +8,12 @@ transaction(
         let registry = TokenList.borrowRegistry()
         let registryAddr = registry.owner?.address ?? panic("Failed to get registry address")
 
+        if acct.check<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
+            // remove old Maintainer
+            let old <- acct.load<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
+            destroy old
+        }
+
         let maintainerId = TokenList.generateReviewMaintainerCapabilityId(acct.address)
         let reviewerCap = acct.inbox
             .claim<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewMaintainer, TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
@@ -18,10 +24,6 @@ transaction(
             reviewerCap.check() == true,
             message: "Failed to check reviewer capability"
         )
-
-        if acct.check<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
-            panic("Maintainer already exists")
-        }
 
         let maintainer <- TokenList.createFungibleTokenReviewMaintainer(reviewerCap)
         acct.save(<- maintainer, to: TokenList.maintainerStoragePath)
