@@ -168,9 +168,37 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The interface for the FT View Data Editor
+    ///
+    access(all) resource interface FTViewDataEditor {
+        /// Update the Storage Path
+        access(all)
+        fun updateStoragePath(_ storagePath: StoragePath)
+        /// Set the FT Vault Data
+        access(all)
+        fun initializeVaultData(
+            receiverPath: PublicPath,
+            metadataPath: PublicPath,
+            providerPath: PrivatePath,
+            receiverType: Type,
+            metadataType: Type,
+            providerType: Type
+        )
+        /// Set the FT Display
+        access(all)
+        fun setFTDisplay(
+            name: String?,
+            symbol: String?,
+            description: String?,
+            externalURL: String?,
+            logo: String?,
+            socials: {String: String}
+        )
+    }
+
     /// The Resource for the FT View
     ///
-    access(all) resource EditableFTView: EditableFTViewDataInterface, MetadataViews.Resolver {
+    access(all) resource EditableFTView: FTViewDataEditor, EditableFTViewDataInterface, MetadataViews.Resolver {
         access(all)
         let identity: FTIdentity
         access(all)
