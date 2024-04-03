@@ -4,10 +4,7 @@ transaction(
     target: Address
 ) {
     prepare(acct: AuthAccount) {
-        let registry = acct.borrow<&TokenList.Registry>(from: TokenList.registryStoragePath)
-            ?? panic("No registry found")
-
-        let reviewerCapId = registry.generateReviewerCapabilityId(target)
+        let reviewerCapId = TokenList.generateReviewerCapabilityId(target)
         // link the private cap
         let privatePath = PrivatePath(identifier: reviewerCapId)!
         acct.unlink(privatePath)

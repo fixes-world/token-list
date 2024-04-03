@@ -28,6 +28,11 @@ access(all) contract TokenList {
         _ name: String,
         _ type: Type,
     )
+    /// Event emitted when the Fungible Token Reviewer accessable is updated
+    access(all) event FungibleTokenReviewerAccessableUpdated(
+        _ reviewer: Address,
+        _ value: Bool
+    )
     /// Event emitted when a Editable FTView is created
     access(all) event FungibleTokenReviewerEditableFTViewCreated(
         _ address: Address,
@@ -316,6 +321,10 @@ access(all) contract TokenList {
     ///
     access(all) resource interface FungibleTokenReviewerInterface {
         access(all) view
+        fun getAddress(): Address {
+            return self.owner?.address ?? panic("Owner not found")
+        }
+        access(all) view
         fun getManagedFTTypes(): [Type]
         access(all) view
         fun getReviewedFTTypes(): [Type]
@@ -384,6 +393,8 @@ access(all) contract TokenList {
         access(all)
         fun reviewFTEvalute(_ type: Type, rank: Evaluation) {
             let registery = self._borrowRegistry()
+            registery.onReviewerCall(self.getAddress())
+
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -411,6 +422,8 @@ access(all) contract TokenList {
         access(all)
         fun reviewFTComment(_ type: Type, comment: String) {
             let registery = self._borrowRegistry()
+            registery.onReviewerCall(self.getAddress())
+
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -440,9 +453,11 @@ access(all) contract TokenList {
             _ ftContractName: String,
             at: StoragePath
         ) {
+            let registery = self._borrowRegistry()
+            registery.onReviewerCall(self.getAddress())
+
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
-            let registery = self._borrowRegistry()
             assert(
                 registery.borrowFungibleTokenEntry(tokenType) == nil,
                 message: "Fungible Token already registered"
@@ -481,6 +496,9 @@ access(all) contract TokenList {
         ///
         access(all)
         fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor}? {
+            let registery = self._borrowRegistry()
+            registery.onReviewerCall(self.getAddress())
+
             return self._borrowEditableFTView(tokenType)
         }
 
@@ -581,6 +599,13 @@ access(all) contract TokenList {
             self.reviewerCap = cap
         }
 
+        /// Get the reviewer address
+        ///
+        access(all) view
+        fun getReviewerAddress(): Address {
+            return self.reviewerCap.address
+        }
+
         /// Review the Fungible Token with Evaluation
         ///
         access(all)
@@ -625,6 +650,10 @@ access(all) contract TokenList {
     /// Interface for the Token List Viewer
     ///
     access(all) resource interface TokenListViewer {
+        // --- Read Methods ---
+        /// Return all available reviewers
+        access(all) view
+        fun getReviewers(): [Address]
         /// Get the amount of Fungible Token Entries
         access(all) view
         fun getFTEntriesAmount(): Int
@@ -655,11 +684,17 @@ access(all) contract TokenList {
         /// Add a new Fungible Token Entry to the registry
         access(contract)
         fun registerFungibleToken(_ ftEntry: @FungibleTokenEntry)
+        /// Invoked when reviewer does a call
+        access(contract)
+        fun onReviewerCall(_ reviewer: Address)
     }
 
     /// The Token List Registry
     ///
     access(all) resource Registry: TokenListViewer, TokenListRegister {
+        // Reviewer => Bool
+        access(self)
+        let reviewerWhitelisted: {Address: Bool}
         // FT Entry ID => FT Type
         access(self)
         let entriesIdMapping: {UInt64: Type}
@@ -678,6 +713,7 @@ access(all) contract TokenList {
             self.entries <- {}
             self.addressMapping = {}
             self.symbolMapping = {}
+            self.reviewerWhitelisted = {}
         }
 
         // @deprecated in Cadence 1.0
@@ -686,6 +722,16 @@ access(all) contract TokenList {
         }
 
         // ----- Read Methods -----
+
+        /// Return all available reviewers
+        ///
+        access(all) view
+        fun getReviewers(): [Address] {
+            let ref = &self.reviewerWhitelisted as &{Address: Bool}
+            return self.reviewerWhitelisted.keys.filter(fun (reviewer: Address): Bool {
+                return ref[reviewer] == true
+            })
+        }
 
         /// Get the amount of Fungible Token Entries
         access(all) view
@@ -746,14 +792,6 @@ access(all) contract TokenList {
             return self.borrowFungibleTokenEntryWritableRef(tokenType)
         }
 
-        // ----- Methods for Reviewer  -----
-
-        /// Generate the reviewer capability ID
-        access(all) view
-        fun generateReviewerCapabilityId(_ addr: Address): String {
-            return TokenList.getPathPrefix().concat("PrivateIdentity_".concat(addr.toString()))
-        }
-
         // ----- Write Methods -----
 
         /// Register a new standard Fungible Token Entry to the registry
@@ -763,6 +801,32 @@ access(all) contract TokenList {
             self.registerFungibleToken(
                 // Use the default view resolver
                 <- create FungibleTokenEntry(ftAddress, ftContractName, nil)
+            )
+        }
+
+        // ----- Write Methods: Admin -----
+
+        access(all)
+        fun updateReviewerAccessable(_ reviewer: Address, _ value: Bool) {
+            self.reviewerWhitelisted[reviewer] = value
+
+            emit FungibleTokenReviewerAccessableUpdated(
+                reviewer,
+                value
+            )
+        }
+
+        // ----- Write Methods: Reviewer -----
+
+        /// Invoked when reviewer does a call
+        access(contract)
+        fun onReviewerCall(_ reviewer: Address) {
+            if self.reviewerWhitelisted[reviewer] == nil {
+                self.updateReviewerAccessable(reviewer, true)
+            }
+            assert(
+                self.reviewerWhitelisted[reviewer] == true,
+                message: "Reviewer is not whitelisted"
             )
         }
 
@@ -899,6 +963,20 @@ access(all) contract TokenList {
     access(all) view
     fun getPathPrefix(): String {
         return "TokenList_".concat(self.account.address.toString()).concat("_")
+    }
+
+    /// Generate the reviewer capability ID
+    ///
+    access(all) view
+    fun generateReviewerCapabilityId(_ addr: Address): String {
+        return TokenList.getPathPrefix().concat("PrivateIdentity_".concat(addr.toString()))
+    }
+
+    /// Generate the review maintainer capability ID
+    ///
+    access(all) view
+    fun generateReviewMaintainerCapabilityId(_ addr: Address): String {
+        return TokenList.getPathPrefix().concat("PrivateIdentity_ReviewMaintainer_".concat(addr.toString()))
     }
 
     init() {
