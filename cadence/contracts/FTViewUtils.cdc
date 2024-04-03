@@ -168,9 +168,9 @@ access(all) contract FTViewUtils {
         }
     }
 
-    /// The Resource for the FT View Data
+    /// The Resource for the FT View
     ///
-    access(all) resource EditableFTViewData: EditableFTViewDataInterface {
+    access(all) resource EditableFTView: EditableFTViewDataInterface, MetadataViews.Resolver {
         access(all)
         let identity: FTIdentity
         access(all)
@@ -415,17 +415,47 @@ access(all) contract FTViewUtils {
             }
             return ret
         }
+
+        /* --- Implement the MetadataViews.Resolver --- */
+
+        access(all) view
+        fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.ExternalURL>(),
+                Type<FungibleTokenMetadataViews.FTView>(),
+                Type<FungibleTokenMetadataViews.FTDisplay>(),
+                Type<FungibleTokenMetadataViews.FTVaultData>()
+            ]
+        }
+
+        access(all) view
+        fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.ExternalURL>():
+                    return self.getExternalURL()
+                case Type<FungibleTokenMetadataViews.FTView>():
+                    return FungibleTokenMetadataViews.FTView(
+                        display: self.getFTDisplay(),
+                        vaultData: self.getFTVaultData()
+                    )
+                case Type<FungibleTokenMetadataViews.FTDisplay>():
+                    return self.getFTDisplay()
+                case Type<FungibleTokenMetadataViews.FTVaultData>():
+                    return self.getFTVaultData()
+            }
+            return nil
+        }
     }
 
     /// Create the FT View Data
     ///
     access(all)
-    fun createFTViewData(
+    fun createEditableFTView(
         _ address: Address,
         _ contractName: String,
         _ storagePath: StoragePath,
-    ): @EditableFTViewData {
-        return <- create EditableFTViewData(address, contractName, storagePath)
+    ): @EditableFTView {
+        return <- create EditableFTView(address, contractName, storagePath)
     }
 
     /// Build the FT Vault Type
