@@ -333,7 +333,7 @@ access(all) contract TokenList {
         access(all) view
         fun getVerifiedFTTypes(): [Type]
         access(all) view
-        fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface}?
+        fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.EditableFTViewDisplayInterface}?
     }
 
     /// Maintainer interface for the Fungible Token Reviewer
@@ -354,7 +354,7 @@ access(all) contract TokenList {
         )
         /// Borrow the FTView editor
         access(all)
-        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor}?
+        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}?
     }
 
     /// The resource for the FT Reviewer
@@ -495,7 +495,7 @@ access(all) contract TokenList {
         /// Borrow the FTView editor
         ///
         access(all)
-        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor}? {
+        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
             let registery = self._borrowRegistry()
             registery.onReviewerCall(self.getAddress())
 
@@ -541,7 +541,7 @@ access(all) contract TokenList {
         /// Borrow the reference of Editable FT View
         ///
         access(all) view
-        fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface}? {
+        fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.EditableFTViewDisplayInterface}? {
             return self._borrowEditableFTView(tokenType)
         }
 
@@ -634,7 +634,7 @@ access(all) contract TokenList {
         /// Borrow the FTView editor
         ///
         access(all)
-        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor}? {
+        fun borrowFTViewEditor(_ tokenType: Type): &FTViewUtils.EditableFTView{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
             return self.borrowReviewer().borrowFTViewEditor(tokenType)
         }
 

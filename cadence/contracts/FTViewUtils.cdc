@@ -107,19 +107,6 @@ access(all) contract FTViewUtils {
         /// Get the Capability Path
         access(all) view
         fun getCapabilityType(_ capPath: FTCapPath): Type?
-        // ----- FT Display -----
-        access(all) view
-        fun getName(): String
-        access(all) view
-        fun getSymbol(): String
-        access(all) view
-        fun getDescription(): String
-        access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL
-        access(all) view
-        fun getLogos(): MetadataViews.Medias
-        access(all) view
-        fun getSocials(): {String: MetadataViews.ExternalURL}
         // --- default implementation ---
         /// Check if the FT View Data is initialized
         ///
@@ -131,19 +118,6 @@ access(all) contract FTViewUtils {
                 self.getCapabilityType(FTCapPath.receiver) != nil &&
                 self.getCapabilityType(FTCapPath.metadata) != nil &&
                 self.getCapabilityType(FTCapPath.provider) != nil
-        }
-        /// Get the FT Display
-        ///
-        access(all)
-        fun getFTDisplay(): FungibleTokenMetadataViews.FTDisplay {
-            return FungibleTokenMetadataViews.FTDisplay(
-                name: self.getName(),
-                symbol: self.getSymbol(),
-                description: self.getDescription(),
-                externalURL: self.getExternalURL(),
-                logos: self.getLogos(),
-                socials: self.getSocials()
-            )
         }
         /// Get the FT Vault Data
         ///
@@ -168,6 +142,41 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The interface for the Editable FT View Display
+    ///
+    access(all) resource interface EditableFTViewDisplayInterface {
+        /// Identity of the FT
+        access(all)
+        let identity: FTIdentity
+        // ----- FT Display -----
+        access(all) view
+        fun getName(): String
+        access(all) view
+        fun getSymbol(): String
+        access(all) view
+        fun getDescription(): String
+        access(all) view
+        fun getExternalURL(): MetadataViews.ExternalURL
+        access(all) view
+        fun getLogos(): MetadataViews.Medias
+        access(all) view
+        fun getSocials(): {String: MetadataViews.ExternalURL}
+        // --- default implementation ---
+        /// Get the FT Display
+        ///
+        access(all)
+        fun getFTDisplay(): FungibleTokenMetadataViews.FTDisplay {
+            return FungibleTokenMetadataViews.FTDisplay(
+                name: self.getName(),
+                symbol: self.getSymbol(),
+                description: self.getDescription(),
+                externalURL: self.getExternalURL(),
+                logos: self.getLogos(),
+                socials: self.getSocials()
+            )
+        }
+    }
+
     /// The interface for the FT View Data Editor
     ///
     access(all) resource interface FTViewDataEditor {
@@ -184,6 +193,11 @@ access(all) contract FTViewUtils {
             metadataType: Type,
             providerType: Type
         )
+    }
+
+    /// The interface for the FT View Display Editor
+    ///
+    access(all) resource interface FTViewDisplayEditor {
         /// Set the FT Display
         access(all)
         fun setFTDisplay(
@@ -196,9 +210,13 @@ access(all) contract FTViewUtils {
         )
     }
 
+    access(all) resource EditableFTDisplay {
+        // TODO add FT Display Editor
+    }
+
     /// The Resource for the FT View
     ///
-    access(all) resource EditableFTView: FTViewDataEditor, EditableFTViewDataInterface, MetadataViews.Resolver {
+    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor, EditableFTViewDataInterface, EditableFTViewDisplayInterface, MetadataViews.Resolver {
         access(all)
         let identity: FTIdentity
         access(all)
