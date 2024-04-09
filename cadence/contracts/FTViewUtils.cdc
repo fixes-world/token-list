@@ -210,83 +210,20 @@ access(all) contract FTViewUtils {
         )
     }
 
-    access(all) resource EditableFTDisplay {
-        // TODO add FT Display Editor
-    }
-
-    /// The Resource for the FT View
+    /// The Resource for the FT Display
     ///
-    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor, EditableFTViewDataInterface, EditableFTViewDisplayInterface, MetadataViews.Resolver {
+    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface {
         access(all)
         let identity: FTIdentity
-        access(all)
-        var storagePath: StoragePath
         access(contract)
         let metadata: {String: String}
-        access(contract)
-        let capabilityPaths: {FTCapPath: CapabilityPath}
-        access(contract)
-        let capabilityTypes: {FTCapPath: Type}
 
         init(
             _ address: Address,
             _ contractName: String,
-            _ storagePath: StoragePath,
         ) {
             self.identity = FTIdentity(address, contractName)
             self.metadata = {}
-            self.capabilityPaths = {}
-            self.capabilityTypes = {}
-            self.storagePath = storagePath
-        }
-
-        // ---- Writable Functions ----
-
-        /// Update the Storage Path
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
-        ///
-        access(all)
-        fun updateStoragePath(_ storagePath: StoragePath) {
-            self.storagePath = storagePath
-
-            emit FTViewStoragePathUpdated(
-                address: self.identity.address,
-                contractName: self.identity.contractName,
-                storagePath: storagePath
-            )
-        }
-
-        /// Initialize the FT View Data
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
-        ///
-        access(all)
-        fun initializeVaultData(
-            receiverPath: PublicPath,
-            metadataPath: PublicPath,
-            providerPath: PrivatePath,
-            receiverType: Type,
-            metadataType: Type,
-            providerType: Type
-        ) {
-            self.capabilityPaths[FTCapPath.receiver] = receiverPath
-            self.capabilityPaths[FTCapPath.metadata] = metadataPath
-            self.capabilityPaths[FTCapPath.provider] = providerPath
-            self.capabilityTypes[FTCapPath.receiver] = receiverType
-            self.capabilityTypes[FTCapPath.metadata] = metadataType
-            self.capabilityTypes[FTCapPath.provider] = providerType
-
-            // Emit the event
-            emit FTVaultDataUpdated(
-                address: self.identity.address,
-                contractName: self.identity.contractName,
-                storagePath: self.storagePath,
-                receiverPath: receiverPath,
-                metadataPath: metadataPath,
-                providerPath: providerPath,
-                receiverType: receiverType,
-                metadataType: metadataType,
-                providerType: providerType
-            )
         }
 
         /// Set the FT Display
@@ -349,38 +286,8 @@ access(all) contract FTViewUtils {
             )
         }
 
-        /** ---- Implement the EditableFTViewDataInterface ---- */
+        /** ---- Implement the EditableFTViewDisplayInterface ---- */
 
-        access(all) view
-        fun getStoragePath(): StoragePath {
-            return self.storagePath
-        }
-
-        /// Get the Receiver Path
-        access(all) view
-        fun getReceiverPath(): PublicPath? {
-            return self.capabilityPaths[FTCapPath.receiver] as! PublicPath?
-        }
-
-        /// Get the Metadata Path
-        access(all) view
-        fun getMetadataPath(): PublicPath? {
-            return self.capabilityPaths[FTCapPath.metadata] as! PublicPath?
-        }
-
-        /// Get the Provider Path
-        access(all) view
-        fun getProviderPath(): PrivatePath? {
-            return self.capabilityPaths[FTCapPath.provider] as! PrivatePath?
-        }
-
-        /// Get the Capability Path
-        access(all) view
-        fun getCapabilityType(_ capPath: FTCapPath): Type? {
-            return self.capabilityTypes[capPath]
-        }
-
-        // ----- FT Display -----
         access(all) view
         fun getName(): String {
             return self.metadata["name"] ?? "Unknown Token"
@@ -460,6 +367,174 @@ access(all) contract FTViewUtils {
                 }
             }
             return ret
+        }
+    }
+
+    /// The Resource for the FT View
+    ///
+    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor, EditableFTViewDataInterface, EditableFTViewDisplayInterface, MetadataViews.Resolver {
+        access(self)
+        let display: @EditableFTDisplay
+        access(all)
+        let identity: FTIdentity
+        access(contract)
+        var storagePath: StoragePath
+        access(contract)
+        let capabilityPaths: {FTCapPath: CapabilityPath}
+        access(contract)
+        let capabilityTypes: {FTCapPath: Type}
+
+        init(
+            _ address: Address,
+            _ contractName: String,
+            _ storagePath: StoragePath,
+        ) {
+            self.identity = FTIdentity(address, contractName)
+            self.display <- create EditableFTDisplay(address, contractName)
+            self.capabilityPaths = {}
+            self.capabilityTypes = {}
+            self.storagePath = storagePath
+        }
+
+        /// @deprecated in Cadence 1.0
+        destroy() {
+            destroy self.display
+        }
+
+        // ---- Writable Functions ----
+
+        /// Update the Storage Path
+        /// TODO: Use entitlements to restrict the access in Cadence 1.0
+        ///
+        access(all)
+        fun updateStoragePath(_ storagePath: StoragePath) {
+            self.storagePath = storagePath
+
+            emit FTViewStoragePathUpdated(
+                address: self.identity.address,
+                contractName: self.identity.contractName,
+                storagePath: storagePath
+            )
+        }
+
+        /// Initialize the FT View Data
+        /// TODO: Use entitlements to restrict the access in Cadence 1.0
+        ///
+        access(all)
+        fun initializeVaultData(
+            receiverPath: PublicPath,
+            metadataPath: PublicPath,
+            providerPath: PrivatePath,
+            receiverType: Type,
+            metadataType: Type,
+            providerType: Type
+        ) {
+            self.capabilityPaths[FTCapPath.receiver] = receiverPath
+            self.capabilityPaths[FTCapPath.metadata] = metadataPath
+            self.capabilityPaths[FTCapPath.provider] = providerPath
+            self.capabilityTypes[FTCapPath.receiver] = receiverType
+            self.capabilityTypes[FTCapPath.metadata] = metadataType
+            self.capabilityTypes[FTCapPath.provider] = providerType
+
+            // Emit the event
+            emit FTVaultDataUpdated(
+                address: self.identity.address,
+                contractName: self.identity.contractName,
+                storagePath: self.storagePath,
+                receiverPath: receiverPath,
+                metadataPath: metadataPath,
+                providerPath: providerPath,
+                receiverType: receiverType,
+                metadataType: metadataType,
+                providerType: providerType
+            )
+        }
+
+        /** ---- Implement the EditableFTViewDataInterface ---- */
+
+        access(all) view
+        fun getStoragePath(): StoragePath {
+            return self.storagePath
+        }
+
+        /// Get the Receiver Path
+        access(all) view
+        fun getReceiverPath(): PublicPath? {
+            return self.capabilityPaths[FTCapPath.receiver] as! PublicPath?
+        }
+
+        /// Get the Metadata Path
+        access(all) view
+        fun getMetadataPath(): PublicPath? {
+            return self.capabilityPaths[FTCapPath.metadata] as! PublicPath?
+        }
+
+        /// Get the Provider Path
+        access(all) view
+        fun getProviderPath(): PrivatePath? {
+            return self.capabilityPaths[FTCapPath.provider] as! PrivatePath?
+        }
+
+        /// Get the Capability Path
+        access(all) view
+        fun getCapabilityType(_ capPath: FTCapPath): Type? {
+            return self.capabilityTypes[capPath]
+        }
+
+        /** ---- Implement the FTViewDataEditor ---- */
+
+        /// Set the FT Display
+        /// TODO: Use entitlements to restrict the access in Cadence 1.0
+        ///
+        access(all)
+        fun setFTDisplay(
+            name: String?,
+            symbol: String?,
+            description: String?,
+            externalURL: String?,
+            logo: String?,
+            socials: {String: String}
+        ) {
+            self.display.setFTDisplay(
+                name: name,
+                symbol: symbol,
+                description: description,
+                externalURL: externalURL,
+                logo: logo,
+                socials: socials
+            )
+        }
+
+        /** ---- Implement the FTViewDisplayInterface ---- */
+
+        access(all) view
+        fun getName(): String {
+            return self.display.getName()
+        }
+
+        access(all) view
+        fun getSymbol(): String {
+            return self.display.getSymbol()
+        }
+
+        access(all) view
+        fun getDescription(): String {
+            return self.display.getDescription()
+        }
+
+        access(all) view
+        fun getExternalURL(): MetadataViews.ExternalURL {
+            return self.display.getExternalURL()
+        }
+
+        access(all) view
+        fun getLogos(): MetadataViews.Medias {
+            return self.display.getLogos()
+        }
+
+        access(all) view
+        fun getSocials(): {String: MetadataViews.ExternalURL} {
+            return self.display.getSocials()
         }
 
         /* --- Implement the MetadataViews.Resolver --- */
