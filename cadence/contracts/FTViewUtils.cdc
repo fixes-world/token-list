@@ -212,7 +212,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT Display
     ///
-    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface {
+    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface, MetadataViews.Resolver {
         access(all)
         let identity: FTIdentity
         access(contract)
@@ -368,6 +368,34 @@ access(all) contract FTViewUtils {
             }
             return ret
         }
+
+        /* --- Implement the MetadataViews.Resolver --- */
+
+        access(all) view
+        fun getViews(): [Type] {
+            return [
+                Type<FungibleTokenMetadataViews.FTDisplay>()
+            ]
+        }
+
+        access(all) view
+        fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<FungibleTokenMetadataViews.FTDisplay>():
+                    return self.getFTDisplay()
+            }
+            return nil
+        }
+    }
+
+    /// Create the FT View Data
+    ///
+    access(all)
+    fun createEditableFTDisplay(
+        _ address: Address,
+        _ contractName: String,
+    ): @EditableFTDisplay {
+        return <- create EditableFTDisplay(address, contractName)
     }
 
     /// The Resource for the FT View

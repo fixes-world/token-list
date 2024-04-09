@@ -77,8 +77,10 @@ access(all) contract ViewResolvers {
     /// The collection view resolver
     ///
     access(all) resource CollectionViewResolver: MetadataViews.Resolver {
+        // FTView Resolver Collection Capability
         access(self)
         let cap: Capability<&AnyResource{MetadataViews.ResolverCollection}>
+        // FTView Id
         access(self)
         let id: UInt64
 
