@@ -33,10 +33,17 @@ transaction(
     execute {
         let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
             ?? panic("Failed to build ft type")
-        let ftviewRef = self.maintainer.borrowFTViewEditor(tokenType)
-            ?? panic("Failed to get the ft view")
-        // init FT Display
-        ftviewRef.setFTDisplay(
+        var ftDisplayRef = self.maintainer.borrowFTDisplayEditor(tokenType)
+        if ftDisplayRef == nil {
+            self.maintainer.registerFungibleTokenDisplayPatch(ftAddress, ftContractName)
+            ftDisplayRef = self.maintainer.borrowFTDisplayEditor(tokenType)
+        }
+        assert(
+            ftDisplayRef != nil,
+            message: "Failed to borrow FT Display Editor"
+        )
+        // update FT Display
+        ftDisplayRef!.setFTDisplay(
             name: name,
             symbol: symbol,
             description: description,

@@ -25,7 +25,6 @@ access(all) contract TokenList {
         _ address: Address,
         _ contractName: String,
         _ symbol: String,
-        _ name: String,
         _ type: Type,
     )
     /// Event emitted when the Fungible Token Reviewer accessable is updated
@@ -86,15 +85,12 @@ access(all) contract TokenList {
         /// Get the Fungible Token Symbol
         access(all) view
         fun getSymbol(): String
-        /// Quick getter for the FT
-        access(all) view
-        fun getName(): String
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type
         /// Get the display metadata of the FT
         access(all) view
-        fun getDisplay(): FungibleTokenMetadataViews.FTDisplay
+        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay
         /// Get the vault info the FT
         access(all) view
         fun getVaultData(): FungibleTokenMetadataViews.FTVaultData
@@ -149,7 +145,7 @@ access(all) contract TokenList {
                 self.viewResolver <- viewResolver!
             }
             // ensure ftView exists
-            self.getDisplay()
+            self.getDisplay(nil)
             self.getVaultData()
         }
 
@@ -183,9 +179,19 @@ access(all) contract TokenList {
         /// Get the display metadata of the FT
         ///
         access(all) view
-        fun getDisplay(): FungibleTokenMetadataViews.FTDisplay {
-            return FungibleTokenMetadataViews.getFTDisplay(self.borrowViewResolver())
-                ?? panic("FTDisplay not found in the metadata")
+        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay {
+            let viewResolver = self.borrowViewResolver()
+            let basicFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
+            if let addr = reviewer {
+                if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
+                    if let ftDisplayRef = reviewerRef.borrowFTDisplayReader(self.getTokenType()) {
+                        if ftDisplayRef.uuid != viewResolver.uuid {
+                            return ftDisplayRef.getFTDisplay()
+                        }
+                    }
+                }
+            }
+            return basicFTDisplay ?? panic("FTDisplay not found in the metadata")
         }
 
         /// Get the vault data of the FT
@@ -206,14 +212,7 @@ access(all) contract TokenList {
         ///
         access(all) view
         fun getSymbol(): String {
-            return self.getDisplay().symbol
-        }
-
-        /// Quick getter for the FT
-        ///
-        access(all) view
-        fun getName(): String {
-            return self.getDisplay().name
+            return self.getDisplay(nil).symbol
         }
 
         /// Create an empty vault for the FT
@@ -423,9 +422,9 @@ access(all) contract TokenList {
         ///
         access(all)
         fun reviewFTEvalute(_ type: Type, rank: Evaluation) {
-            let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
+            self._ensureReviewerWhitelisted()
 
+            let registery = self._borrowRegistry()
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -452,9 +451,9 @@ access(all) contract TokenList {
         ///
         access(all)
         fun reviewFTComment(_ type: Type, comment: String) {
-            let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
+            self._ensureReviewerWhitelisted()
 
+            let registery = self._borrowRegistry()
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -484,8 +483,9 @@ access(all) contract TokenList {
             _ ftContractName: String,
             at: StoragePath
         ) {
+            self._ensureReviewerWhitelisted()
+
             let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
 
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
@@ -526,9 +526,10 @@ access(all) contract TokenList {
         /// Borrow the FTView editor
         ///
         access(all)
-        fun borrowFTViewEditor(_ tokenType: Type): &AnyResource{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
-            let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
+        fun borrowFTViewEditor(
+            _ tokenType: Type
+        ): &AnyResource{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
+            self._ensureReviewerWhitelisted()
 
             return self._borrowEditableFTView(tokenType)
         }
@@ -540,8 +541,9 @@ access(all) contract TokenList {
             _ ftAddress: Address,
             _ ftContractName: String
         ) {
+            self._ensureReviewerWhitelisted()
+
             let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
 
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
@@ -572,10 +574,12 @@ access(all) contract TokenList {
         /// Borrow or create the FTDisplay editor
         ///
         access(all)
-        fun borrowFTDisplayEditor(_ tokenType: Type): &AnyResource{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
-            let registery = self._borrowRegistry()
-            registery.onReviewerCall(self.getAddress())
+        fun borrowFTDisplayEditor(
+            _ tokenType: Type
+        ): &AnyResource{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
+            self._ensureReviewerWhitelisted()
 
+            let registery = self._borrowRegistry()
             if let ref = self._borrowEditableFTDisplay(tokenType) {
                 return ref
             }
@@ -658,6 +662,14 @@ access(all) contract TokenList {
         }
 
         // --- Internal Methods ---
+
+        /// Ensure the reviewer is whitelisted
+        ///
+        access(self) view
+        fun _ensureReviewerWhitelisted() {
+            let registry = self._borrowRegistry()
+            registry.onReviewerCall(self.getAddress())
+        }
 
         /// Borrow the Editable FT View
         ///
@@ -981,7 +993,6 @@ access(all) contract TokenList {
                 ref.identity.address,
                 ref.identity.contractName,
                 ref.getSymbol(),
-                ref.getName(),
                 tokenType
             )
         }
