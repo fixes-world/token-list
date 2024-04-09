@@ -1,3 +1,18 @@
 {
-  "extends": "astro/tsconfigs/strict"
+	"extends": "astro/tsconfigs/strict",
+	"compilerOptions": {
+		"jsx": "preserve",
+		"baseUrl": ".",
+		"paths": {
+			"@flow.json": ["flow.json"],
+			"@cadence/*": ["cadence/*"],
+			"@api/*": ["src/pages/api/*"],
+			"@assets/*": ["src/assets/*"],
+			"@components/*": ["src/components/*"],
+			"@shared/*": ["src/shared/*"],
+			"@layouts/*": ["src/layouts/*"]
+		},
+		"typeRoots": ["./node_modules/@types", "./src/types"]
+	},
+	"exclude": ["node_modules", "dist", "build", "public"]
 }
