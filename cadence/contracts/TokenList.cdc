@@ -186,7 +186,19 @@ access(all) contract TokenList {
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     if let ftDisplayRef = reviewerRef.borrowFTDisplayReader(self.getTokenType()) {
                         if ftDisplayRef.uuid != viewResolver.uuid {
-                            return ftDisplayRef.getFTDisplay()
+                            let socials = basicFTDisplay?.socials ?? {}
+                            let extraSocials = ftDisplayRef.getSocials()
+                            for key in extraSocials.keys {
+                                socials[key] = extraSocials[key]
+                            }
+                            return FungibleTokenMetadataViews.FTDisplay(
+                                name: ftDisplayRef.getName() ?? basicFTDisplay?.name ?? "Unkonwn",
+                                symbol: ftDisplayRef.getSymbol(),
+                                description: ftDisplayRef.getDescription() ?? basicFTDisplay?.description ?? "No Description",
+                                externalURL: ftDisplayRef.getExternalURL() ?? basicFTDisplay?.externalURL ?? MetadataViews.ExternalURL("https://fixes.world"),
+                                logos: ftDisplayRef.getLogos(),
+                                socials: socials
+                            )
                         }
                     }
                 }

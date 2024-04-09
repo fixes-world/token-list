@@ -12,6 +12,38 @@ import "FungibleTokenMetadataViews"
 
 access(all) contract FTViewUtils {
 
+    /*  ---- Events ---- */
+
+    access(all) event FTViewStoragePathUpdated(
+        address: Address,
+        contractName: String,
+        storagePath: StoragePath
+    )
+
+    access(all) event FTVaultDataUpdated(
+        address: Address,
+        contractName: String,
+        storagePath: StoragePath,
+        receiverPath: PublicPath,
+        metadataPath: PublicPath,
+        providerPath: PrivatePath,
+        receiverType: Type,
+        metadataType: Type,
+        providerType: Type
+    )
+
+    access(all) event FTDisplayUpdated(
+        address: Address,
+        contractName: String,
+        name: String?,
+        symbol: String?,
+        description: String?,
+        externalURL: String?,
+        logo: String?,
+        socials: {String: String}
+    )
+
+
     /// The struct for the Fungible Token Identity
     ///
     access(all) struct FTIdentity {
@@ -44,38 +76,44 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The struct for the Fungible Token List View
+    ///
+    access(all) struct StandardTokenView {
+        access(all)
+        let identity: FTIdentity
+        access(all)
+        let vaultPath: StoragePath
+        access(all)
+        let balancePath: PublicPath
+        access(all)
+        let receiverPath: PublicPath
+        access(all)
+        let decimals: UInt8
+        access(all)
+        let display: FungibleTokenMetadataViews.FTDisplay
+        access(all)
+        let tags: [String]
+
+        init(
+            identity: FTIdentity,
+            vaultPath: StoragePath,
+            balancePath: PublicPath,
+            receiverPath: PublicPath,
+            decimals: UInt8,
+            display: FungibleTokenMetadataViews.FTDisplay,
+            tags: [String]
+        ) {
+            self.identity = identity
+            self.vaultPath = vaultPath
+            self.balancePath = balancePath
+            self.receiverPath = receiverPath
+            self.decimals = decimals
+            self.display = display
+            self.tags = tags
+        }
+    }
+
     /** Editable FTView */
-
-    /*  ---- Events ---- */
-
-    access(all) event FTViewStoragePathUpdated(
-        address: Address,
-        contractName: String,
-        storagePath: StoragePath
-    )
-
-    access(all) event FTVaultDataUpdated(
-        address: Address,
-        contractName: String,
-        storagePath: StoragePath,
-        receiverPath: PublicPath,
-        metadataPath: PublicPath,
-        providerPath: PrivatePath,
-        receiverType: Type,
-        metadataType: Type,
-        providerType: Type
-    )
-
-    access(all) event FTDisplayUpdated(
-        address: Address,
-        contractName: String,
-        name: String?,
-        symbol: String?,
-        description: String?,
-        externalURL: String?,
-        logo: String?,
-        socials: {String: String}
-    )
 
     /// The enum for the FT Capability Path
     ///
@@ -150,13 +188,13 @@ access(all) contract FTViewUtils {
         let identity: FTIdentity
         // ----- FT Display -----
         access(all) view
-        fun getName(): String
-        access(all) view
         fun getSymbol(): String
         access(all) view
-        fun getDescription(): String
+        fun getName(): String?
         access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL
+        fun getDescription(): String?
+        access(all) view
+        fun getExternalURL(): MetadataViews.ExternalURL?
         access(all) view
         fun getLogos(): MetadataViews.Medias
         access(all) view
@@ -167,10 +205,10 @@ access(all) contract FTViewUtils {
         access(all)
         fun getFTDisplay(): FungibleTokenMetadataViews.FTDisplay {
             return FungibleTokenMetadataViews.FTDisplay(
-                name: self.getName(),
+                name: self.getName() ?? "Unknown Token",
                 symbol: self.getSymbol(),
-                description: self.getDescription(),
-                externalURL: self.getExternalURL(),
+                description: self.getDescription() ?? "No Description",
+                externalURL: self.getExternalURL() ?? MetadataViews.ExternalURL("https://fixes.world"),
                 logos: self.getLogos(),
                 socials: self.getSocials()
             )
@@ -289,25 +327,24 @@ access(all) contract FTViewUtils {
         /** ---- Implement the EditableFTViewDisplayInterface ---- */
 
         access(all) view
-        fun getName(): String {
-            return self.metadata["name"] ?? "Unknown Token"
-        }
-
-        access(all) view
         fun getSymbol(): String {
-            return self.metadata["symbol"] ?? "UNK"
+            return self.metadata["symbol"] ?? "NONE"
         }
 
         access(all) view
-        fun getDescription(): String {
-            return self.metadata["description"] ?? "No Description"
+        fun getName(): String? {
+            return self.metadata["name"]
         }
 
         access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL {
-            return MetadataViews.ExternalURL(
-                self.metadata["externalURL"] ?? "https://fixes.world/"
-            )
+        fun getDescription(): String? {
+            return self.metadata["description"]
+        }
+
+        access(all) view
+        fun getExternalURL(): MetadataViews.ExternalURL? {
+            let url = self.metadata["externalURL"]
+            return url != nil ? MetadataViews.ExternalURL(url!) : nil
         }
 
         access(all) view
@@ -536,22 +573,22 @@ access(all) contract FTViewUtils {
         /** ---- Implement the FTViewDisplayInterface ---- */
 
         access(all) view
-        fun getName(): String {
-            return self.display.getName()
-        }
-
-        access(all) view
         fun getSymbol(): String {
             return self.display.getSymbol()
         }
 
         access(all) view
-        fun getDescription(): String {
+        fun getName(): String? {
+            return self.display.getName()
+        }
+
+        access(all) view
+        fun getDescription(): String? {
             return self.display.getDescription()
         }
 
         access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL {
+        fun getExternalURL(): MetadataViews.ExternalURL? {
             return self.display.getExternalURL()
         }
 
