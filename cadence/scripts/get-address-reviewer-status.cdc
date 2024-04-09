@@ -9,14 +9,7 @@ fun main(
     let registry = TokenList.borrowRegistry()
     let registryAddr = registry.owner?.address ?? panic("Failed to get registry address")
 
-    let reviewerId = TokenList.generateReviewerCapabilityId(addr)
-    let isPendingToClaimReviewer = acct.inbox
-        .claim<&TokenList.Registry{TokenList.TokenListViewer, TokenList.TokenListRegister}>(
-            reviewerId,
-            provider: registryAddr
-        ) != nil
     let isReviewer = TokenList.borrowReviewerPublic(addr) != nil
-        || isPendingToClaimReviewer
 
     let maintainerId = TokenList.generateReviewMaintainerCapabilityId(addr)
     let reviewers = registry.getReviewers()
@@ -43,7 +36,6 @@ fun main(
 
     return Status(
         isReviewer,
-        isPendingToClaimReviewer,
         isReviewMaintainer,
         isPendingToClaimReviewMaintainer,
         isReviewer
@@ -56,8 +48,6 @@ access(all) struct Status {
     access(all)
     let isReviewer: Bool
     access(all)
-    let isPendingToClaimReviewer: Bool
-    access(all)
     let isReviewMaintainer: Bool
     access(all)
     let isPendingToClaimReviewMaintainer: Bool
@@ -66,13 +56,11 @@ access(all) struct Status {
 
     init(
         _ isReviewer: Bool,
-        _ isPendingToClaimReviewer: Bool,
         _ isReviewMaintainer: Bool,
         _ isPendingToClaimReviewMaintainer: Bool,
         _ reviewerAddr: Address?,
     ) {
         self.isReviewer = isReviewer
-        self.isPendingToClaimReviewer = isPendingToClaimReviewer
         self.reviewerAddr = reviewerAddr
         self.isReviewMaintainer = isReviewMaintainer
         self.isPendingToClaimReviewMaintainer = isPendingToClaimReviewMaintainer

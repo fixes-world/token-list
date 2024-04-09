@@ -20,17 +20,17 @@ access(all) contract TokenList {
 
     /// Event emitted when the contract is initialized
     access(all) event ContractInitialized()
+
     /// Event emitted when a new Fungible Token is registered
     access(all) event FungibleTokenRegistered(
         _ address: Address,
         _ contractName: String,
-        _ symbol: String,
         _ type: Type,
     )
-    /// Event emitted when the Fungible Token Reviewer accessable is updated
-    access(all) event FungibleTokenReviewerAccessableUpdated(
+    /// Event emitted when Reviewer Rank is updated
+    access(all) event FungibleTokenReviewerRankUpdated(
         _ reviewer: Address,
-        _ value: Bool
+        _ rank: UInt8
     )
     /// Event emitted when an Editable FTView is created
     access(all) event FungibleTokenReviewerEditableFTViewCreated(
@@ -82,18 +82,15 @@ access(all) contract TokenList {
         // ----- View Methods -----
         access(all) view
         fun getIdentity(): FTViewUtils.FTIdentity
-        /// Get the Fungible Token Symbol
-        access(all) view
-        fun getSymbol(): String
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type
         /// Get the display metadata of the FT
         access(all) view
-        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay
+        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay?
         /// Get the vault info the FT
         access(all) view
-        fun getVaultData(): FungibleTokenMetadataViews.FTVaultData
+        fun getVaultData(_ reviewer: Address?): FungibleTokenMetadataViews.FTVaultData?
         /// Check if the Fungible Token is reviewed by some one
         access(all) view
         fun isReviewedBy(_ reviewerId: UInt64): Bool
@@ -105,8 +102,6 @@ access(all) contract TokenList {
         access(all)
         fun createEmptyVault(): @FungibleToken.Vault
         // ----- Internal Methods: Used by Reviewer -----
-        access(contract)
-        fun updateViewResolver(_ viewResolver: @{MetadataViews.Resolver})
         access(contract)
         fun addRewiew(_ reviewerId: UInt64, _ review: FTReview)
         access(contract)
@@ -123,30 +118,25 @@ access(all) contract TokenList {
         let reviewers: {UInt64: FTReview}
         // view resolver
         access(all)
-        var viewResolver: @{MetadataViews.Resolver}
+        var viewResolver: @{MetadataViews.Resolver}?
 
         init(
             _ ftAddress: Address,
             _ ftContractName: String,
-            _ viewResolver: @{MetadataViews.Resolver}?
         ) {
             self.identity = FTViewUtils.FTIdentity(ftAddress, ftContractName)
+            // ensure the contract is a Fungible Token
+            self.identity.borrowFungibleTokenContract()
             self.reviewers = {}
-            if viewResolver == nil {
-                assert(
-                    ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil,
-                    message: "ViewResolver not found in the contract"
-                )
-                // If viewResolver is not provided, then create one using the ViewResolvers
+            // If viewResolver is not provided, then create one using the ViewResolvers
+            if ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil {
                 self.viewResolver <- ViewResolvers.createContractViewResolver(address: ftAddress, contractName: ftContractName)
-                destroy viewResolver
+                // ensure ftView exists
+                self.getDisplay(nil)
+                self.getVaultData(nil)
             } else {
-                // If viewResolver is not provided, then panic
-                self.viewResolver <- viewResolver!
+                self.viewResolver <- nil
             }
-            // ensure ftView exists
-            self.getDisplay(nil)
-            self.getVaultData()
         }
 
         destroy() {
@@ -179,52 +169,65 @@ access(all) contract TokenList {
         /// Get the display metadata of the FT
         ///
         access(all) view
-        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay {
-            let viewResolver = self.borrowViewResolver()
-            let basicFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
-            if let addr = reviewer {
+        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay? {
+            var retFTDisplay: FungibleTokenMetadataViews.FTDisplay? = nil
+            if let viewResolver = self.borrowViewResolver() {
+                retFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
+            }
+            let tokenType = self.getTokenType()
+            var reviewerAddr = reviewer
+            if reviewerAddr == nil {
+                let registry = TokenList.borrowRegistry()
+                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+            }
+            if let addr = reviewerAddr {
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     if let ftDisplayRef = reviewerRef.borrowFTDisplayReader(self.getTokenType()) {
-                        if ftDisplayRef.uuid != viewResolver.uuid {
-                            let socials = basicFTDisplay?.socials ?? {}
-                            let extraSocials = ftDisplayRef.getSocials()
-                            for key in extraSocials.keys {
-                                socials[key] = extraSocials[key]
-                            }
-                            return FungibleTokenMetadataViews.FTDisplay(
-                                name: ftDisplayRef.getName() ?? basicFTDisplay?.name ?? "Unkonwn",
-                                symbol: ftDisplayRef.getSymbol(),
-                                description: ftDisplayRef.getDescription() ?? basicFTDisplay?.description ?? "No Description",
-                                externalURL: ftDisplayRef.getExternalURL() ?? basicFTDisplay?.externalURL ?? MetadataViews.ExternalURL("https://fixes.world"),
-                                logos: ftDisplayRef.getLogos(),
-                                socials: socials
-                            )
+                        let socials = retFTDisplay?.socials ?? {}
+                        let extraSocials = ftDisplayRef.getSocials()
+                        for key in extraSocials.keys {
+                            socials[key] = extraSocials[key]
                         }
+                        retFTDisplay = FungibleTokenMetadataViews.FTDisplay(
+                            name: ftDisplayRef.getName() ?? retFTDisplay?.name ?? "Unkonwn",
+                            symbol: ftDisplayRef.getSymbol(),
+                            description: ftDisplayRef.getDescription() ?? retFTDisplay?.description ?? "No Description",
+                            externalURL: ftDisplayRef.getExternalURL() ?? retFTDisplay?.externalURL ?? MetadataViews.ExternalURL("https://fixes.world"),
+                            logos: ftDisplayRef.getLogos(),
+                            socials: socials
+                        )
                     }
                 }
             }
-            return basicFTDisplay ?? panic("FTDisplay not found in the metadata")
+            return retFTDisplay
         }
 
         /// Get the vault data of the FT
         ///
         access(all) view
-        fun getVaultData(): FungibleTokenMetadataViews.FTVaultData {
-            return FungibleTokenMetadataViews.getFTVaultData(self.borrowViewResolver())
-                ?? panic("FTVaultData not found in the metadata")
+        fun getVaultData(_ reviewer: Address?): FungibleTokenMetadataViews.FTVaultData? {
+            if let viewResolver = self.borrowViewResolver() {
+                return FungibleTokenMetadataViews.getFTVaultData(viewResolver)
+            }
+            let tokenType = self.getTokenType()
+            var reviewerAddr = reviewer
+            if reviewerAddr == nil {
+                let registry = TokenList.borrowRegistry()
+                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+            }
+            if let addr = reviewerAddr {
+                if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
+                    let ref = reviewerRef.borrowFTViewReader(tokenType)
+                    return ref?.getFTVaultData()
+                }
+            }
+            return nil
         }
 
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type {
             return self.identity.buildType()
-        }
-
-        /// Get the Fungible Token Symbol
-        ///
-        access(all) view
-        fun getSymbol(): String {
-            return self.getDisplay(nil).symbol
         }
 
         /// Create an empty vault for the FT
@@ -241,8 +244,22 @@ access(all) contract TokenList {
         /// Update the view resolver
         ///
         access(contract)
-        fun updateViewResolver(_ viewResolver: @{MetadataViews.Resolver}) {
-            let old <- self.viewResolver <- viewResolver
+        fun updateViewResolver() {
+            if ViewResolvers.borrowContractViewResolver(
+                self.identity.address,
+                self.identity.contractName,
+            ) == nil {
+                return // no view resolver found
+            }
+            let newViewResolver <- ViewResolvers.createContractViewResolver(
+                address: self.identity.address,
+                contractName: self.identity.contractName
+            )
+            // ensure ftView exists
+            self.getDisplay(nil)
+            self.getVaultData(nil)
+
+            let old <- self.viewResolver <- newViewResolver
             destroy old
 
             // emit the event
@@ -274,8 +291,8 @@ access(all) contract TokenList {
         /// Borrow the View Resolver
         ///
         access(contract)
-        fun borrowViewResolver(): &{MetadataViews.Resolver} {
-            return &self.viewResolver as &{MetadataViews.Resolver}
+        fun borrowViewResolver(): &{MetadataViews.Resolver}? {
+            return &self.viewResolver as &{MetadataViews.Resolver}?
         }
 
         /// Borrow the Fungible Token Contract
@@ -399,8 +416,6 @@ access(all) contract TokenList {
     ///
     access(all) resource FungibleTokenReviewer: FungibleTokenReviewMaintainer, FungibleTokenReviewerInterface, MetadataViews.ResolverCollection {
         access(self)
-        let writableRegistryCap: Capability<&Registry{TokenListViewer, TokenListRegister}>
-        access(self)
         let storedIdMapping: {UInt64: Type}
         access(self)
         let storedDatas: @{Type: FTViewUtils.EditableFTView}
@@ -409,13 +424,7 @@ access(all) contract TokenList {
         access(self)
         let reviewed: {Type: Evaluation}
 
-        init(
-            _ cap: Capability<&Registry{TokenListViewer, TokenListRegister}>
-        ) {
-            pre {
-                cap.check(): "Invalid capability"
-            }
-            self.writableRegistryCap = cap
+        init() {
             self.storedIdMapping = {}
             self.storedDatas <- {}
             self.storedDisplayPatches <- {}
@@ -434,9 +443,7 @@ access(all) contract TokenList {
         ///
         access(all)
         fun reviewFTEvalute(_ type: Type, rank: Evaluation) {
-            self._ensureReviewerWhitelisted()
-
-            let registery = self._borrowRegistry()
+            let registery = TokenList.borrowRegistry()
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -463,9 +470,7 @@ access(all) contract TokenList {
         ///
         access(all)
         fun reviewFTComment(_ type: Type, comment: String) {
-            self._ensureReviewerWhitelisted()
-
-            let registery = self._borrowRegistry()
+            let registery = TokenList.borrowRegistry()
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
@@ -495,16 +500,15 @@ access(all) contract TokenList {
             _ ftContractName: String,
             at: StoragePath
         ) {
-            self._ensureReviewerWhitelisted()
-
-            let registery = self._borrowRegistry()
+            let registery = TokenList.borrowRegistry()
 
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
-            assert(
-                registery.borrowFungibleTokenEntry(tokenType) == nil,
-                message: "Fungible Token already registered"
-            )
+            // register the Fungible Token if not exists
+            if registery.borrowFungibleTokenEntry(tokenType) == nil {
+                registery.registerStandardFungibleToken(ftAddress, ftContractName)
+            }
+
             assert(
                 self.storedDatas[tokenType] == nil,
                 message: "Editable FTView already exists"
@@ -517,22 +521,15 @@ access(all) contract TokenList {
             self.storedDatas[tokenType] <-! editableFTView
             self.storedIdMapping[ftViewId] = tokenType
 
-            let reviewer = self.owner?.address ?? panic("Owner not found")
+            registery.onReviewerFTDataCustomized(self.getAddress(), tokenType)
+
             // emit the event for editable FTView
             emit FungibleTokenReviewerEditableFTViewCreated(
                 ftAddress,
                 ftContractName,
                 id: ftViewId,
-                reviewer: reviewer
+                reviewer: self.getAddress()
             )
-
-            // create the view resolver
-            let ftViewResolver <- ViewResolvers.createCollectionViewResolver(
-                TokenList.getReviewerCapability(reviewer),
-                id: ftViewId
-            )
-            let ftEntry <- create FungibleTokenEntry(ftAddress, ftContractName, <- ftViewResolver)
-            registery.registerFungibleToken(<- ftEntry)
         }
 
         /// Borrow the FTView editor
@@ -541,8 +538,6 @@ access(all) contract TokenList {
         fun borrowFTViewEditor(
             _ tokenType: Type
         ): &AnyResource{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
-            self._ensureReviewerWhitelisted()
-
             return self._borrowEditableFTView(tokenType)
         }
 
@@ -553,9 +548,7 @@ access(all) contract TokenList {
             _ ftAddress: Address,
             _ ftContractName: String
         ) {
-            self._ensureReviewerWhitelisted()
-
-            let registery = self._borrowRegistry()
+            let registery = TokenList.borrowRegistry()
 
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
@@ -574,12 +567,11 @@ access(all) contract TokenList {
             // save in the resource
             self.storedDisplayPatches[tokenType] <-! editableFTDisplay
 
-            let reviewer = self.owner?.address ?? panic("Owner not found")
             // emit the event for editable FTDisplay
             emit FungibleTokenReviewerEditableFTDisplayCreated(
                 ftAddress,
                 ftContractName,
-                reviewer: reviewer
+                reviewer: self.getAddress()
             )
         }
 
@@ -589,9 +581,7 @@ access(all) contract TokenList {
         fun borrowFTDisplayEditor(
             _ tokenType: Type
         ): &AnyResource{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
-            self._ensureReviewerWhitelisted()
-
-            let registery = self._borrowRegistry()
+            let registery = TokenList.borrowRegistry()
             if let ref = self._borrowEditableFTDisplay(tokenType) {
                 return ref
             }
@@ -652,6 +642,25 @@ access(all) contract TokenList {
             return self._borrowEditableFTView(tokenType)
         }
 
+        // --- Resource only methods ---
+
+        /// Create a customized view resolver for the Fungible Token
+        ///
+        access(all)
+        fun createCustomizedViewResolver(
+            _ ftAddress: Address,
+            _ ftContractName: String,
+        ): @AnyResource{MetadataViews.Resolver} {
+            let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
+                ?? panic("Could not build the FT Type")
+            let ref = self._borrowEditableFTView(tokenType)
+                ?? panic("Editable FTView not found")
+            return <- ViewResolvers.createCollectionViewResolver(
+                TokenList.getReviewerCapability(self.getAddress()),
+                id: ref.uuid
+            )
+        }
+
         // --- Implement the MetadataViews.ResolverCollection ---
 
         /// Get the IDs of the view resolvers
@@ -675,14 +684,6 @@ access(all) contract TokenList {
 
         // --- Internal Methods ---
 
-        /// Ensure the reviewer is whitelisted
-        ///
-        access(self) view
-        fun _ensureReviewerWhitelisted() {
-            let registry = self._borrowRegistry()
-            registry.onReviewerCall(self.getAddress())
-        }
-
         /// Borrow the Editable FT View
         ///
         access(self)
@@ -695,14 +696,6 @@ access(all) contract TokenList {
         access(self)
         fun _borrowEditableFTDisplay(_ tokenType: Type): &FTViewUtils.EditableFTDisplay? {
             return &self.storedDisplayPatches[tokenType] as &FTViewUtils.EditableFTDisplay?
-        }
-
-        /// Borrow the Registry
-        ///
-        access(self)
-        fun _borrowRegistry(): &Registry{TokenListViewer, TokenListRegister} {
-            return self.writableRegistryCap.borrow()
-                ?? panic("This reviewer cannot access writable Registry reference.")
         }
     }
 
@@ -793,6 +786,9 @@ access(all) contract TokenList {
         /// Return all available reviewers
         access(all) view
         fun getReviewers(): [Address]
+        /// Get the reviewer rank
+        access(all) view
+        fun getReviewerRank(_ reviewer: Address): ReviewerRank?
         /// Get the amount of Fungible Token Entries
         access(all) view
         fun getFTEntriesAmount(): Int
@@ -805,9 +801,9 @@ access(all) contract TokenList {
         /// Get the Fungible Token Entry by the address
         access(all) view
         fun getFTEntriesByAddress(_ address: Address): [Type]
-        /// Get the Fungible Token Entry by the symbol
+        /// Get the customized reviewers
         access(all) view
-        fun getFTEntriesBySymbol(_ symbol: String): [Type]
+        fun getHighestRankCustomizedReviewer(_ tokenType: Type): Address?
         /// Get the Fungible Token Entry by the type
         access(all) view
         fun borrowFungibleTokenEntry(_ tokenType: Type): &FungibleTokenEntry{FTEntryInterface}?
@@ -815,44 +811,42 @@ access(all) contract TokenList {
         /// Register a new standard Fungible Token Entry to the registry
         access(contract)
         fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String)
+        /// Invoked when a new Fungible Token is customized by the reviewer
+        access(contract)
+        fun onReviewerFTDataCustomized(_ reviewer: Address, _ tokenType: Type)
     }
 
-    /// Interface for the Token List Register
-    ///
-    access(all) resource interface TokenListRegister {
-        /// Add a new Fungible Token Entry to the registry
-        access(contract)
-        fun registerFungibleToken(_ ftEntry: @FungibleTokenEntry)
-        /// Invoked when reviewer does a call
-        access(contract)
-        fun onReviewerCall(_ reviewer: Address)
+    access(all) enum ReviewerRank: UInt8 {
+        access(all) case NORMAL
+        access(all) case ADVANCED
+        access(all) case EXPERT
     }
 
     /// The Token List Registry
     ///
-    access(all) resource Registry: TokenListViewer, TokenListRegister {
-        // Reviewer => Bool
+    access(all) resource Registry: TokenListViewer {
+        // Reviewer => ReviewerRank
         access(self)
-        let reviewerWhitelisted: {Address: Bool}
-        // FT Entry ID => FT Type
-        access(self)
-        let entriesIdMapping: {UInt64: Type}
+        let reviewerRanks: {Address: ReviewerRank}
         // FT Type => FT Entry
         access(self)
         let entries: @{Type: FungibleTokenEntry}
+        // FT Entry ID => FT Type
+        access(self)
+        let entriesIdMapping: {UInt64: Type}
         // Address => [FTContractName]
         access(self)
         let addressMapping: {Address: [String]}
-        // Symbol => [FT Type]
+        // Customized FT Views
         access(self)
-        let symbolMapping: {String: [Type]}
+        let customizedFTViews: {Type: [Address]}
 
         init() {
             self.entriesIdMapping = {}
             self.entries <- {}
             self.addressMapping = {}
-            self.symbolMapping = {}
-            self.reviewerWhitelisted = {}
+            self.reviewerRanks = {}
+            self.customizedFTViews = {}
         }
 
         // @deprecated in Cadence 1.0
@@ -866,10 +860,14 @@ access(all) contract TokenList {
         ///
         access(all) view
         fun getReviewers(): [Address] {
-            let ref = &self.reviewerWhitelisted as &{Address: Bool}
-            return self.reviewerWhitelisted.keys.filter(fun (reviewer: Address): Bool {
-                return ref[reviewer] == true
-            })
+            return self.reviewerRanks.keys
+        }
+
+        /// Get the reviewer rank
+        ///
+        access(all) view
+        fun getReviewerRank(_ reviewer: Address): ReviewerRank? {
+            return self.reviewerRanks[reviewer]
         }
 
         /// Get the amount of Fungible Token Entries
@@ -915,14 +913,24 @@ access(all) contract TokenList {
             return []
         }
 
-        /// Get the Fungible Token Entry by the symbol
+        /// Get the highest rank customized reviewers
         ///
         access(all) view
-        fun getFTEntriesBySymbol(_ symbol: String): [Type] {
-            if let types = self.borrowSymbolTypeRef(symbol) {
-                return self.symbolMapping[symbol]!
+        fun getHighestRankCustomizedReviewer(_ tokenType: Type): Address? {
+            if let reviewers = self.customizedFTViews[tokenType] {
+                var highestRank: ReviewerRank? = nil
+                var highestReviewer: Address? = nil
+                for reviewer in reviewers {
+                    if let rank = self.reviewerRanks[reviewer] {
+                        if highestRank == nil || rank.rawValue > highestRank!.rawValue {
+                            highestRank = rank
+                            highestReviewer = reviewer
+                        }
+                    }
+                }
+                return highestReviewer
             }
-            return []
+            return nil
         }
 
         /// Get the Fungible Token Entry by the type
@@ -933,46 +941,50 @@ access(all) contract TokenList {
 
         // ----- Write Methods -----
 
+        access(all)
+        fun updateReviewerRank(_ reviewer: Address, _ rank: ReviewerRank) {
+            self.reviewerRanks[reviewer] = rank
+
+            // emit the event
+            emit FungibleTokenReviewerRankUpdated(reviewer, rank.rawValue)
+        }
+
         /// Register a new standard Fungible Token Entry to the registry
         ///
         access(contract)
         fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
-            self.registerFungibleToken(
+            self._registerFungibleToken(
                 // Use the default view resolver
-                <- create FungibleTokenEntry(ftAddress, ftContractName, nil)
+                <- create FungibleTokenEntry(ftAddress, ftContractName)
             )
         }
 
-        // ----- Write Methods: Admin -----
-
-        access(all)
-        fun updateReviewerAccessable(_ reviewer: Address, _ value: Bool) {
-            self.reviewerWhitelisted[reviewer] = value
-
-            emit FungibleTokenReviewerAccessableUpdated(
-                reviewer,
-                value
-            )
-        }
-
-        // ----- Write Methods: Reviewer -----
-
-        /// Invoked when reviewer does a call
+        /// Invoked when a new Fungible Token is customized by the reviewer
+        ///
         access(contract)
-        fun onReviewerCall(_ reviewer: Address) {
-            if self.reviewerWhitelisted[reviewer] == nil {
-                self.updateReviewerAccessable(reviewer, true)
+        fun onReviewerFTDataCustomized(_ reviewer: Address, _ tokenType: Type) {
+            // ensure the reviewer rank exists
+            if self.reviewerRanks[reviewer] == nil {
+                self.reviewerRanks[reviewer] = ReviewerRank.NORMAL
             }
-            assert(
-                self.reviewerWhitelisted[reviewer] == true,
-                message: "Reviewer is not whitelisted"
-            )
+            // ensure the tokenType exists
+            if self.customizedFTViews[tokenType] == nil {
+                self.customizedFTViews[tokenType] = []
+            }
+            // add the reviewer to the list
+            if let arrRef = &self.customizedFTViews[tokenType] as &[Address]? {
+                if arrRef.firstIndex(of: reviewer) == nil {
+                    self.customizedFTViews[tokenType]?.append(reviewer)
+                }
+            }
         }
+
+        // ----- Internal Methods -----
 
         /// Add a new Fungible Token Entry to the registry
         ///
-        access(contract)
-        fun registerFungibleToken(_ ftEntry: @FungibleTokenEntry) {
+        access(self)
+        fun _registerFungibleToken(_ ftEntry: @FungibleTokenEntry) {
             pre {
                 self.entries[ftEntry.getTokenType()] == nil:
                     "FungibleToken Entry already exists in the registry"
@@ -993,23 +1005,13 @@ access(all) contract TokenList {
                 self.addressMapping[ref.identity.address] = [ref.identity.contractName]
             }
 
-            // Add the symbol mapping
-            if let symbolRef = self.borrowSymbolTypeRef(ref.getSymbol()) {
-                symbolRef.append(tokenType)
-            } else {
-                self.symbolMapping[ref.getSymbol()] = [tokenType]
-            }
-
             // emit the event
             emit FungibleTokenRegistered(
                 ref.identity.address,
                 ref.identity.contractName,
-                ref.getSymbol(),
                 tokenType
             )
         }
-
-        // ----- Internal Methods -----
 
         access(self)
         fun borrowFungibleTokenEntryWritableRef(_ tokenType: Type): &FungibleTokenEntry? {
@@ -1020,11 +1022,6 @@ access(all) contract TokenList {
         fun borrowAddressContractsRef(_ addr: Address): &[String]? {
             return &self.addressMapping[addr] as &[String]?
         }
-
-        access(self)
-        fun borrowSymbolTypeRef(_ symbol: String): &[Type]? {
-            return &self.symbolMapping[symbol] as &[Type]?
-        }
     }
 
     /* --- Methods --- */
@@ -1032,10 +1029,8 @@ access(all) contract TokenList {
     /// Create a new Fungible Token Reviewer
     ///
     access(all)
-    fun createFungibleTokenReviewer(
-        _ cap: Capability<&Registry{TokenListViewer, TokenListRegister}>
-    ): @FungibleTokenReviewer {
-        return <- create FungibleTokenReviewer(cap)
+    fun createFungibleTokenReviewer(): @FungibleTokenReviewer {
+        return <- create FungibleTokenReviewer()
     }
 
     /// Create a new Fungible Token Review Maintainer
@@ -1101,13 +1096,6 @@ access(all) contract TokenList {
     access(all) view
     fun getPathPrefix(): String {
         return "TokenList_".concat(self.account.address.toString()).concat("_")
-    }
-
-    /// Generate the reviewer capability ID
-    ///
-    access(all) view
-    fun generateReviewerCapabilityId(_ addr: Address): String {
-        return TokenList.getPathPrefix().concat("PrivateIdentity_".concat(addr.toString()))
     }
 
     /// Generate the review maintainer capability ID
