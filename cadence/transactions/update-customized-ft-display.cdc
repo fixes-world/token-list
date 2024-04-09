@@ -1,3 +1,4 @@
+import "MetadataViews"
 import "FungibleToken"
 import "FTViewUtils"
 import "TokenList"
@@ -22,10 +23,19 @@ transaction(
                 ?? panic("Failed to load FungibleTokenReviewMaintainer from reviewer")
         }
         // Try borrow review
-        if acct.check<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
-            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
-                ?? panic("Failed to load FungibleTokenReviewMaintainer from review maintainer")
+        if !acct.check<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
+            log("Creating a new reviewer")
+            let reviewer <- TokenList.createFungibleTokenReviewer()
+            acct.save(<- reviewer, to: TokenList.reviewerStoragePath)
+
+            // public the public capability
+            acct.link<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
+                TokenList.reviewerPublicPath,
+                target: TokenList.reviewerStoragePath
+            )
         }
+        maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
+                ?? panic("Failed to load FungibleTokenReviewMaintainer from review maintainer")
 
         self.maintainer = maintainer ?? panic("Missing maintainer")
     }
