@@ -33,6 +33,16 @@ access(all) contract TokenList {
         name: String?,
         url: String?,
     )
+    /// Event emitted when reviewer rank is updated
+    access(all) event FungibleTokenReviewerVerifiedUpdated(
+        _ reviewer: Address,
+        _ isVerified: Bool
+    )
+    /// Event emitted when reviewer rank is updated
+    access(all) event FungibleTokenReviewerRankUpdated(
+        _ reviewer: Address,
+        _ rank: UInt8
+    )
     /// Event emitted when an Editable FTView is created
     access(all) event FungibleTokenReviewerEditableFTViewCreated(
         _ address: Address,
@@ -611,6 +621,8 @@ access(all) contract TokenList {
             // save in the resource
             self.storedDisplayPatches[tokenType] <-! editableFTDisplay
 
+            registery.onReviewerFTDataCustomized(self.getAddress(), tokenType)
+
             // emit the event for editable FTDisplay
             emit FungibleTokenReviewerEditableFTDisplayCreated(
                 ftAddress,
@@ -902,7 +914,9 @@ access(all) contract TokenList {
     /// The Token List Registry
     ///
     access(all) resource Registry: TokenListViewer {
-        // Reviewer => ReviewerRank
+        // Address => isVerified
+        access(self)
+        let verifiedReviewers: {Address: Bool}
         access(self)
         let reviewerRanks: {Address: ReviewerRank}
         // FT Type => FT Entry
@@ -919,10 +933,11 @@ access(all) contract TokenList {
         let customizedFTViews: {Type: [Address]}
 
         init() {
+            self.verifiedReviewers = {}
+            self.reviewerRanks = {}
             self.entriesIdMapping = {}
             self.entries <- {}
             self.addressMapping = {}
-            self.reviewerRanks = {}
             self.customizedFTViews = {}
         }
 
@@ -1018,6 +1033,22 @@ access(all) contract TokenList {
 
         // ----- Write Methods -----
 
+        /// Update the reviewer verified status
+        ///
+        access(all)
+        fun updateReviewerVerified(_ reviewer: Address, _ verified: Bool) {
+            pre {
+                TokenList.borrowReviewerPublic(reviewer) != nil: "FT Reviewer not found"
+            }
+            self.verifiedReviewers[reviewer] = verified
+
+            // emit the event
+            emit FungibleTokenReviewerVerifiedUpdated(
+                reviewer,
+                verified
+            )
+        }
+
         /// Register a new standard Fungible Token Entry to the registry
         ///
         access(contract)
@@ -1035,9 +1066,8 @@ access(all) contract TokenList {
         ///
         access(contract)
         fun onReviewerFTDataCustomized(_ reviewer: Address, _ tokenType: Type) {
-            // ensure the reviewer rank exists
-            if self.reviewerRanks[reviewer] == nil {
-                self.reviewerRanks[reviewer] = ReviewerRank.NORMAL
+            pre {
+                TokenList.borrowReviewerPublic(reviewer) != nil: "FT Reviewer not found"
             }
             // ensure the tokenType exists
             if self.customizedFTViews[tokenType] == nil {
@@ -1049,9 +1079,43 @@ access(all) contract TokenList {
                     self.customizedFTViews[tokenType]?.append(reviewer)
                 }
             }
+            // update the rank
+            self._updateReviewerRank(reviewer)
         }
 
         // ----- Internal Methods -----
+
+        access(self)
+        fun _updateReviewerRank(_ reviewer: Address) {
+            let reviewerRef = TokenList.borrowReviewerPublic(reviewer)
+                ?? panic("Could not find the FT Reviewer")
+            let oldRank = self.reviewerRanks[reviewer]
+            var newRank: TokenList.ReviewerRank? = nil
+            // ensure the reviewer rank exists
+            if self.reviewerRanks[reviewer] == nil {
+                newRank = ReviewerRank.NORMAL
+            } else {
+                // update the rank by the amount of customized FT
+                let managedAmt = reviewerRef.getManagedTokenAmount()
+                let reviewedAmt = reviewerRef.getReviewedTokenAmount()
+                let customizedAmt = reviewerRef.getCustomizedTokenAmount()
+                let weight = managedAmt * 10 + customizedAmt * 5 + reviewedAmt
+                if weight >= 1000 {
+                    newRank = ReviewerRank.EXPERT
+                } else if weight >= 200 {
+                    newRank = ReviewerRank.ADVANCED
+                }
+            }
+
+            if newRank != nil && oldRank != newRank {
+                self.reviewerRanks[reviewer] = newRank!
+                // emit the event
+                emit FungibleTokenReviewerRankUpdated(
+                    reviewer,
+                    newRank!.rawValue
+                )
+            }
+        }
 
         /// Add a new Fungible Token Entry to the registry
         ///
