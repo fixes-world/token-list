@@ -43,10 +43,22 @@ access(all) contract FTViewUtils {
         socials: {String: String}
     )
 
+    /// The struct interface for the Fungible Token Identity
+    ///
+    access(all) struct interface TokenIdentity {
+        /// Build type
+        access(all) view
+        fun buildType(): Type
+        /// Get Type identifier
+        access(all) view
+        fun toString(): String {
+            return self.buildType().identifier
+        }
+    }
 
     /// The struct for the Fungible Token Identity
     ///
-    access(all) struct FTIdentity {
+    access(all) struct FTIdentity: TokenIdentity {
         access(all)
         let address: Address
         access(all)
@@ -60,7 +72,7 @@ access(all) contract FTViewUtils {
             self.contractName = contractName
         }
 
-        access(all)
+        access(all) view
         fun buildType(): Type {
             return FTViewUtils.buildFTVaultType(self.address, self.contractName)
                 ?? panic("Could not build the FT Type")
@@ -76,40 +88,53 @@ access(all) contract FTViewUtils {
         }
     }
 
-    /// The struct for the Fungible Token List View
+    /// The struct for the Fungible Token Paths
     ///
-    access(all) struct StandardTokenView {
-        access(all)
-        let identity: FTIdentity
+    access(all) struct StandardTokenPaths {
         access(all)
         let vaultPath: StoragePath
         access(all)
         let balancePath: PublicPath
         access(all)
         let receiverPath: PublicPath
-        access(all)
-        let decimals: UInt8
-        access(all)
-        let display: FungibleTokenMetadataViews.FTDisplay
-        access(all)
-        let tags: [String]
 
         init(
-            identity: FTIdentity,
             vaultPath: StoragePath,
             balancePath: PublicPath,
             receiverPath: PublicPath,
-            decimals: UInt8,
-            display: FungibleTokenMetadataViews.FTDisplay,
-            tags: [String]
         ) {
-            self.identity = identity
             self.vaultPath = vaultPath
             self.balancePath = balancePath
             self.receiverPath = receiverPath
+        }
+    }
+
+    /// The struct for the Fungible Token List View
+    ///
+    access(all) struct StandardTokenView {
+        access(all)
+        let identity: FTIdentity
+        access(all)
+        let decimals: UInt8
+        access(all)
+        let tags: [String]
+        access(all)
+        let paths: StandardTokenPaths?
+        access(all)
+        let display: FungibleTokenMetadataViews.FTDisplay?
+
+        init(
+            identity: FTIdentity,
+            decimals: UInt8,
+            tags: [String],
+            paths: StandardTokenPaths?,
+            display: FungibleTokenMetadataViews.FTDisplay?,
+        ) {
+            self.identity = identity
             self.decimals = decimals
-            self.display = display
             self.tags = tags
+            self.paths = paths
+            self.display = display
         }
     }
 

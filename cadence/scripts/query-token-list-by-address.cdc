@@ -18,15 +18,20 @@ fun main(
     for ftType in ftTypes {
         if let ftEntry = registry.borrowFungibleTokenEntry(ftType) {
             let identity = ftEntry.getIdentity()
-            let vaultData = ftEntry.getVaultData()
+            var paths: FTViewUtils.StandardTokenPaths? = nil
+            if let vaultData = ftEntry.getVaultData(reviewer) {
+                paths = FTViewUtils.StandardTokenPaths(
+                    vaultPath: vaultData.storagePath,
+                    balancePath: vaultData.metadataPath,
+                    receiverPath: vaultData.receiverPath,
+                )
+            }
             list.append(FTViewUtils.StandardTokenView(
                 identity: identity,
-                vaultPath: vaultData.storagePath,
-                balancePath: vaultData.metadataPath,
-                receiverPath: vaultData.receiverPath,
                 decimals: 8,
+                tags: [],
+                paths: paths,
                 display: ftEntry.getDisplay(reviewer),
-                tags: []
             ))
         }
     }
