@@ -27,10 +27,11 @@ access(all) contract TokenList {
         _ contractName: String,
         _ type: Type,
     )
-    /// Event emitted when Reviewer Rank is updated
-    access(all) event FungibleTokenReviewerRankUpdated(
+    /// Event emitted when Reviewer Metadata is updated
+    access(all) event FungibleTokenReviewerMetadataUpdated(
         _ reviewer: Address,
-        _ rank: UInt8
+        name: String?,
+        url: String?,
     )
     /// Event emitted when an Editable FTView is created
     access(all) event FungibleTokenReviewerEditableFTViewCreated(
@@ -369,6 +370,24 @@ access(all) contract TokenList {
             return self.owner?.address ?? panic("Owner not found")
         }
         access(all) view
+        fun getName(): String? {
+            let metadata = self.getMetadata()
+            return metadata["name"]
+        }
+        access(all) view
+        fun getUrl(): String? {
+            let metadata = self.getMetadata()
+            return metadata["url"]
+        }
+        access(all) view
+        fun getMetadata(): {String: String}
+        access(all) view
+        fun getManagedTokenAmount(): Int
+        access(all) view
+        fun getReviewedTokenAmount(): Int
+        access(all) view
+        fun getCustomizedTokenAmount(): Int
+        access(all) view
         fun getManagedFTTypes(): [Type]
         access(all) view
         fun getReviewedFTTypes(): [Type]
@@ -385,6 +404,9 @@ access(all) contract TokenList {
     /// Maintainer interface for the Fungible Token Reviewer
     ///
     access(all) resource interface FungibleTokenReviewMaintainer {
+        /// Update Reviewer Metadata
+        access(all)
+        fun updateMetadata(name: String?, url: String?)
         /// Review the Fungible Token with Evaluation
         access(all)
         fun reviewFTEvalute(_ type: Type, rank: Evaluation)
@@ -416,6 +438,8 @@ access(all) contract TokenList {
     ///
     access(all) resource FungibleTokenReviewer: FungibleTokenReviewMaintainer, FungibleTokenReviewerInterface, MetadataViews.ResolverCollection {
         access(self)
+        let metadata: {String: String}
+        access(self)
         let storedIdMapping: {UInt64: Type}
         access(self)
         let storedDatas: @{Type: FTViewUtils.EditableFTView}
@@ -425,6 +449,7 @@ access(all) contract TokenList {
         let reviewed: {Type: Evaluation}
 
         init() {
+            self.metadata = {}
             self.storedIdMapping = {}
             self.storedDatas <- {}
             self.storedDisplayPatches <- {}
@@ -438,6 +463,26 @@ access(all) contract TokenList {
         }
 
         // --- Implement the FungibleTokenReviewMaintainer ---
+
+        /// Update Reviewer Metadata
+        ///
+        access(all)
+        fun updateMetadata(name: String?, url: String?) {
+            if name != nil {
+                self.metadata["name"] = name!
+            }
+
+            if url != nil {
+                self.metadata["url"] = url!
+            }
+
+            // emit the event
+            emit FungibleTokenReviewerMetadataUpdated(
+                self.getAddress(),
+                name: name,
+                url: url,
+            )
+        }
 
         /// Review the Fungible Token with Evaluation
         ///
@@ -590,6 +635,32 @@ access(all) contract TokenList {
 
         // --- Implement the FungibleTokenReviewerInterface ---
 
+        access(all) view
+        fun getMetadata(): {String: String} {
+            return self.metadata
+        }
+
+        /// Return the amount of Fungible Token which managed by the reviewer
+        ///
+        access(all) view
+        fun getManagedTokenAmount(): Int {
+            return self.storedDatas.keys.length
+        }
+
+        /// Return the amount of Fungible Token which reviewed by the reviewer
+        ///
+        access(all) view
+        fun getReviewedTokenAmount(): Int {
+            return self.reviewed.keys.length
+        }
+
+        /// Return the amount of Fungible Token which display customized by the reviewer
+        ///
+        access(all) view
+        fun getCustomizedTokenAmount(): Int {
+            return self.storedDatas.keys.length + self.storedDisplayPatches.keys.length
+        }
+
         /// Return all Fungible Token Types managed by the reviewer
         ///
         access(all) view
@@ -719,6 +790,13 @@ access(all) contract TokenList {
         access(all) view
         fun getReviewerAddress(): Address {
             return self.reviewerCap.address
+        }
+
+        /// Update Reviewer Metadata
+        ///
+        access(all)
+        fun updateMetadata(name: String?, url: String?) {
+            self._borrowReviewer().updateMetadata(name: name, url: url)
         }
 
         /// Review the Fungible Token with Evaluation
@@ -940,14 +1018,6 @@ access(all) contract TokenList {
         }
 
         // ----- Write Methods -----
-
-        access(all)
-        fun updateReviewerRank(_ reviewer: Address, _ rank: ReviewerRank) {
-            self.reviewerRanks[reviewer] = rank
-
-            // emit the event
-            emit FungibleTokenReviewerRankUpdated(reviewer, rank.rawValue)
-        }
 
         /// Register a new standard Fungible Token Entry to the registry
         ///
