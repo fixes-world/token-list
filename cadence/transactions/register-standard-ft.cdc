@@ -5,7 +5,6 @@ transaction(
     ftContractName: String,
 ) {
     prepare(acct: AuthAccount) {
-        let registry = TokenList.borrowRegistry()
-        registry.registerStandardFungibleToken(ftAddress, ftContractName)
+        TokenList.tryRegisterStandardFungibleToken(ftAddress, ftContractName)
     }
 }

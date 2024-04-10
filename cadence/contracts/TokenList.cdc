@@ -546,7 +546,6 @@ access(all) contract TokenList {
             at: StoragePath
         ) {
             let registery = TokenList.borrowRegistry()
-
             let tokenType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName)
                 ?? panic("Could not build the FT Type")
             // register the Fungible Token if not exists
@@ -1023,6 +1022,9 @@ access(all) contract TokenList {
         ///
         access(contract)
         fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
+            pre {
+                TokenList.isFungibleTokenRegistered(ftAddress, ftContractName) == false: "Fungible Token already registered"
+            }
             self._registerFungibleToken(
                 // Use the default view resolver
                 <- create FungibleTokenEntry(ftAddress, ftContractName)
@@ -1094,7 +1096,7 @@ access(all) contract TokenList {
         }
     }
 
-    /* --- Methods --- */
+    /* --- Public Methods --- */
 
     /// Create a new Fungible Token Reviewer
     ///
@@ -1143,22 +1145,21 @@ access(all) contract TokenList {
     ///
     access(all) view
     fun isFungibleTokenRegistered(_ address: Address, _ contractName: String): Bool {
-        let registry = self.borrowRegistry()
+        let registry: &TokenList.Registry{TokenList.TokenListViewer} = self.borrowRegistry()
         if let ftType = FTViewUtils.buildFTVaultType(address, contractName) {
             return registry.borrowFungibleTokenEntry(ftType) != nil
         }
         return false
     }
 
-    /// Register a new Fungible Token
+    /// Try to register a new Fungible Token, if already registered, then do nothing
     ///
     access(all)
-    fun registerStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
-        pre {
-            self.isFungibleTokenRegistered(ftAddress, ftContractName) == false: "Fungible Token already registered"
+    fun tryRegisterStandardFungibleToken(_ ftAddress: Address, _ ftContractName: String) {
+        if !self.isFungibleTokenRegistered(ftAddress, ftContractName) {
+            let registry = self.borrowRegistry()
+            registry.registerStandardFungibleToken(ftAddress, ftContractName)
         }
-        let registry = self.borrowRegistry()
-        registry.registerStandardFungibleToken(ftAddress, ftContractName)
     }
 
     /// The prefix for the paths
