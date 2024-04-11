@@ -2,6 +2,7 @@
 import "@assets/css/global.css";
 import { ViewTransitions } from "astro:transitions";
 import appInfo from "@shared/config/info";
+import Footer from "@components/partials/Footer.astro";
 
 interface Props {
   title: string;
@@ -50,7 +51,13 @@ const url = appInfo.url;
     <ViewTransitions />
   </head>
   <body>
-    <slot />
+    <main class="container mx-a px-4 mt-20 md:mt-16 lg:mt-12">
+      <div class="mx-a min-h-[calc(100vh-13rem)]">
+        <slot />
+      </div>
+      <Footer />
+      <slot name="after-footer" />
+    </main>
     <script>
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
         .matches

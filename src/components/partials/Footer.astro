@@ -1,0 +1,41 @@
+---
+import { Image } from "astro:assets";
+import builtOnFlow from "@assets/BuiltOnFlow_Green.svg";
+import appInfo from "@shared/config/info";
+---
+
+<footer
+  class="container px-3 mx-a mt-12 mb-4 py-4 text-lg font-500"
+  transition:persist
+>
+  <div
+    class:list={[
+      "text-sm text-center md:text-left",
+      "flex flex-wrap flex-col items-start md:justify-between",
+      "gap-2 md:gap-4",
+    ]}
+  >
+    <div
+      class="w-full xl:w-auto flex-auto flex flex-col items-center justify-center md:items-start md:justify-start"
+    >
+      <span class="flex-inline items-center gap-1">
+        <span>
+          <span class="highlight">TokenList</span> is made with
+          <span class="i-carbon:favorite-filled w-4 h-4 text-red"></span>
+          by the community.
+        </span>
+      </span>
+    </div>
+    <div
+      class="w-full md:w-auto flex items-center flex-col md:flex-row md:justify-between gap-2"
+    >
+      <span>
+        Powered by
+        <a href={appInfo.linktree} target="_blank" class="highlight">
+          FIXeS.World
+        </a>
+      </span>
+      <Image src={builtOnFlow} alt="Built on Flow" class="w-28" />
+    </div>
+  </div>
+</footer>
