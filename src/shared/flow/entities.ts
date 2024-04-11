@@ -7,6 +7,11 @@ export interface TokenIdentity {
   contractName: string;
 }
 
+export interface Media {
+  uri: string;
+  type: string;
+}
+
 export interface TokenPaths {
   vault: string;
   balance: string;
@@ -14,9 +19,10 @@ export interface TokenPaths {
   provider?: string;
 }
 
-export interface Media {
-  uri: string;
-  type: string;
+export interface TokenStatus extends TokenIdentity {
+  isRegistered: boolean;
+  vaultPath: string;
+  publicPaths: Record<string, string>;
 }
 
 export interface TokenDisplayBasic {

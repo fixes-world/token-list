@@ -7,15 +7,17 @@ import type {
   TokenIdentity,
   TokenPaths,
   TokenQueryResult,
+  TokenStatus,
 } from "@shared/flow/entities";
 import { EvaluationType, FilterType } from "@shared/flow/enums";
 import type { FlowService } from "../flow.service";
 // import { } from "../utilitites";
 import appInfo from "@shared/config/info";
 // Scripts
+import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
+import scGetFTContracts from "@cadence/scripts/get-ft-contracts.cdc?raw";
 import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
 import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
-import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
 import scGetAddressReviewerStatus from "@cadence/scripts/get-address-reviewer-status.cdc?raw";
 import scQueryTokenList from "@cadence/scripts/query-token-list.cdc?raw";
 import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-address.cdc?raw";
@@ -34,6 +36,29 @@ export async function isTokenRegistered(
     (arg, t) => [arg(ft.address, t.Address), arg(ft.contractName, t.String)],
     false
   );
+}
+
+/**
+ * Get the FT contracts
+ */
+export async function getFTContracts(
+  flowServ: FlowService,
+  address: string
+): Promise<TokenStatus[]> {
+  const ret = await flowServ.executeScript(
+    scGetFTContracts,
+    (arg, t) => [arg(address, t.Address)],
+    []
+  );
+  return ret.map((obj: any) => {
+    return {
+      address: obj.address,
+      contractName: obj.contractName,
+      isRegistered: obj.isRegistered,
+      vaultPath: obj.vaultPath,
+      publicPaths: obj.publicPaths,
+    };
+  });
 }
 
 /**
@@ -85,9 +110,9 @@ export async function getVerifiedReviewers(flowServ: FlowService) {
 
 const parseTokenPaths = (obj: any): TokenPaths => {
   return {
-    vault: obj.vault,
-    receiver: obj.receiver,
-    balance: obj.balance,
+    vault: obj.vaultPath,
+    receiver: obj.receiverPath,
+    balance: obj.balancePath,
   };
 };
 
