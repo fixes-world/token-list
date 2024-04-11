@@ -3,13 +3,13 @@ import "TokenList"
 access(all)
 fun main(): [ReviewerInfo] {
     let registry = TokenList.borrowRegistry()
-    let addrs = registry.getReviewers()
+    let addrs = registry.getVerifiedReviewers()
     let ret: [ReviewerInfo] = []
     for addr in addrs {
         if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
             ret.append(ReviewerInfo(
                 address: addr,
-                verified: registry.isReviewerVerified(addr),
+                verified: true,
                 name: reviewerRef.getName(),
                 url: reviewerRef.getUrl(),
                 reviewerRef.getManagedTokenAmount(),

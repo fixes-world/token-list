@@ -878,6 +878,12 @@ access(all) contract TokenList {
         /// Get the reviewer rank
         access(all) view
         fun getReviewerRank(_ reviewer: Address): ReviewerRank?
+        /// Return all verified reviewers
+        access(all) view
+        fun getVerifiedReviewers(): [Address]
+        /// Return if the reviewer is verified
+        access(all) view
+        fun isReviewerVerified(_ reviewer: Address): Bool
         /// Get the amount of Fungible Token Entries
         access(all) view
         fun getFTEntriesAmount(): Int
@@ -960,6 +966,20 @@ access(all) contract TokenList {
         access(all) view
         fun getReviewerRank(_ reviewer: Address): ReviewerRank? {
             return self.reviewerRanks[reviewer]
+        }
+
+        /// Return all verified reviewers
+        ///
+        access(all) view
+        fun getVerifiedReviewers(): [Address] {
+            return self.verifiedReviewers.keys
+        }
+
+        /// Return if the reviewer is verified
+        ///
+        access(all) view
+        fun isReviewerVerified(_ reviewer: Address): Bool {
+            return self.verifiedReviewers[reviewer] ?? false
         }
 
         /// Get the amount of Fungible Token Entries
