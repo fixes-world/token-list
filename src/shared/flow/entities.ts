@@ -14,7 +14,7 @@ export interface TokenPaths {
   provider?: string;
 }
 
-export interface TokenMedia {
+export interface Media {
   uri: string;
   type: string;
 }
@@ -27,7 +27,7 @@ export interface TokenDisplayBasic {
 }
 
 export interface TokenDisplay extends TokenDisplayBasic {
-  logos: TokenMedia[];
+  logos: Media[];
   social: Record<string, string>;
 }
 
@@ -47,4 +47,21 @@ export interface CustomizedTokenDto extends TokenDisplayBasic {
 export interface TokenQueryResult {
   total: number;
   list: StandardTokenView[];
+}
+
+export interface ReviewerInfo {
+  address: string;
+  verified: boolean;
+  name?: string;
+  url?: string;
+  managedTokenAmt: number;
+  reviewedTokenAmt: number;
+  customziedTokenAmt: number;
+}
+
+export interface AddressStatus {
+  isReviewer: boolean;
+  isReviewMaintainer: boolean;
+  isPendingToClaimReviewMaintainer: boolean;
+  reviewerAddr?: string;
 }
