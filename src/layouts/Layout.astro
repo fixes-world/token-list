@@ -66,6 +66,8 @@ const url = appInfo.url;
 
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(systemTheme);
+
+      localStorage.setItem("theme", systemTheme);
     </script>
   </body>
 </html>
