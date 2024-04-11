@@ -3,23 +3,43 @@
 }
 
 :root {
-  --base-color: #131B21;
-  --primary-color: #50D59B;
-  --primary-hover-color: #95E1C0;
+  --base-color: hsl(206, 27%, 10%);
+  --primary-color: hsl(180, 90%, 40%);
+  --primary-hover-color: hsl(190, 80%, 75%);
+  --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
-  --bg-color-dark: #F4F6F6;
-  --bg-color: #F4F6F6;
+  --bg-color-dark: hsl(180, 10%, 85%);
+  --bg-color: hsl(180, 15%, 95%);
 }
 
 .theme-dark, .dark {
-  --base-color: #F4F6F6;
-  --primary-color: #50D59B;
-  --primary-hover-color: #95E1C0;
+  --base-color: hsl(180, 10%, 96%);
+  --primary-color: hsl(180, 90%, 40%);
+  --primary-hover-color: hsl(190, 80%, 75%);
+  --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
-  --bg-color-dark: #131B21;
-  --bg-color: #212E37;
+  --bg-color-dark: hsl(206, 27%, 10%);
+  --bg-color: hsl(206, 25%, 17%);
+}
+
+body {
+  @apply bg-[var(--bg-color)] text-[var(--base-color)] font-body;
+}
+
+a {
+  text-decoration: none;
+}
+a:not([aria-disabled]):hover,
+a:not([aria-disabled]):active {
+  color: var(--primary-hover-color);
+  cursor: pointer;
+}
+
+section {
+  @apply flex flex-col items-center justify-start gap-4;
+  @apply py-4 mx-auto;
 }
 
 .highlight {
@@ -41,18 +61,4 @@
 
 .card-default {
   @apply !rounded-xl !hover:border-[var(--primary-color)] w-full;
-}
-
-a {
-  text-decoration: none;
-}
-a:not([aria-disabled]):hover,
-a:not([aria-disabled]):active {
-  color: var(--primary-hover-color);
-  cursor: pointer;
-}
-
-section {
-  @apply flex flex-col items-center justify-start gap-4;
-  @apply py-4 mx-auto;
 }
