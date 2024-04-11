@@ -51,10 +51,8 @@ const url = appInfo.url;
     <ViewTransitions />
   </head>
   <body>
-    <main class="container mx-a px-4 mt-20 md:mt-16 lg:mt-12">
-      <div class="mx-a min-h-[calc(100vh-13rem)]">
-        <slot />
-      </div>
+    <main class="mt-20 md:mt-16 lg:mt-12 min-h-[calc(100vh-13rem)]">
+      <slot />
       <Footer />
       <slot name="after-footer" />
     </main>

@@ -1,0 +1,15 @@
+---
+// This is the default section wrapper component
+---
+
+<section
+  class:list={[
+    "px-4 py-36 first-of-type:mt-12 last-of-type:mb-24",
+    // Odd number dark background color, even number normal background color.
+    "odd-of-type:bg-[var(--bg-color)] even-of-type:bg-[var(--bg-color-dark)]",
+  ]}
+>
+  <div class="container mx-a">
+    <slot />
+  </div>
+</section>
