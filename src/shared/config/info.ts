@@ -9,6 +9,7 @@ export default {
     "TokenList is a platform for registering Fungible Tokens on Flow Blockchain. It supports permissionless on-chain registration of any Flow FT with on-chain MetadataViews and provides an API endpoint to expose the Uniswap standard token list JSON file.",
   author: "FIXeS World",
   url: baseUrl,
+  version: "0.1.0",
   icon: import.meta.env.PUBLIC_ICON ?? `${baseUrl}/apple-touch-icon.png`,
   banner: import.meta.env.PUBLIC_BANNER ?? "https://i.imgur.com/Wdy3GG7.jpg",
   linktree: import.meta.env.PUBLIC_LINKTREE ?? "https://linktr.ee/fixes.world",

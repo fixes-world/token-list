@@ -1,0 +1,58 @@
+:global(.dark) {
+  color-scheme: dark;
+}
+
+:root {
+  --base-color: #131B21;
+  --primary-color: #50D59B;
+  --primary-hover-color: #95E1C0;
+  --error-color: #E88080;
+  --warn-color: #F2C97D;
+  --bg-color-dark: #F4F6F6;
+  --bg-color: #F4F6F6;
+}
+
+.theme-dark, .dark {
+  --base-color: #F4F6F6;
+  --primary-color: #50D59B;
+  --primary-hover-color: #95E1C0;
+  --error-color: #E88080;
+  --warn-color: #F2C97D;
+  --bg-color-dark: #131B21;
+  --bg-color: #212E37;
+}
+
+.highlight {
+  color: var(--primary-color);
+}
+
+.highlight-gradient {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-hover-color)];
+}
+
+.page-title {
+  @apply mb-4 mt-4 lg:mt-8 xl:mt-12;
+  @apply w-full text-center truncate;
+}
+
+.title-base {
+  @apply font-title italic tracking-wide;
+}
+
+.card-default {
+  @apply !rounded-xl !hover:border-[var(--primary-color)] w-full;
+}
+
+a {
+  text-decoration: none;
+}
+a:not([aria-disabled]):hover,
+a:not([aria-disabled]):active {
+  color: var(--primary-hover-color);
+  cursor: pointer;
+}
+
+section {
+  @apply flex flex-col items-center justify-start gap-4;
+  @apply py-4 mx-auto;
+}

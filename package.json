@@ -24,6 +24,7 @@
   "dependencies": {
     "@astrojs/vue": "^4.0.10",
     "@onflow/fcl": "^1.10.0",
+		"@onflow/fcl-wc": "5.0.2",
     "@vercel/analytics": "^1.2.2",
     "@vercel/edge": "^1.1.1",
     "@vueuse/components": "^10.9.0",
