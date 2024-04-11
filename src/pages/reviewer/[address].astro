@@ -1,0 +1,10 @@
+---
+import Layout from "@layouts/Layout.astro";
+import ReviewerMain from "@components/reviewer/ReviewerMain.astro";
+
+const { address } = Astro.params;
+---
+
+<Layout title={`Reviewer: ${address}`}>
+  <ReviewerMain />
+</Layout>
