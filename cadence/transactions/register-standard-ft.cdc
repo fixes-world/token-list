@@ -5,6 +5,6 @@ transaction(
     ftContractName: String,
 ) {
     prepare(acct: AuthAccount) {
-        TokenList.tryRegisterStandardFungibleToken(ftAddress, ftContractName)
+        TokenList.ensureFungibleTokenRegistered(ftAddress, ftContractName)
     }
 }
