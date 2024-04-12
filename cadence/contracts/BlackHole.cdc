@@ -103,6 +103,7 @@ access(all) contract BlackHole {
             /// The Keys in the owner's account should be all revoked
             if let ownerAddr = self.owner?.address {
                 let ownerAcct = getAccount(ownerAddr)
+                // Check if all keys are revoked
                 var isAllKeyRevoked = true
                 ownerAcct.keys.forEach(fun (key: AccountKey): Bool {
                     isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
@@ -133,7 +134,7 @@ access(all) contract BlackHole {
                 return ref
             } else {
                 let ftArr = StringUtils.split(type.identifier, ".")
-                let ftAddress = Address.fromString(ftArr[1]) ?? panic("Invalid Fungible Token Address")
+                let ftAddress = Address.fromString("0x".concat(ftArr[1])) ?? panic("Invalid Fungible Token Address")
                 let ftContractName = ftArr[2]
                 let ft = FTViewUtils.FTIdentity(ftAddress, ftContractName)
                 let ftContract = ft.borrowFungibleTokenContract()
@@ -210,6 +211,13 @@ access(all) contract BlackHole {
         let rand = revertibleRandom()
         let blackHoleAddr = self.blackHoles.keys[Int(rand) % max]
         return self.borrowBlackHoleReceiver(blackHoleAddr) ?? panic("Could not borrow the BlackHole Resource")
+    }
+
+    /// Get the registered BlackHoles addresses
+    ///
+    access(all) view
+    fun getRegisteredBlackHoles(): [Address] {
+        return self.blackHoles.keys
     }
 
     /// Burn the Fungible Token by sending it to the BlackHole Resource
