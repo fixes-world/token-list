@@ -12,6 +12,7 @@
 			"source": "./cadence/contracts/BlackHole.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "4396883a58c3a2d1",
 				"testnet": "ad26718c4b6b921b"
 			}
 		},
@@ -192,6 +193,13 @@
 				"location": "emulator-account.key"
 			}
 		},
+		"mainnet-blackhole": {
+			"address": "4396883a58c3a2d1",
+			"key": {
+				"type": "file",
+				"location": "mainnet-blackhole.pkey"
+			}
+		},
 		"testnet-blackhole": {
 			"address": "ad26718c4b6b921b",
 			"key": {
@@ -215,6 +223,11 @@
 		},
 		"testnet": {
 			"testnet-blackhole": [
+				"BlackHole"
+			]
+		},
+		"mainnet": {
+			"mainnet-blackhole": [
 				"BlackHole"
 			]
 		}

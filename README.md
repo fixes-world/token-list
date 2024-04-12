@@ -6,7 +6,7 @@ This repo contains all contract and frontend code.
 
 | Contract Name | Testnet | Mainnet |
 | :------------ | :------ | :------ |
-| BlackHole | [0xad26718c4b6b921b](https://contractbrowser.com/A.ad26718c4b6b921b.BlackHole) | Not deployed |
+| BlackHole | [0xad26718c4b6b921b](https://contractbrowser.com/A.ad26718c4b6b921b.BlackHole) | [0x4396883a58c3a2d1](https://contractbrowser.com/A.4396883a58c3a2d1.BlackHole) |
 
 ## 🚀 Project Structure
 
