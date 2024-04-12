@@ -8,6 +8,13 @@
 				"testnet": "31ad40c07a2a9788"
 			}
 		},
+		"BlackHole": {
+			"source": "./cadence/contracts/BlackHole.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet": "ad26718c4b6b921b"
+			}
+		},
 		"Burner": {
 			"source": "./imports/f233dcee88fe0abe/Burner.cdc",
 			"aliases": {
@@ -184,11 +191,19 @@
 				"type": "file",
 				"location": "emulator-account.key"
 			}
+		},
+		"testnet-blackhole": {
+			"address": "ad26718c4b6b921b",
+			"key": {
+				"type": "file",
+				"location": "testnet-blackhole.pkey"
+			}
 		}
 	},
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
+				"BlackHole",
 				"Burner",
 				"StringUtils",
 				"ArrayUtils",
@@ -196,6 +211,11 @@
 				"ViewResolvers",
 				"FTViewUtils",
 				"TokenList"
+			]
+		},
+		"testnet": {
+			"testnet-blackhole": [
+				"BlackHole"
 			]
 		}
 	}
