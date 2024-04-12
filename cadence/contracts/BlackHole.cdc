@@ -202,6 +202,13 @@ access(all) contract BlackHole {
             .borrow()
     }
 
+    /// Check if is the address a valid BlackHole address
+    ///
+    access(all) view
+    fun isValidBlackHole(_ addr: Address): Bool {
+        return self.borrowBlackHoleReceiver(addr)?.isValid() == true
+    }
+
     /// Register a BlackHole Resource
     ///
     access(all)
