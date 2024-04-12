@@ -52,9 +52,8 @@ flowSrv?.currentUser.subscribe((user) => {
 
 <template>
   <VueWrapper :class="[
-    'flex flex-col items-center',
-    !isLoggedIn ? 'gap-2' : 'gap-0',
-  ]">
+    'flex flex-col items-center', !isLoggedIn ? 'gap-2' : 'gap-0',
+  ]" :is-global="true">
     <AuthBoxNotLoggedIn v-if="!isLoggedIn" />
     <AuthBoxLoggedIn v-else @logout="logout" />
   </VueWrapper>

@@ -1,9 +1,14 @@
 ---
 import LandingSlogan from "./sections/LandingSlogan.astro";
 import SectionWrapper from "@components/partials/SectionWrapper.astro";
+import QuickRegisterToken from "./sections/QuickRegisterToken.vue";
 ---
 
-<LandingSlogan />
-<SectionWrapper>Section 2</SectionWrapper>
-<SectionWrapper>Section 3</SectionWrapper>
-<SectionWrapper>Section 4</SectionWrapper>
+<SectionWrapper>
+  <LandingSlogan />
+</SectionWrapper>
+<SectionWrapper title="Quick Register">
+  <QuickRegisterToken client:only="vue" />
+</SectionWrapper>
+<SectionWrapper title="How to use"> Section 3 </SectionWrapper>
+<SectionWrapper title="Full List"> Section 4 </SectionWrapper>

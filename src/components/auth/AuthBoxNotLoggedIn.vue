@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FlowLogoWhite from '@assets/flow-white.svg?component';
+// import FlowLogoWhite from '@assets/flow-white.svg?component';
 import FlowConnectButton from '@components/flow/FlowConnectButton.vue'
 
 </script>
@@ -7,7 +7,7 @@ import FlowConnectButton from '@components/flow/FlowConnectButton.vue'
 <template>
   <FlowConnectButton size="large" class="relative group">
     <template #icon>
-      <FlowLogoWhite class="h-6 w-6" />
+      <span class="i-carbon:wallet h-5 w-5" />
     </template>
     <div class="w-0 group-hover:w-15 transition-all duration-200 ease-out">
     </div>

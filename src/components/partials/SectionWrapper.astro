@@ -1,15 +1,39 @@
 ---
 // This is the default section wrapper component
+interface Props {
+  title?: string;
+  widthLimited?: boolean;
+}
+
+const { title = "", widthLimited = true } = Astro.props;
 ---
 
 <section
+  id={title ? title.toLowerCase().replace(/\s/g, "-") : undefined}
   class:list={[
-    "px-4 py-36 last-of-type:mb-24",
+    "px-4 last-of-type:mb-24",
     // Odd number dark background color, even number normal background color.
     "odd-of-type:bg-[var(--bg-color)] even-of-type:bg-[var(--bg-color-dark)]",
   ]}
 >
-  <div class="container mx-a">
+  <div
+    class:list={[
+      "relative container mx-a py-36",
+      { "max-w-4xl": widthLimited },
+    ]}
+  >
+    {
+      title && (
+        <h2
+          class:list={[
+            "absolute top-2 md:top-4 lg:top-6 xl:top-8",
+            "italic text-2xl font-bold text-[var(--primary-hover-color)] opacity-60",
+          ]}
+        >
+          # {title}
+        </h2>
+      )
+    }
     <slot />
   </div>
 </section>

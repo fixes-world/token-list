@@ -1,5 +1,7 @@
 const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 
+const contractAddr = network === "testnet" ? "0x1" : "0x2";
+
 const baseUrl = import.meta.env.SITE ?? "http://localhost:4321";
 
 export default {
@@ -18,6 +20,7 @@ export default {
   discord: import.meta.env.PUBLIC_DISCORD ?? "https://discord.gg/flow",
   // Blockchain info
   network: network,
+  contractAddr: contractAddr,
   walletConnectProjectId:
     import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID ??
     "779bb5171b7c2aea7b27968a964ce083",
