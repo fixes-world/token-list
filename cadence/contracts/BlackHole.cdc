@@ -12,7 +12,6 @@
 */
 import "FungibleToken"
 import "StringUtils"
-import "FTViewUtils"
 
 /// BlackHole contract
 ///
@@ -136,8 +135,9 @@ access(all) contract BlackHole {
                 let ftArr = StringUtils.split(type.identifier, ".")
                 let ftAddress = Address.fromString("0x".concat(ftArr[1])) ?? panic("Invalid Fungible Token Address")
                 let ftContractName = ftArr[2]
-                let ft = FTViewUtils.FTIdentity(ftAddress, ftContractName)
-                let ftContract = ft.borrowFungibleTokenContract()
+                let ftContract = getAccount(ftAddress)
+                    .contracts.borrow<&FungibleToken>(name: ftContractName)
+                    ?? panic("Could not borrow the FungibleToken contract reference")
                 // @deprecated in Cadence 1.0
                 self.pools[type] <-! ftContract.createEmptyVault()
                 return &self.pools[type] as &FungibleToken.Vault? ?? panic("Invalid Fungible Token Vault")

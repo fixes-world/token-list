@@ -2,6 +2,11 @@
 
 This repo contains all contract and frontend code.
 
+## 🔗 Contract Addresses
+
+|-- Contract Name --|-- Testnet --|-- Mainnet --|
+| BlackHole | [0xad26718c4b6b921b](https://contractbrowser.com/A.ad26718c4b6b921b.BlackHole) | Not deployed |
+
 ## 🚀 Project Structure
 
 Inside of your Astro project, you'll see the following folders and files:
