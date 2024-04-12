@@ -1,9 +1,11 @@
 ---
 import ThemeToggle from "@components/widgets/ThemeToggle.vue";
+import AuthBox from "@components/auth/AuthBox.vue";
 ---
 
 <header class="container mx-a p-4">
-  <div class="w-full flex justify-end gap-2">
+  <div class="w-full flex items-center justify-end gap-2 md:gap-4">
     <ThemeToggle client:load />
+    <AuthBox client:only="vue" />
   </div>
 </header>

@@ -23,9 +23,9 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
       fontFamily: "Overpass, Roboto, 'Helvetica Neue', Arial, Helvetica, 'Noto Sans', 'PingFang SC', 'Microsoft Yahei', 微软雅黑, 'WenQuanYi Micro Hei', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
       fontFamilyMono: "'IBM Plex Mono', Consolas, 'Andale Mono WT', 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Liberation Mono', 'Nimbus Mono L', Monaco, 'Courier New', Courier, monospace",
     }, !isDark.value ? {
-      baseColor: "#131a20",
+      baseColor: "#f4f6f6",
       primaryColor: "#0ac2c2",
-      primaryColorHover: "#8ce1f2",
+      primaryColorHover: "#75c6d6",
       bodyColor: "#f0f4f4",
       tableColor: "#e9ebeb",
       cardColor: "#e9ebeb",
