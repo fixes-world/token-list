@@ -18,8 +18,5 @@ transaction() {
             BlackHole.getBlackHoleReceiverPublicPath(),
             target: storagePath
         )
-
-        // register the new account as a black hole receiver
-        BlackHole.registerAsBlackHole(acct.address)
     }
 }
