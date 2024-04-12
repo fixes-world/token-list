@@ -2,16 +2,13 @@ import { computed, reactive, ref, type Ref } from "vue";
 import {
   createGlobalState,
   createSharedComposable,
+  useDark,
   useLocalStorage,
   useSessionStorage,
 } from "@vueuse/core";
 import type { UserSnapshot } from "@onflow/fcl";
 
 // ---------------- Global State ----------------
-
-export const useTheme = createGlobalState(() =>
-  useLocalStorage("theme", "light")
-);
 
 export const useGlobalAccount = createGlobalState(() =>
   useSessionStorage("x-app-account", "")
@@ -36,6 +33,8 @@ export const useSendingTransaction = createGlobalState(() => {
 const flowUser = useCurrentFlowUser();
 const acctName = useGlobalAccount();
 const isNetworkCorrect = useNetworkCorrect();
+
+export const useSharedDark = createSharedComposable(() => useDark());
 
 export const useCurrentSignerAddress = createSharedComposable(() => {
   return computed<string | undefined>(() => {

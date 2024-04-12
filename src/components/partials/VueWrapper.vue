@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { useTheme } from '@components/shared';
+import {
+  useSharedDark
+} from '@components/shared';
 import {
   lightTheme, darkTheme,
   NConfigProvider, NGlobalStyle, NMessageProvider,
@@ -14,8 +16,7 @@ defineProps({
   }
 })
 
-const theme = useTheme()
-const isDark = computed(() => theme.value === 'dark')
+const isDark = useSharedDark()
 const themeOverrides = computed<GlobalThemeOverrides>(() => {
   return {
     common: Object.assign({
