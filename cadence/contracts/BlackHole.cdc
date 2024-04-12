@@ -6,8 +6,8 @@
 ## Features:
 
 - You can register a BlackHole Resource from the BlackHole contract.
-- Users can burn fungible tokens by sending them to the BlackHole Resource.
-- Users can get all valid BlackHole Resources.
+- Users can burn fungible tokens by sending them to the random BlackHole Resource.
+- Users can get the balance of vanished fungible tokens by the type of the Fungible Token in the BlackHole Resource.
 
 */
 import "FungibleToken"
@@ -215,9 +215,9 @@ access(all) contract BlackHole {
     /// Burn the Fungible Token by sending it to the BlackHole Resource
     ///
     access(all)
-    fun vanish(_ token: @FungibleToken.Vault) {
+    fun vanish(_ vault: @FungibleToken.Vault) {
         let blackHole = self.borrowRandomBlackHoleReceiver()
-        blackHole.deposit(from: <- token)
+        blackHole.deposit(from: <- vault)
     }
 
     init() {
