@@ -8,8 +8,7 @@ import { getFTContracts } from '@shared/flow/action/scripts'
 import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { TokenStatus } from '@shared/flow/entities';
 
-import SelectOptionItem from './SelectOptionItem.vue';
-import { get } from '@vueuse/core';
+import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
 
 const props = withDefaults(defineProps<{
   address?: string;
@@ -30,12 +29,13 @@ const flowSrv = inject(FlowSrvKey);
 const isLoadingData = ref(false);
 const ftContracts = ref<TokenStatus[]>([]);
 
-const options = computed<{ label: string, value: string }[]>(() => {
+const options = computed<SelectOption[]>(() => {
   return ftContracts.value?.map((contract) => {
     let identifier = `${contract.address}.${contract.contractName}`
     return {
       label: identifier,
       value: identifier,
+      disabled: contract.isRegistered,
     }
   }) || [];
 })
@@ -87,7 +87,7 @@ function renderLabel(option: SelectOption): VNodeChild {
     return h('span', {}, undefined)
   }
   const [address, contractName] = (option.label as string)?.split('.');
-  return h(SelectOptionItem, {
+  return h(ItemFungibleTokenStatus, {
     item: getFTData(address, contractName),
   })
 }

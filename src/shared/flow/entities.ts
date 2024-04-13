@@ -21,6 +21,8 @@ export interface TokenPaths {
 
 export interface TokenStatus extends TokenIdentity {
   isRegistered: boolean;
+  isWithDisplay: boolean;
+  isWithVaultData: boolean;
   vaultPath: string;
   publicPaths: Record<string, string>;
 }

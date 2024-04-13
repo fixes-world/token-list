@@ -65,6 +65,8 @@ export async function getFTContracts(
       address: obj.address,
       contractName: obj.contractName,
       isRegistered: obj.isRegistered,
+      isWithDisplay: obj.isWithDisplay,
+      isWithVaultData: obj.isWithVaultData,
       vaultPath: obj.vaultPath,
       publicPaths: paths,
     };

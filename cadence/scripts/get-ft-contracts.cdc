@@ -1,6 +1,9 @@
 import "FungibleToken"
+import "ViewResolver"
+import "FungibleTokenMetadataViews"
 import "FTViewUtils"
 import "TokenList"
+import "ViewResolvers"
 
 access(all)
 fun main(
@@ -15,12 +18,17 @@ fun main(
     let addrNo0x = addr.toString().slice(from: 2, upTo: addr.toString().length)
 
     let ftDic: {Type: String} = {}
+    let ftViewResolverDic: {Type: &ViewResolver} = {}
     for contractName in contractNames {
         if let contract = acct.contracts.borrow<&FungibleToken>(name: contractName) {
             let ftType = CompositeType("A.".concat(addrNo0x)
                 .concat(".").concat(contractName)
                 .concat(".Vault"))!
             ftDic[ftType] = contractName
+            // Borrow the view resolver for the contract
+            if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
+                ftViewResolverDic[ftType] = viewResolver
+            }
         }
     }
     let ftVaultPathsDic: {Type: String} = {}
@@ -52,10 +60,13 @@ fun main(
         if ftVaultPathsDic[ftType] == nil || ftPublicPathsDic[ftType] == nil {
             continue
         }
+        let supportedViews = ftViewResolverDic[ftType]?.getViews() ?? []
         let status = FTStatus(
             address: addr,
             contractName: contractName,
             isRegistered: TokenList.isFungibleTokenRegistered(addr, contractName),
+            isWithDisplay: supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),
+            isWithVaultData: supportedViews.contains(Type<FungibleTokenMetadataViews.FTVaultData>()),
             vaultPath: ftVaultPathsDic[ftType]!,
             publicPaths: ftPublicPathsDic[ftType]!
         )
@@ -72,6 +83,10 @@ access(all) struct FTStatus {
     access(all)
     let isRegistered: Bool
     access(all)
+    let isWithDisplay: Bool
+    access(all)
+    let isWithVaultData: Bool
+    access(all)
     let vaultPath: String
     // TypeIdentifier => Path
     access(all)
@@ -81,12 +96,16 @@ access(all) struct FTStatus {
         address: Address,
         contractName: String,
         isRegistered: Bool,
+        isWithDisplay: Bool,
+        isWithVaultData: Bool,
         vaultPath: String,
         publicPaths: {String: String}
     ) {
         self.address = address
         self.contractName = contractName
         self.isRegistered = isRegistered
+        self.isWithDisplay = isWithDisplay
+        self.isWithVaultData = isWithVaultData
         self.vaultPath = vaultPath
         self.publicPaths = publicPaths
     }
