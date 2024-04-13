@@ -117,14 +117,33 @@ defineExpose({
 
 <template>
   <div class="flex flex-col gap-2 rounded-xl">
-    <NButton v-if="disabled && !txid" role="button" strong round :size="size" style="width: 100%;" disabled>
+    <NButton
+      v-if="disabled && !txid"
+      role="button"
+      strong
+      round
+      :size="size"
+      style="width: 100%;"
+      disabled
+    >
       <slot name="disabled">
         Disabled
       </slot>
     </NButton>
     <template v-else-if="!hideButton && (!txid || !isSealed)">
-      <NButton role="button" strong round :size="size" style="width: 100%;" :type="type" :aria-busy="isBusy"
-        :loading="isBusy" :disabled="isDisabled" :aria-disabled="isDisabled" @click.stop.prevent="startTransaction">
+      <NButton
+        role="button"
+        strong
+        round
+        :size="size"
+        style="width: 100%;"
+        :type="type"
+        :aria-busy="isBusy"
+        :loading="isBusy"
+        :disabled="isDisabled"
+        :aria-disabled="isDisabled"
+        @click.stop.prevent="startTransaction"
+      >
         <template #icon>
           <slot name="icon" />
         </template>
@@ -132,25 +151,47 @@ defineExpose({
           {{ content }}
         </slot>
       </NButton>
-      <p v-if="errorMessage" class="w-full max-h-20 overflow-y-scroll px-4 mb-0 text-xs">
+      <p
+        v-if="errorMessage"
+        class="w-full max-h-20 overflow-y-scroll px-4 mb-0 text-xs"
+      >
         {{ errorMessage }}
       </p>
     </template>
-    <slot v-if="!hideButton && (txid && isSealed)" name="next">
-      <NButton role="button" strong round :size="size" style="width: 100%;" :type="type" ghost
-        @click.stop.prevent="resetComponent">
+    <slot
+      v-if="!hideButton && (txid && isSealed)"
+      name="next"
+    >
+      <NButton
+        role="button"
+        strong
+        round
+        :size="size"
+        style="width: 100%;"
+        :type="type"
+        ghost
+        @click.stop.prevent="resetComponent"
+      >
         Close
       </NButton>
     </slot>
     <Teleport to="body">
-      <FlowWaitTransaction v-if="txid" :hidden="hideTrx" :txid="txid" @sealed="onSealed" @error="onError"
-        @close="resetComponent">
+      <FlowWaitTransaction
+        v-if="txid"
+        :hidden="hideTrx"
+        :txid="txid"
+        @sealed="onSealed"
+        @error="onError"
+        @close="resetComponent"
+      >
         <template v-if="action != ''">
           <span class="mb-0 font-medium text-sm">{{ action }}</span>
         </template>
         <template #append>
-          <pre v-if="errorMessage"
-            class="w-full max-h-20 overflow-scroll px-4 mb-0 text-xs text-[var(--error-color)]">{{ errorMessage }}</pre>
+          <pre
+            v-if="errorMessage"
+            class="w-full max-h-20 overflow-scroll px-4 mb-0 text-xs text-[var(--error-color)]"
+          >{{ errorMessage }}</pre>
         </template>
       </FlowWaitTransaction>
     </Teleport>

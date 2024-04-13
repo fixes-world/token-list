@@ -11,7 +11,10 @@ const toggleDark = useToggle(isDark)
 </script>
 
 <template>
-  <div class="cursor-pointer focus:outline-none" @click="toggleDark()">
+  <div
+    class="cursor-pointer focus:outline-none"
+    @click="toggleDark()"
+  >
     <span class="sr-only">View ThemeToggle</span>
     <span :class="['w-8 h-8', isDark ? 'i-carbon:sun' : 'i-carbon:moon']" />
   </div>

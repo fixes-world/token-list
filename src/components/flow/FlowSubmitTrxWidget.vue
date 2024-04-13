@@ -69,56 +69,59 @@ onUnmounted(() => {
 </script>
 
 <template>
-<NDialogProvider>
-  <div :class="['flex flex-col-reverse lg:flex-row items-center gap-2', { 'w-full': wFull }]">
-    <div class="w-full lg:w-auto flex-auto flex items-center gap-2">
-      <div
-        v-if="!withoutCancel"
-        class="flex-none w-16 lg:w-32"
-      >
-        <NButton
-          style="width: 100%;"
-          :size="isNotMobile ? 'large' : 'small'"
-          strong round ghost
-          :disabled="isSending"
-          @click.stop.prevent="onCancel">
-          <span class="i-carbon:close-large w-5 h-5 inline-block lg:hidden" />
-          <span class="hidden lg:inline-block">Cancel</span>
-        </NButton>
-      </div>
-      <FlowSubmitTransaction
-        class="flex-auto"
-        :action="action"
-        :size="isNotMobile ? size : 'small'"
-        :type="type"
-        :disabled="disabled || isSending"
-        :method="method"
-        @sent="onTrxSent"
-        @success="onTrxSuccess"
-        @error="onTrxError"
-        @reset="emits('reset')"
-      >
-        <template #icon>
-          <slot name="icon" />
-        </template>
-        <template #disabled>
-          <slot name="disabled">
-            {{
+  <NDialogProvider>
+    <div :class="['flex flex-col-reverse lg:flex-row items-center gap-2', { 'w-full': wFull }]">
+      <div class="w-full lg:w-auto flex-auto flex items-center gap-2">
+        <div
+          v-if="!withoutCancel"
+          class="flex-none w-16 lg:w-32"
+        >
+          <NButton
+            style="width: 100%;"
+            :size="isNotMobile ? 'large' : 'small'"
+            strong
+            round
+            ghost
+            :disabled="isSending"
+            @click.stop.prevent="onCancel"
+          >
+            <span class="i-carbon:close-large w-5 h-5 inline-block lg:hidden" />
+            <span class="hidden lg:inline-block">Cancel</span>
+          </NButton>
+        </div>
+        <FlowSubmitTransaction
+          class="flex-auto"
+          :action="action"
+          :size="isNotMobile ? size : 'small'"
+          :type="type"
+          :disabled="disabled || isSending"
+          :method="method"
+          @sent="onTrxSent"
+          @success="onTrxSuccess"
+          @error="onTrxError"
+          @reset="emits('reset')"
+        >
+          <template #icon>
+            <slot name="icon" />
+          </template>
+          <template #disabled>
+            <slot name="disabled">
+              {{
               disabled
               ? disabledReason ?? 'Please Wait'
               : isSending
-                ? "Transaction Sending"
-                : 'Balance Not Enough'
-            }}
-          </slot>
-        </template>
-        <template #default>
-          <slot>
-            {{ content }}
-          </slot>
-        </template>
-      </FlowSubmitTransaction>
+              ? "Transaction Sending"
+              : 'Balance Not Enough'
+              }}
+            </slot>
+          </template>
+          <template #default>
+            <slot>
+              {{ content }}
+            </slot>
+          </template>
+        </FlowSubmitTransaction>
+      </div>
     </div>
-  </div>
-</NDialogProvider>
+  </NDialogProvider>
 </template>

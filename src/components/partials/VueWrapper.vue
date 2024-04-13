@@ -60,7 +60,10 @@ addNaiveUIStyleMeta()
 </script>
 
 <template>
-  <NConfigProvider :theme="isDark ? darkTheme : lightTheme" :theme-overrides="themeOverrides">
+  <NConfigProvider
+    :theme="isDark ? darkTheme : lightTheme"
+    :theme-overrides="themeOverrides"
+  >
     <NMessageProvider placement="bottom">
       <slot />
     </NMessageProvider>

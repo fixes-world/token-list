@@ -5,7 +5,10 @@ import FlowConnectButton from '@components/flow/FlowConnectButton.vue'
 </script>
 
 <template>
-  <FlowConnectButton size="large" class="relative group">
+  <FlowConnectButton
+    size="large"
+    class="relative group"
+  >
     <template #icon>
       <span class="i-carbon:wallet h-5 w-5" />
     </template>

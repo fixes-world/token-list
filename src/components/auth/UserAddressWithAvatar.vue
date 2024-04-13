@@ -4,8 +4,7 @@ import { NAvatar, NTag, useThemeVars } from 'naive-ui'
 import { useCurrentSignerAddress, useGlobalAccount, useIsConnected } from '@components/shared';
 
 import FlowLogo from '@assets/flow.svg?component';
-import ItemHintLabel from '@components/items/ItemHintLabel.vue';
-import ItemAddressDisplay from '@components/items/ItemAddressDisplay.vue'
+import ElementAddressDisplay from '@components/items/cardElements/ElementAddressDisplay.vue';
 
 withDefaults(defineProps<{
   short?: boolean;
@@ -45,11 +44,18 @@ const avatarUrl = computed(() => {
       : '',
   ]">
     <div class="relative flex-none w-fit flex items-center">
-      <n-avatar round size="medium" :src="avatarUrl" />
-      <div v-if="!isConnected" :class="[
+      <n-avatar
+        round
+        size="medium"
+        :src="avatarUrl"
+      />
+      <div
+        v-if="!isConnected"
+        :class="[
         'flex justify-between',
         'absolute -bottom-1 -left-2 z-20',
-      ]">
+]"
+      >
         <div>
           <FlowLogo :class="['h-4 w-4']" />
         </div>
@@ -64,8 +70,17 @@ const avatarUrl = computed(() => {
         : 'relative',
     ]">
       <div class="relative flex-auto flex flex-col items-start">
-        <ItemAddressDisplay :address="currentUserAddr" :short="short" class="font-semibold" />
-        <NTag type="primary" size="tiny" round class="-ml-1">
+        <ElementAddressDisplay
+          :address="currentUserAddr"
+          :short="short"
+          class="font-semibold"
+        />
+        <NTag
+          type="primary"
+          size="tiny"
+          round
+          class="-ml-1"
+        >
           <div class="text-center text-xs px-1">
             <span>Flow Native</span>
           </div>

@@ -34,12 +34,24 @@ const isConnected = useIsConnected()
 </script>
 
 <template>
-  <div v-if="!isNetworkCorrect" :class="['flex justify-center', { 'w-full': wFull }]">
-    <NTag type="error" size="medium" round>
+  <div
+    v-if="!isNetworkCorrect"
+    :class="['flex justify-center', { 'w-full': wFull }]"
+  >
+    <NTag
+      type="error"
+      size="medium"
+      round
+    >
       Incorrect Network
     </NTag>
   </div>
-  <FlowConnectButton v-else-if="!isConnected" :type="type" :size="size" :w-full="wFull">
+  <FlowConnectButton
+    v-else-if="!isConnected"
+    :type="type"
+    :size="size"
+    :w-full="wFull"
+  >
     <template #icon>
       <span class="i-carbon:wallet w-4 h-4" />
     </template>

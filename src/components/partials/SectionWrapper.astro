@@ -18,22 +18,14 @@ const { title = "", widthLimited = true } = Astro.props;
 >
   <div
     class:list={[
-      "relative container mx-a py-36",
-      { "max-w-4xl": widthLimited },
+      "relative container mx-a",
+      !!title ? "pt-28 pb-20" : "py-24",
+      {
+        "max-w-4xl": widthLimited,
+      },
     ]}
   >
-    {
-      title && (
-        <h2
-          class:list={[
-            "absolute top-2 md:top-4 lg:top-6 xl:top-8",
-            "italic text-2xl font-bold text-[var(--primary-hover-color)] opacity-60",
-          ]}
-        >
-          # {title}
-        </h2>
-      )
-    }
+    {title && <h2 class:list={["absolute top-4 md:top-6 xl:top-8", "italic text-2xl font-bold text-[var(--primary-hover-color)] opacity-60"]}># {title}</h2>}
     <slot />
   </div>
 </section>

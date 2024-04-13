@@ -24,7 +24,11 @@ const calcMaxWidth = computed(() => props.maxWidth ?? (isOnPCBrowser.value ? '42
 </script>
 
 <template>
-  <NTooltip :trigger="trigger" :style="{ maxWidth: calcMaxWidth }" :placement="placement">
+  <NTooltip
+    :trigger="trigger"
+    :style="{ maxWidth: calcMaxWidth }"
+    :placement="placement"
+  >
     <template #trigger>
       <span :class="[
       'inline-flex items-center gap-1',

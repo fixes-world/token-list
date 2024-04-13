@@ -53,8 +53,17 @@ defineExpose({
 </script>
 
 <template>
-  <NButton v-if="!current" strong round :class="[wFull ? '!w-full' : '']" :type="type" :size="size"
-    :loading="isInitializingWalletConnect" :disabled="isInitializingWalletConnect" @click="login">
+  <NButton
+    v-if="!current"
+    strong
+    round
+    :class="[wFull ? '!w-full' : '']"
+    :type="type"
+    :size="size"
+    :loading="isInitializingWalletConnect"
+    :disabled="isInitializingWalletConnect"
+    @click="login"
+  >
     <template #icon>
       <slot name="icon">
         <FlowLogoWhite class="h-5 w-5" />

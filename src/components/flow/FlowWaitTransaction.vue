@@ -103,44 +103,48 @@ onBeforeUnmount(stopSubscribe);
 </script>
 
 <template>
-<div
-  v-if="!hidden"
-  :class="[
+  <div
+    v-if="!hidden"
+    :class="[
     'fixed z-100 right-0 bottom-0',
     'rounded-xl p-2 w-fit max-w-screen md:max-w-[80%] lg:max-w-[50%]',
     'flex flex-col items-center justify-center',
     'bg-[var(--bg-color-dark)]'
   ]"
->
-  <div :class="[
+  >
+    <div :class="[
     'flex flex-col gap-2',
     'relative w-full px-3 py-2 rounded-lg',
     'border-2 border-solid border-[var(--primary-color)]',
     'text-center bg-[var(--bg-color)]',
   ]">
-    <slot></slot>
-    <div :class="[
+      <slot></slot>
+      <div :class="[
       'flex items-center gap-2 pr-6',
       'font-semibold text-lg text-[var(--base-color)]'
     ]">
-      <span class="">{{ txStatusString }}</span>
-      <a :href="getTxURL(txid)" target="_blank" class="highlight">
-        {{ txidDisplay }}
-      </a>
+        <span class="">{{ txStatusString }}</span>
+        <a
+          :href="getTxURL(txid)"
+          target="_blank"
+          class="highlight"
+        >
+          {{ txidDisplay }}
+        </a>
+      </div>
+      <NProgress
+        type="line"
+        :percentage="progress"
+        indicator-placement="inside"
+        status="success"
+        processing
+      />
+      <div
+        v-if="progress && progress >= 100"
+        class="i-carbon:misuse w-5 h-5 absolute top-3 right-3 cursor-pointer"
+        @click="emit('close')"
+      />
     </div>
-    <NProgress
-      type="line"
-      :percentage="progress"
-      indicator-placement="inside"
-      status="success"
-      processing
-    />
-    <div
-      v-if="progress && progress >= 100"
-      class="i-carbon:misuse w-5 h-5 absolute top-3 right-3 cursor-pointer"
-      @click="emit('close')"
-    />
+    <slot name="append"></slot>
   </div>
-  <slot name="append"></slot>
-</div>
 </template>

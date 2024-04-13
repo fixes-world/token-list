@@ -83,8 +83,18 @@ async function reloadEVMEntrustedAccount() {
 </script>
 
 <template>
-  <NDropdown :options="dropdownOptions" trigger="click" size="huge" placement="top-start" animated show-arrow
-    @select="handleDropdownCommand">
-    <UserAddressWithAvatar :short="isWithAside" :is-aside="false" />
+  <NDropdown
+    :options="dropdownOptions"
+    trigger="click"
+    size="huge"
+    placement="top-start"
+    animated
+    show-arrow
+    @select="handleDropdownCommand"
+  >
+    <UserAddressWithAvatar
+      :short="isWithAside"
+      :is-aside="false"
+    />
   </NDropdown>
 </template>
