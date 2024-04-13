@@ -24,7 +24,7 @@
   "dependencies": {
     "@astrojs/vue": "^4.0.10",
     "@onflow/fcl": "^1.10.0",
-		"@onflow/fcl-wc": "5.0.2",
+    "@onflow/fcl-wc": "5.0.2",
     "@vercel/analytics": "^1.2.2",
     "@vercel/edge": "^1.1.1",
     "@vueuse/components": "^10.9.0",
@@ -48,6 +48,7 @@
     "@unocss/reset": "0.59.0-beta.1",
     "@unocss/transformer-variant-group": "0.59.0-beta.1",
     "naive-ui": "^2.38.1",
+    "prettier": "^3.2.5",
     "seemly": "^0.3.8",
     "unocss": "0.59.0-beta.1",
     "unocss-preset-scrollbar": "^0.3.1",

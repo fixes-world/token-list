@@ -1,0 +1,11 @@
+{
+  "prettier.enable": true,
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "html.format.unformatted": "b,em,i,span,strong,u",
+  "html.format.wrapLineLength": 200,
+  "html.format.preserveNewLines": true,
+  "html.format.maxPreserveNewLines": 1,
+  "html.format.wrapAttributes": "force-expand-multiline"
+}
