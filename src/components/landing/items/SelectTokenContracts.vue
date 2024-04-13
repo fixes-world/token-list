@@ -67,11 +67,19 @@ function getFTData(address: string, contractName: string): TokenStatus | undefin
   });
 }
 
+async function reload() {
+  if (!props.address) {
+    return;
+  }
+  await loadFTContracts(props.address);
+}
+
 async function loadFTContracts(addr: string) {
   if (!flowSrv) {
     console.error('Flow Service not available');
     return;
   }
+  console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
   try {
@@ -101,6 +109,12 @@ watch(() => props.address, async (address) => {
 
   await loadFTContracts(address);
 }, { immediate: true });
+
+// Expose to parent component
+
+defineExpose({
+  reload,
+})
 
 </script>
 

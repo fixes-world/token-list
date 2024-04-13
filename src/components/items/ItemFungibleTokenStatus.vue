@@ -12,7 +12,7 @@ const props = defineProps<{
 <template>
   <div
     v-if="item !== undefined"
-    class="flex flex-wrap items-center gap-2"
+    class="flex items-center gap-2"
   >
     <span :class="[
       'w-5 h-5',
@@ -23,10 +23,18 @@ const props = defineProps<{
         {{ item.contractName }}
       </span>
       <NTag
+        v-if="item.isRegistered"
+        size="tiny"
+        type="success"
+        round
+      >
+        <span class="px-1">Registered</span>
+      </NTag>
+      <NTag
         size="tiny"
         round
         :type="item.isWithDisplay ? 'success' : 'default'"
-        :bordered="item.isWithDisplay ? false : true"
+        :bordered="!item.isWithDisplay ? false : true"
         :disabled="!item.isWithDisplay"
       >
         <span :class="['px-1', { 'decoration-line-through': !item.isWithDisplay }]">
@@ -37,7 +45,7 @@ const props = defineProps<{
         size="tiny"
         round
         :type="item.isWithVaultData ? 'warning' : 'default'"
-        :bordered="item.isWithVaultData ? false : true"
+        :bordered="!item.isWithVaultData ? false : true"
         :disabled="!item.isWithVaultData"
       >
         <span :class="['px-1', { 'decoration-line-through': !item.isWithVaultData }]">

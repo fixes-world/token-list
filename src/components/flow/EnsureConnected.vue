@@ -35,7 +35,7 @@ const isConnected = useIsConnected()
 
 <template>
   <div
-    v-if="!isNetworkCorrect"
+    v-if="currentFlowUser && !isNetworkCorrect"
     :class="['flex justify-center', { 'w-full': wFull }]"
   >
     <NTag

@@ -48,7 +48,8 @@ const errorMessage = ref<string | null>(null);
 const isSealed = ref<boolean | undefined>(undefined);
 
 const isBusy = computed(() => isLoading.value || isSealed.value === false);
-const isDisabled = computed(() => !isNetworkCorrect.value || isBusy.value);
+const isSubmitTxDisabled = computed(() => !isNetworkCorrect.value || isBusy.value);
+const disabledReason = computed(() => !isNetworkCorrect.value ? "Network Incorrect" : undefined);
 
 async function startTransaction(e: MouseEvent) {
   e.preventDefault();
@@ -140,14 +141,17 @@ defineExpose({
         :type="type"
         :aria-busy="isBusy"
         :loading="isBusy"
-        :disabled="isDisabled"
-        :aria-disabled="isDisabled"
+        :disabled="isSubmitTxDisabled"
+        :aria-disabled="isSubmitTxDisabled"
         @click.stop.prevent="startTransaction"
       >
         <template #icon>
           <slot name="icon" />
         </template>
-        <slot>
+        <template v-if="isSubmitTxDisabled && disabledReason">
+          {{ disabledReason }}
+        </template>
+        <slot v-else>
           {{ content }}
         </slot>
       </NButton>

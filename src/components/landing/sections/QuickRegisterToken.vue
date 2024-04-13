@@ -7,6 +7,10 @@ import VueWrapper from '@components/partials/VueWrapper.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
+import FromSubmitRegisterToken from '@components/landing/form/FromSubmitRegisterToken.vue';
+
+// Reactive Variables
+const contractsRef = ref<typeof SelectTokenContracts | null>(null)
 
 const addressSearching = ref('');
 const addressPlaceHolder = ref('Input Flow Address with Fungible Token Contracts.');
@@ -27,6 +31,11 @@ function onHandleKeyup(e: KeyboardEvent) {
     // Go to the next step
     currentAddress.value = address;
   }
+}
+
+function refresh() {
+  currentFTContract.value = undefined;
+  contractsRef.value?.reload();
 }
 
 onMounted(() => {
@@ -69,10 +78,16 @@ onMounted(() => {
           </span>
         </template>
         <SelectTokenContracts
+          ref="contractsRef"
           :address="currentAddress"
           v-model:current="currentFTContract"
         />
       </ElementWrapper>
+      <FromSubmitRegisterToken
+        v-if="currentFTContract"
+        :token="currentFTContract"
+        @success="refresh"
+      />
     </div>
   </VueWrapper>
 </template>
