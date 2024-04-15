@@ -1,8 +1,8 @@
 ---
-
+import SectionWrapper from "@components/partials/SectionWrapper.astro";
+import MaintainerEditor from "./MaintainerEditor.vue";
 ---
 
-<section>Maintainer Section 1</section>
-<section>Maintainer Section 2</section>
-<section>Maintainer Section 3</section>
-<section>Maintainer Section 4</section>
+<SectionWrapper title="Maintain Extra Metadata for Fungible Tokens">
+  <MaintainerEditor client:only="vue" />
+</SectionWrapper>
