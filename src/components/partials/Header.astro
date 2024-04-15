@@ -1,11 +1,17 @@
 ---
 import ThemeToggle from "@components/widgets/ThemeToggle.vue";
 import AuthBox from "@components/auth/AuthBox.vue";
+import Aside from "@components/partials/Aside.vue";
 ---
 
-<header class="container mx-a p-4">
-  <div class="w-full flex items-center justify-end gap-2 md:gap-4">
-    <ThemeToggle client:load />
-    <AuthBox client:only="vue" />
+<header class="container mx-a p-4" transition:persist-props>
+  <div class="w-full flex items-center justify-between gap-2">
+    <div class="flex-auto hidden md:block">
+      <a class="title-base highlight italic text-3xl" href="/"> TokenList </a>
+    </div>
+    <div class="flex-auto md:flex-none flex items-center justify-between md:justify-end gap-2 md:gap-4">
+      <ThemeToggle client:load />
+      <AuthBox client:only="vue" transition:persist-props />
+    </div>
   </div>
 </header>

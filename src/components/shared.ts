@@ -1,11 +1,5 @@
 import { computed, reactive, ref, type Ref } from "vue";
-import {
-  createGlobalState,
-  createSharedComposable,
-  useDark,
-  useLocalStorage,
-  useSessionStorage,
-} from "@vueuse/core";
+import { createGlobalState, createSharedComposable, useDark, useLocalStorage, useSessionStorage, type EventBusKey } from "@vueuse/core";
 import type { UserSnapshot } from "@onflow/fcl";
 
 // ---------------- Global State ----------------
@@ -25,6 +19,10 @@ export const useNetworkCorrect = createGlobalState(() => {
 });
 
 export const useSendingTransaction = createGlobalState(() => {
+  return ref(false);
+});
+
+export const useAppDrawerOpened = createGlobalState(() => {
   return ref(false);
 });
 
@@ -66,3 +64,5 @@ export function updateGlobalAccount(addr?: string) {
 }
 
 // ---------------- Constants ----------------
+
+export const logoutKey: EventBusKey<{ address: string }> = Symbol("logout");

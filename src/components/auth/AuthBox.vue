@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, h, inject, computed, watch } from 'vue'
+import { useEventBus } from '@vueuse/core'
 import {
   useCurrentFlowUser,
   useNetworkCorrect,
   updateGlobalAccount,
   useIsConnected,
+  logoutKey,
 } from '@components/shared'
 
 import { FlowSrvKey } from "@shared/flow/utilitites";
@@ -12,11 +14,13 @@ import { FlowSrvKey } from "@shared/flow/utilitites";
 import VueWrapper from '@components/partials/VueWrapper.vue'
 import AuthBoxNotLoggedIn from '@components/auth/AuthBoxNotLoggedIn.vue'
 import AuthBoxLoggedIn from '@components/auth/AuthBoxLoggedIn.vue'
+import LoggedInMenu from '@components/auth/LoggedInMenu.vue'
 
 const flowSrv = inject(FlowSrvKey);
 const isNetworkCorrect = useNetworkCorrect();
 const currentFlowUser = useCurrentFlowUser();
 const isLoggedIn = useIsConnected();
+const logoutEventBus = useEventBus(logoutKey)
 
 function logout() {
   if (!!currentFlowUser.value) {
@@ -27,6 +31,10 @@ function logout() {
 
 watch(currentFlowUser, (user) => {
   updateGlobalAccount(user?.addr)
+})
+
+logoutEventBus.on(() => {
+  logout()
 })
 
 // subscribe to user for header
@@ -58,9 +66,9 @@ flowSrv?.currentUser.subscribe((user) => {
     :is-global="true"
   >
     <AuthBoxNotLoggedIn v-if="!isLoggedIn" />
-    <AuthBoxLoggedIn
-      v-else
-      @logout="logout"
-    />
+    <template v-else>
+      <AuthBoxLoggedIn />
+      <LoggedInMenu />
+    </template>
   </VueWrapper>
 </template>
