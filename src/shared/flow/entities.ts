@@ -19,10 +19,13 @@ export interface TokenPaths {
   provider?: string;
 }
 
-export interface TokenStatus extends TokenIdentity {
-  isRegistered: boolean;
+export interface TokenStatusBasic extends TokenIdentity {
+  isRegistered?: boolean;
   isWithDisplay: boolean;
   isWithVaultData: boolean;
+}
+
+export interface TokenStatus extends TokenStatusBasic {
   vaultPath: string;
   publicPaths: Record<string, string>;
 }
@@ -40,9 +43,10 @@ export interface TokenDisplay extends TokenDisplayBasic {
 }
 
 export interface StandardTokenView {
-  identity: TokenIdentity;
+  identity: TokenStatusBasic;
   decimals: number;
   tags: string[];
+  dataSource?: string;
   path?: TokenPaths;
   display?: TokenDisplay;
 }

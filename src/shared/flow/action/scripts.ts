@@ -168,9 +168,12 @@ const parseTokenView = (obj: any): StandardTokenView => {
     identity: {
       address: obj.identity.address,
       contractName: obj.identity.contractName,
+      isWithDisplay: !!obj.display,
+      isWithVaultData: !!obj.paths,
     },
     decimals: parseInt(obj.decimals),
     tags: obj.tags,
+    dataSource: obj.dataSource,
     path: obj.paths ? parseTokenPaths(obj.paths) : undefined,
     display: obj.display ? parseTokenDisplay(obj.display) : undefined,
   };
@@ -182,12 +185,12 @@ const parseTokenView = (obj: any): StandardTokenView => {
 export async function queryTokenListByAddress(
   flowServ: FlowService,
   address: string,
-  reviewer?: string
+  reviewer?: string,
 ): Promise<TokenQueryResult> {
   const ret = await flowServ.executeScript(
     scQueryTokenListByAddress,
     (arg, t) => [arg(address, t.Address), arg(reviewer, t.Optional(t.Address))],
-    { total: "0", list: [] }
+    { total: "0", list: [] },
   );
   return {
     total: parseInt(ret.total),
@@ -203,7 +206,7 @@ export async function queryTokenList(
   page: number,
   limit: number,
   reviewer?: string,
-  filter?: FilterType
+  filter: FilterType = FilterType.ALL,
 ): Promise<TokenQueryResult> {
   const ret = await flowServ.executeScript(
     scQueryTokenList,
@@ -213,7 +216,7 @@ export async function queryTokenList(
       arg(reviewer, t.Optional(t.Address)),
       arg(filter?.toString(), t.Optional(t.UInt8)),
     ],
-    { total: "0", list: [] }
+    { total: "0", list: [] },
   );
   return {
     total: parseInt(ret.total),

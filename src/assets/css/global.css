@@ -9,6 +9,7 @@
   --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
+  --bg-color-active: hsl(192, 47%, 78%);
   --bg-color-dark: #e9ebeb;
   --bg-color: #f0f4f4;
 }
@@ -20,6 +21,7 @@
   --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
+  --primary-hover-color: hsl(189, 28%, 37%);
   --bg-color-dark: #1c282d;
   --bg-color: #212d36;
 }

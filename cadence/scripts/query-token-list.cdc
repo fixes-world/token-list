@@ -85,7 +85,9 @@ fun main(
 }
 
 access(all) struct QueryResult {
+    access(all)
     let total: Int
+    access(all)
     let list: [FTViewUtils.StandardTokenView]
 
     init(total: Int, list: [FTViewUtils.StandardTokenView]) {

@@ -6,7 +6,7 @@ import {
 
 import { getAddressReviewerStatus } from '@shared/flow/action/scripts';
 import { FlowSrvKey } from '@shared/flow/utilitites';
-import type { TokenIdentity, AddressStatus } from '@shared/flow/entities';
+import type { StandardTokenView, AddressStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
@@ -24,7 +24,7 @@ const addrStatus = ref<AddressStatus | null>(null);
 
 const isFirstLoading = ref(false)
 
-const currentToken = ref<TokenIdentity | undefined>(undefined)
+const currentToken = ref<StandardTokenView | undefined>(undefined)
 
 const isEditorAvailable = computed(() => {
   return addrStatus.value && (addrStatus.value.isReviewer || addrStatus.value.isReviewMaintainer)
@@ -78,7 +78,7 @@ watch(acctName, refresh, { immediate: true })
         <template v-else>
           <div
             v-if="isEditorAvailable"
-            class="w-full flex items-start justify-between gap-2"
+            class="w-full flex items-start justify-between gap-4"
           >
             <PanelTokenList
               class="flex-none"
