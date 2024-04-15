@@ -1,8 +1,11 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import MaintainerMain from "@components/reviewer/MaintainerMain.astro";
+import SectionWrapper from "@components/partials/SectionWrapper.astro";
+import MaintainerEditor from "@components/reviewer/MaintainerEditor.vue";
 ---
 
-<Layout title="Maintain Your Reviews">
-  <MaintainerMain />
+<Layout title="Maintain Extra Token Metadata">
+  <SectionWrapper title="Maintain Extra Metadata for Fungible Tokens">
+    <MaintainerEditor client:only="vue" />
+  </SectionWrapper>
 </Layout>

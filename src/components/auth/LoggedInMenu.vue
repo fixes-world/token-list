@@ -35,24 +35,12 @@ const menuOptions = computed(() => {
   ]
   if (acctName.value) {
     menu.unshift({
-      label: "Maintain",
+      label: "Maintain Token Views",
       key: 'maintain',
       icon: () => h("div", {
         class: "i-carbon:face-pending-filled w-5 h-5"
       }),
     })
-    // // add extra options for EVM account
-    // menu.unshift({
-    //   type: 'divider',
-    //   key: 'd1'
-    // })
-    // menu.unshift({
-    //   label: acctName.value,
-    //   key: 'flow-address',
-    //   icon: () => h("div", {
-    //     class: "i-carbon:copy w-5 h-5"
-    //   }),
-    // })
   }
   return menu
 })

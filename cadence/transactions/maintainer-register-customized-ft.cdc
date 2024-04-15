@@ -22,12 +22,12 @@ transaction(
     prepare(acct: AuthAccount) {
         var maintainer: &{TokenList.FungibleTokenReviewMaintainer}? = nil
         // Try borrow maintainer
-        if acct.check<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath) {
+        if acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath) {
             maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath)
                 ?? panic("Failed to load FungibleTokenReviewMaintainer from reviewer")
         }
         // Try borrow review
-        if !acct.check<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
+        if !acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
             log("Creating a new reviewer")
             let reviewer <- TokenList.createFungibleTokenReviewer()
             acct.save(<- reviewer, to: TokenList.reviewerStoragePath)

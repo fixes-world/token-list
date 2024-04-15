@@ -8,7 +8,7 @@ transaction(
         let registry = TokenList.borrowRegistry()
         let registryAddr = registry.owner?.address ?? panic("Failed to get registry address")
 
-        if acct.check<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
+        if acct.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
             // remove old Maintainer
             let old <- acct.load<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
             destroy old

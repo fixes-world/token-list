@@ -28,7 +28,7 @@ fun main(
         }
     }
 
-    let isReviewMaintainer = acct.check<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
+    let isReviewMaintainer = acct.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
     if isReviewMaintainer {
         let maintainer = acct.borrow<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
         reviewerAddr = maintainer?.getReviewerAddress()

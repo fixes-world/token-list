@@ -7,6 +7,7 @@ import { FilterType } from "@shared/flow/enums";
 import type { FlowService } from "@shared/flow/flow.service";
 // Transactions
 import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
+import txReviewerInit from "@cadence/transactions/reviewer-init.cdc?raw";
 import txReviewerPublishMaintainer from "@cadence/transactions/reviewer-publish-maintainer.cdc?raw";
 import txMaintainerClaim from "@cadence/transactions/maintainer-claim.cdc?raw";
 import txMaintainerRegisterCustomizedFT from "@cadence/transactions/maintainer-register-customized-ft.cdc?raw";
@@ -20,14 +21,17 @@ import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer
  * @param flowSrv The FlowService instance
  * @param ft The FT to register
  */
-export async function registerStandardFT(
-  flowSrv: FlowService,
-  ft: TokenIdentity
-): Promise<string> {
-  return await flowSrv.sendTransaction(txRegisterStandardFT, (arg, t) => [
-    arg(ft.address, t.Address),
-    arg(ft.contractName, t.String),
-  ]);
+export async function registerStandardFT(flowSrv: FlowService, ft: TokenIdentity): Promise<string> {
+  return await flowSrv.sendTransaction(txRegisterStandardFT, (arg, t) => [arg(ft.address, t.Address), arg(ft.contractName, t.String)]);
+}
+
+/**
+ * Initialize the reviewer
+ * @param flowSrv The FlowService instance
+ * @returns The transaction ID
+ */
+export async function reviewerInit(flowSrv: FlowService) {
+  return await flowSrv.sendTransaction(txReviewerInit, (arg, t) => []);
 }
 
 /**
