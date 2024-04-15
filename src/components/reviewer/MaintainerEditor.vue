@@ -6,13 +6,14 @@ import {
 
 import { getAddressReviewerStatus } from '@shared/flow/action/scripts';
 import { FlowSrvKey } from '@shared/flow/utilitites';
-import type { AddressStatus } from '@shared/flow/entities';
+import type { TokenIdentity, AddressStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
+import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 
 const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
@@ -22,7 +23,8 @@ const acctName = useGlobalAccount();
 const addrStatus = ref<AddressStatus | null>(null);
 
 const isFirstLoading = ref(false)
-const isLoadingTokenList = ref(false)
+
+const currentToken = ref<TokenIdentity | undefined>(undefined)
 
 const isEditorAvailable = computed(() => {
   return addrStatus.value && (addrStatus.value.isReviewer || addrStatus.value.isReviewMaintainer)
@@ -31,7 +33,7 @@ const isMaintainerClaimable = computed(() => {
   return addrStatus.value && addrStatus.value.isPendingToClaimReviewMaintainer && addrStatus.value.reviewerAddr
 })
 const isPlaceCenter = computed(() => {
-  return !addrStatus.value || isMaintainerClaimable.value || isEditorAvailable.value
+  return !addrStatus.value || isMaintainerClaimable.value || !isEditorAvailable.value
 })
 
 // Functions
@@ -57,7 +59,7 @@ watch(acctName, refresh, { immediate: true })
 
 <template>
   <VueWrapper>
-    <div :class="['min-h-[calc(100vh-36rem)] flex', !isPlaceCenter ? 'items-center justify-center' : '']">
+    <div :class="['min-h-[calc(100vh-36rem)] flex', isPlaceCenter ? 'items-center justify-center' : '']">
       <EnsureConnected type="primary">
         <template #not-connected>
           <span class="text-lg">Connect wallet to access Maintainer Editor</span>
@@ -78,7 +80,10 @@ watch(acctName, refresh, { immediate: true })
             v-if="isEditorAvailable"
             class="w-full flex items-start justify-between gap-2"
           >
-            <div class="flex-none min-w-[12rem]">List</div>
+            <PanelTokenList
+              class="flex-none"
+              v-model:ft="currentToken"
+            />
             <div class="flex-auto">
               Editor
             </div>
