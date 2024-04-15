@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, h, ref, inject, onMounted, watch, type VNodeChild } from 'vue';
+import { computed, h, ref, inject, onMounted, watch, type VNodeChild, toRaw } from 'vue';
 import {
-  NSkeleton, NEmpty,
+  NSkeleton, NEmpty, NTag,
   NSelect, type SelectOption,
 } from 'naive-ui';
-import { getFTContracts } from '@shared/flow/action/scripts'
+import { getContractNames, getFTContracts, getFTContractStatus } from '@shared/flow/action/scripts'
 import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { TokenStatus } from '@shared/flow/entities';
 
@@ -28,6 +28,7 @@ const flowSrv = inject(FlowSrvKey);
 
 const isLoadingData = ref(false);
 const ftContracts = ref<TokenStatus[]>([]);
+const allContractNames = ref<string[]>([]);
 
 const options = computed<SelectOption[]>(() => {
   return ftContracts.value?.map((contract) => {
@@ -82,10 +83,26 @@ async function loadFTContracts(addr: string) {
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
-  try {
-    ftContracts.value = await getFTContracts(flowSrv, addr);
-  } catch (error) {
-    console.error('Error:', error);
+  ftContracts.value = await getFTContracts(flowSrv, addr);
+  if (ftContracts.value.length > 0) {
+    allContractNames.value = ftContracts.value.map((contract) => contract.contractName);
+  } else {
+    allContractNames.value = await getContractNames(flowSrv, addr);
+  }
+  isLoadingData.value = false;
+}
+
+async function loadFTStatus(addr: string, contractName: string) {
+  if (!flowSrv) {
+    console.error('Flow Service not available');
+    return;
+  }
+  console.log('Loading contract status:', addr, contractName)
+
+  isLoadingData.value = true;
+  const status = await getFTContractStatus(flowSrv, addr, contractName);
+  if (status) {
+    ftContracts.value = [status]
   }
   isLoadingData.value = false;
 }
@@ -130,11 +147,25 @@ defineExpose({
       :height="6"
       round
     />
-    <NEmpty
-      v-else-if="ftContracts.length === 0"
-      description="No Fungible Token Contract Found"
-      class="my-6"
-    />
+    <template v-else-if="ftContracts.length === 0">
+      <NEmpty
+        description="Failed to fetch FT Contracts automatically"
+        class="my-6"
+      />
+      <p class="mb-2 text-gray-400 italic font-semibold">Try click the contract name to load again</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <NTag
+          v-for="name in allContractNames"
+          type="primary"
+          size="small"
+          round
+          class="!cursor-pointer"
+          @click="loadFTStatus(address, name)"
+        >
+          {{ name }}
+        </NTag>
+      </div>
+    </template>
     <NSelect
       v-else
       size="large"

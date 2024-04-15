@@ -20,14 +20,17 @@ fun main(
     let ftDic: {Type: String} = {}
     let ftViewResolverDic: {Type: &ViewResolver} = {}
     for contractName in contractNames {
+        log("Loading Contract: ".concat(contractName))
         if let contract = acct.contracts.borrow<&FungibleToken>(name: contractName) {
-            let ftType = CompositeType("A.".concat(addrNo0x)
+            if let ftType = CompositeType("A.".concat(addrNo0x)
                 .concat(".").concat(contractName)
-                .concat(".Vault"))!
-            ftDic[ftType] = contractName
-            // Borrow the view resolver for the contract
-            if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
-                ftViewResolverDic[ftType] = viewResolver
+                .concat(".Vault")) {
+                ftDic[ftType] = contractName
+                // Borrow the view resolver for the contract
+                if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
+                    log("ViewResolver for ".concat(contractName).concat("is borrowed"))
+                    ftViewResolverDic[ftType] = viewResolver
+                }
             }
         }
     }

@@ -69,7 +69,9 @@ access(all) contract ViewResolvers {
     ///
     access(all)
     fun borrowContractViewResolver(_ addr: Address, _ name: String): &ViewResolver? {
-        return getAccount(addr).contracts.borrow<&ViewResolver>(name: name)
+        let viewResolver: &ViewResolver? = getAccount(addr).contracts.borrow<&ViewResolver>(name: name)
+        log("Borrowed contract view resolver: ".concat(addr.toString()).concat(" - ").concat(name))
+        return viewResolver
     }
 
     /* --- Collection Resolver --- */

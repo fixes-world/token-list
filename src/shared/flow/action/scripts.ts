@@ -15,7 +15,9 @@ import type { FlowService } from "../flow.service";
 import appInfo from "@shared/config/info";
 // Scripts
 import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
+import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
 import scGetFTContracts from "@cadence/scripts/get-ft-contracts.cdc?raw";
+import scGetFTContractStatus from "@cadence/scripts/get-ft-contract-status.cdc?raw";
 import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
 import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
 import scGetAddressReviewerStatus from "@cadence/scripts/get-address-reviewer-status.cdc?raw";
@@ -29,13 +31,47 @@ import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-addr
  */
 export async function isTokenRegistered(
   flowServ: FlowService,
-  ft: TokenIdentity
+  ft: TokenIdentity,
 ): Promise<boolean> {
   return await flowServ.executeScript(
     scIsTokenRegistered,
     (arg, t) => [arg(ft.address, t.Address), arg(ft.contractName, t.String)],
-    false
+    false,
   );
+}
+
+function parseFTContractStatus(obj: any): TokenStatus {
+  const paths: Record<string, string> = {};
+  // add alias for balance and receiver
+  for (let key in obj.publicPaths) {
+    if (key.includes("FungibleToken.Balance")) {
+      paths["balance"] = obj.publicPaths[key];
+    } else if (key.includes("FungibleToken.Receiver")) {
+      paths["receiver"] = obj.publicPaths[key];
+    }
+    paths[key] = obj.publicPaths[key];
+  }
+  return {
+    address: obj.address,
+    contractName: obj.contractName,
+    isRegistered: obj.isRegistered,
+    isWithDisplay: obj.isWithDisplay,
+    isWithVaultData: obj.isWithVaultData,
+    vaultPath: obj.vaultPath,
+    publicPaths: paths,
+  };
+}
+
+export async function getContractNames(
+  flowServ: FlowService,
+  address: string,
+): Promise<string[]> {
+  const ret = await flowServ.executeScript(
+    scGetContractNames,
+    (arg, t) => [arg(address, t.Address)],
+    [],
+  );
+  return ret;
 }
 
 /**
@@ -43,34 +79,32 @@ export async function isTokenRegistered(
  */
 export async function getFTContracts(
   flowServ: FlowService,
-  address: string
+  address: string,
 ): Promise<TokenStatus[]> {
   const ret = await flowServ.executeScript(
     scGetFTContracts,
     (arg, t) => [arg(address, t.Address)],
-    []
+    [],
   );
-  return ret.map((obj: any) => {
-    const paths: Record<string, string> = {};
-    // add alias for balance and receiver
-    for (let key in obj.publicPaths) {
-      if (key.includes("FungibleToken.Balance")) {
-        paths["balance"] = obj.publicPaths[key];
-      } else if (key.includes("FungibleToken.Receiver")) {
-        paths["receiver"] = obj.publicPaths[key];
-      }
-      paths[key] = obj.publicPaths[key];
-    }
-    return {
-      address: obj.address,
-      contractName: obj.contractName,
-      isRegistered: obj.isRegistered,
-      isWithDisplay: obj.isWithDisplay,
-      isWithVaultData: obj.isWithVaultData,
-      vaultPath: obj.vaultPath,
-      publicPaths: paths,
-    };
-  });
+  return ret.map(parseFTContractStatus);
+}
+
+/**
+ * Get the FT contract status
+ * @param address
+ * @param contractName
+ */
+export async function getFTContractStatus(
+  flowServ: FlowService,
+  address: string,
+  contractName: string,
+): Promise<TokenStatus | null> {
+  const ret = await flowServ.executeScript(
+    scGetFTContractStatus,
+    (arg, t) => [arg(address, t.Address), arg(contractName, t.String)],
+    null,
+  );
+  return ret ? parseFTContractStatus(ret) : null;
 }
 
 /**

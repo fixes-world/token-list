@@ -45,27 +45,21 @@ async function loadTokenList() {
   if (!flowSrv) return
 
   isLoading.value = true
-  try {
-    const results = await queryTokenList(
-      flowSrv!,
-      currentPage.value,
-      loadingSize.value,
-      props.reviewer,
-      props.filterType
-    )
-    hasMore.value = results.list.length === loadingSize.value && currentPage.value * loadingSize.value < results.total
-    totalAmount.value = results.total
-    // update last start rank
-    if (results.list.length > 0) {
-      currentPage.value = currentPage.value ? currentPage.value + 1 : 1
-      tokens.push(...results.list)
-    }
-  } catch (e) {
-    console.log('Error loading items', e)
-    tokens.splice(0, tokens.length)
-  } finally {
-    isLoading.value = false
+  const results = await queryTokenList(
+    flowSrv!,
+    currentPage.value,
+    loadingSize.value,
+    props.reviewer,
+    props.filterType
+  )
+  hasMore.value = results.list.length === loadingSize.value && currentPage.value * loadingSize.value < results.total
+  totalAmount.value = results.total
+  // update last start rank
+  if (results.list.length > 0) {
+    currentPage.value = currentPage.value ? currentPage.value + 1 : 1
+    tokens.push(...results.list)
   }
+  isLoading.value = false
 }
 
 async function reload() {
