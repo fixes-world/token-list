@@ -104,6 +104,8 @@ onMounted(async () => {
             v-for="token in tokens"
             :key="`${token.identity.address}.${token.identity.contractName}`"
             :token="token"
+            :active="current?.identity.address === token.identity.address && current?.identity.contractName === token.identity.contractName"
+            @select="current = token"
           />
         </template>
       </template>

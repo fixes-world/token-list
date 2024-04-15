@@ -12,15 +12,26 @@ const props = withDefaults(defineProps<{
   active: false
 });
 
+const emits = defineEmits<{
+  (e: 'select', v: StandardTokenView): void
+}>()
+
+function onClick() {
+  emits('select', props.token)
+}
+
 </script>
 
 <template>
-  <div :class="[
-    'flex flex-col items-start gap-1',
-    'px-3 py-2 rounded-lg cursor-pointer',
-    !props.active ? 'bg-[var(--bg-color-dark)]' : 'bg-[var(--bg-color-active)]',
-  ]">
-    <div class="text-xs text-gray-400/60 italic">
+  <div
+    :class="['flex flex-col items-start gap-1',
+      'px-3 py-2 rounded-lg cursor-pointer', !props.active
+        ? 'bg-[var(--bg-color-dark)]'
+        : 'bg-[var(--bg-color-active)]'
+    ]"
+    @click="onClick"
+  >
+    <div class="text-xs text-gray-400 italic font-semibold">
       <ElementAddressDisplay
         :address="token.identity.address"
         :short="false"
