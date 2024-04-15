@@ -98,10 +98,10 @@ access(all) contract TokenList {
         fun getTokenType(): Type
         /// Get the display metadata of the FT
         access(all) view
-        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay?
+        fun getDisplay(_ reviewer: Address?): FTViewUtils.FTDisplayWithSource?
         /// Get the vault info the FT
         access(all) view
-        fun getVaultData(_ reviewer: Address?): FungibleTokenMetadataViews.FTVaultData?
+        fun getVaultData(_ reviewer: Address?): FTViewUtils.FTVaultDataWithSource?
         /// Check if the Fungible Token is reviewed by some one
         access(all) view
         fun isReviewedBy(_ reviewerId: UInt64): Bool
@@ -180,7 +180,8 @@ access(all) contract TokenList {
         /// Get the display metadata of the FT
         ///
         access(all) view
-        fun getDisplay(_ reviewer: Address?): FungibleTokenMetadataViews.FTDisplay? {
+        fun getDisplay(_ reviewer: Address?): FTViewUtils.FTDisplayWithSource? {
+            var source: Address? = nil
             var retFTDisplay: FungibleTokenMetadataViews.FTDisplay? = nil
             if let viewResolver = self.borrowViewResolver() {
                 retFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
@@ -199,6 +200,7 @@ access(all) contract TokenList {
                         for key in extraSocials.keys {
                             socials[key] = extraSocials[key]
                         }
+                        source = addr
                         retFTDisplay = FungibleTokenMetadataViews.FTDisplay(
                             name: ftDisplayRef.getName() ?? retFTDisplay?.name ?? "Unkonwn",
                             symbol: ftDisplayRef.getSymbol(),
@@ -210,16 +212,23 @@ access(all) contract TokenList {
                     }
                 }
             }
-            return retFTDisplay
+            return retFTDisplay != nil
+                ? FTViewUtils.FTDisplayWithSource(source, retFTDisplay!)
+                : nil
         }
 
         /// Get the vault data of the FT
         ///
         access(all) view
-        fun getVaultData(_ reviewer: Address?): FungibleTokenMetadataViews.FTVaultData? {
+        fun getVaultData(_ reviewer: Address?): FTViewUtils.FTVaultDataWithSource? {
+            var source: Address? = nil
+            var retVaultData: FungibleTokenMetadataViews.FTVaultData? = nil
             // First try to get the data from the view resolver
             if let viewResolver = self.borrowViewResolver() {
-                return FungibleTokenMetadataViews.getFTVaultData(viewResolver)
+                retVaultData = FungibleTokenMetadataViews.getFTVaultData(viewResolver)
+            }
+            if retVaultData != nil {
+                return FTViewUtils.FTVaultDataWithSource(nil, retVaultData!)
             }
             // If not found, then try to get the data from the reviewer
             let tokenType = self.getTokenType()
@@ -231,10 +240,13 @@ access(all) contract TokenList {
             if let addr = reviewerAddr {
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     let ref = reviewerRef.borrowFTViewReader(tokenType)
-                    return ref?.getFTVaultData()
+                    source = addr
+                    retVaultData = ref?.getFTVaultData()
                 }
             }
-            return nil
+            return retVaultData != nil
+                ? FTViewUtils.FTVaultDataWithSource(source, retVaultData!)
+                : nil
         }
 
         /// Get the FT Type

@@ -88,6 +88,38 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The struct for the Fungible Token Vault Data with Source
+    ///
+    access(all) struct FTVaultDataWithSource {
+        access(all)
+        let source: Address?
+        access(all)
+        let vaultData: FungibleTokenMetadataViews.FTVaultData
+        init(
+            _ source: Address?,
+            _ vaultData: FungibleTokenMetadataViews.FTVaultData
+        ) {
+            self.source = source
+            self.vaultData = vaultData
+        }
+    }
+
+    /// The struct for the Fungible Token Display with Source
+    ///
+    access(all) struct FTDisplayWithSource {
+        access(all)
+        let source: Address?
+        access(all)
+        let display: FungibleTokenMetadataViews.FTDisplay
+        init(
+            _ source: Address?,
+            _ display: FungibleTokenMetadataViews.FTDisplay
+        ) {
+            self.source = source
+            self.display = display
+        }
+    }
+
     /// The struct for the Fungible Token Paths
     ///
     access(all) struct StandardTokenPaths {
@@ -119,20 +151,24 @@ access(all) contract FTViewUtils {
         access(all)
         let tags: [String]
         access(all)
+        let dataSource: Address?
+        access(all)
         let paths: StandardTokenPaths?
         access(all)
-        let display: FungibleTokenMetadataViews.FTDisplay?
+        let display: FTDisplayWithSource?
 
         init(
             identity: FTIdentity,
             decimals: UInt8,
             tags: [String],
+            dataSource: Address?,
             paths: StandardTokenPaths?,
-            display: FungibleTokenMetadataViews.FTDisplay?,
+            display: FTDisplayWithSource?,
         ) {
             self.identity = identity
             self.decimals = decimals
             self.tags = tags
+            self.dataSource = dataSource
             self.paths = paths
             self.display = display
         }
