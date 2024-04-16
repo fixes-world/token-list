@@ -31,6 +31,7 @@
     "@vueuse/core": "^10.9.0",
     "astro": "^4.5.12",
     "dompurify": "^3.0.11",
+    "nft.storage": "^7.1.1",
     "typescript": "^5.4.3",
     "uuid": "^9.0.1",
     "vue": "^3.4.21"
