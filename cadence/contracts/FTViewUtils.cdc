@@ -364,7 +364,7 @@ access(all) contract FTViewUtils {
                 } else if fileType == "jpg" {
                     self.metadata["logo:jpg"] = logo!
                 } else {
-                    panic("Invalid logo file type")
+                    self.metadata["logo"] = logo!
                 }
             }
             // set socials
@@ -414,7 +414,7 @@ access(all) contract FTViewUtils {
             if self.metadata["logo"] != nil {
                 medias.append(MetadataViews.Media(
                     file: MetadataViews.HTTPFile(url: self.metadata["logo"]!),
-                    mediaType: "image/png" // default is png
+                    mediaType: "image/*"
                 ))
             }
             if self.metadata["logo:png"] != nil {
