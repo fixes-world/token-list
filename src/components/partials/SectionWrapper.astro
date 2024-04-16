@@ -11,7 +11,7 @@ const { title = "", widthLimited = true } = Astro.props;
 <section
   id={title ? title.toLowerCase().replace(/\s/g, "-") : undefined}
   class:list={[
-    "px-4 last-of-type:mb-24",
+    "px-4",
     // Odd number dark background color, even number normal background color.
     "odd-of-type:bg-[var(--bg-color)] even-of-type:bg-[var(--bg-color-dark)]",
   ]}
@@ -25,7 +25,18 @@ const { title = "", widthLimited = true } = Astro.props;
       },
     ]}
   >
-    {title && <h2 class:list={["absolute top-4 md:top-6 xl:top-8", "italic text-2xl font-bold text-[var(--primary-hover-color)] opacity-60"]}># {title}</h2>}
+    {
+      title && (
+        <h2
+          class:list={[
+            "absolute top-4 md:top-6 xl:top-8",
+            "italic text-2xl font-bold text-[var(--primary-hover-color)] opacity-60",
+          ]}
+        >
+          # {title}
+        </h2>
+      )
+    }
     <slot />
   </div>
 </section>

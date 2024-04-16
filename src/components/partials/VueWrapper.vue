@@ -64,7 +64,7 @@ addNaiveUIStyleMeta()
     :theme="isDark ? darkTheme : lightTheme"
     :theme-overrides="themeOverrides"
   >
-    <NMessageProvider placement="bottom">
+    <NMessageProvider placement="top">
       <slot />
     </NMessageProvider>
     <template v-if="isGlobal">

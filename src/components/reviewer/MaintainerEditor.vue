@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, inject, watch } from 'vue'
 import {
-  NSkeleton, NEmpty,
+  NSkeleton, NEmpty, NDivider,
 } from 'naive-ui';
 
 import { getAddressReviewerStatus } from '@shared/flow/action/scripts';
@@ -15,6 +15,8 @@ import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaim
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
+import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
+import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 
 const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
@@ -60,7 +62,7 @@ watch(acctName, refresh, { immediate: true })
 
 <template>
   <VueWrapper>
-    <div :class="['min-h-[calc(100vh-36rem)] flex', isPlaceCenter ? 'items-center justify-center' : '']">
+    <div :class="['min-h-[calc(100vh-36rem)] flex flex-col', isPlaceCenter ? 'items-center justify-center' : '']">
       <EnsureConnected type="primary">
         <template #not-connected>
           <span class="text-lg">Connect wallet to access Maintainer Editor</span>
@@ -85,14 +87,19 @@ watch(acctName, refresh, { immediate: true })
               class="flex-none"
               v-model:ft="currentToken"
             />
-            <div class="flex-auto">
+            <div class="flex-auto flex flex-col">
+              <PanelReviewer :reviewer="addrStatus.reviewerAddr" />
+              <NDivider class="!mt-3 !mb-5" />
               <p
                 v-if="!currentToken"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
               >
                 Select a fungible token to edit
               </p>
-              <PanelTokenEditor :ft="currentToken" />
+              <PanelTokenEditor
+                v-else
+                :ft="currentToken"
+              />
             </div>
           </div>
           <div

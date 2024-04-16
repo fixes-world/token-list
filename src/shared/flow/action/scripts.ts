@@ -209,7 +209,12 @@ const parseTokenView = (obj: any): StandardTokenView => {
     tags: obj.tags,
     dataSource: obj.dataSource,
     path: obj.paths ? parseTokenPaths(obj.paths) : undefined,
-    display: obj.display ? parseTokenDisplay(obj.display) : undefined,
+    display: obj.display
+      ? {
+          source: obj.display.source,
+          display: parseTokenDisplay(obj.display.display),
+        }
+      : undefined,
   };
 };
 

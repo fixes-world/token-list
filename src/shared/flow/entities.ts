@@ -42,17 +42,22 @@ export interface TokenDisplay extends TokenDisplayBasic {
   social: Record<string, string>;
 }
 
+export interface TokenDisplayWithSource {
+  source: string;
+  display: TokenDisplay;
+}
+
 export interface StandardTokenView {
   identity: TokenStatusBasic;
   decimals: number;
   tags: string[];
   dataSource?: string;
   path?: TokenPaths;
-  display?: TokenDisplay;
+  display?: TokenDisplayWithSource;
 }
 
 export interface CustomizedTokenDto extends TokenDisplayBasic {
-  logo: String;
+  logo: string;
   social: Record<string, string>;
 }
 

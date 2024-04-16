@@ -1,5 +1,6 @@
 const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 
+// TODO: Update contract address
 const contractAddr = network === "testnet" ? "0x1" : "0x2";
 
 const baseUrl = import.meta.env.SITE ?? "http://localhost:4321";
@@ -18,6 +19,8 @@ export default {
   twitter: import.meta.env.PUBLIC_TWITTER ?? "https://x.com/fixesWorld",
   github: import.meta.env.PUBLIC_GITHUB ?? "https://github.com/fixes-world",
   discord: import.meta.env.PUBLIC_DISCORD ?? "https://discord.gg/flow",
+  // API Keys
+  nftStorageKey: import.meta.env.PUBLIC_NFTSTORAGE_KEY ?? undefined,
   // Blockchain info
   network: network,
   contractAddr: contractAddr,

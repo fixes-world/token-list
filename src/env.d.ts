@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly PUBLIC_FLOW_NETWORK: string;
+  readonly PUBLIC_NFTSTORAGE_KEY: string;
 }
 
 interface ImportMeta {
