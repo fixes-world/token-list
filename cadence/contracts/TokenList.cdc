@@ -135,10 +135,10 @@ access(all) contract TokenList {
             _ ftAddress: Address,
             _ ftContractName: String,
         ) {
+            self.reviewers = {}
             self.identity = FTViewUtils.FTIdentity(ftAddress, ftContractName)
             // ensure the contract is a Fungible Token
-            self.identity.borrowFungibleTokenContract()
-            self.reviewers = {}
+            let ftContractRef = self.identity.borrowFungibleTokenContract()
             // If viewResolver is not provided, then create one using the ViewResolvers
             if ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil {
                 self.viewResolver <- ViewResolvers.createContractViewResolver(address: ftAddress, contractName: ftContractName)
@@ -146,6 +146,14 @@ access(all) contract TokenList {
                 self.getDisplay(nil)
                 self.getVaultData(nil)
             } else {
+                // Upgrade in Cadence 1.0 to use the FungibleToken(v2) contract
+                // let emptyVault <- ftContractRef.createEmptyVault()
+                // if emptyVault.isInstance(Type<@{MetadataViews.Resolver}>()) {
+                //     self.viewResolver <- emptyVault as @{MetadataViews.Resolver}
+                // } else {
+                //     self.viewResolver <- nil
+                //     destroy emptyVault
+                // }
                 self.viewResolver <- nil
             }
         }
