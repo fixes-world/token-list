@@ -78,7 +78,7 @@ onMounted(async () => {
 
 <template>
   <div class="md:min-w-[10rem] max-w-[10rem] md:max-w-[20rem]">
-    <div :class="['flex flex-col items-center gap-2', {
+    <div :class="['flex flex-col items-start gap-2', {
       'justify-center': tokens.length === 0,
     }]">
       <NSkeleton
@@ -98,6 +98,7 @@ onMounted(async () => {
             v-for="token in tokens"
             :key="`${token.identity.address}.${token.identity.contractName}`"
             :token="token"
+            class="w-full"
             :active="current?.identity.address === token.identity.address && current?.identity.contractName === token.identity.contractName"
             @select="current = token"
           />

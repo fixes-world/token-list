@@ -14,6 +14,7 @@ import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
+import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
 
 const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
@@ -85,7 +86,13 @@ watch(acctName, refresh, { immediate: true })
               v-model:ft="currentToken"
             />
             <div class="flex-auto">
-              Editor
+              <p
+                v-if="!currentToken"
+                class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
+              >
+                Select a fungible token to edit
+              </p>
+              <PanelTokenEditor :ft="currentToken" />
             </div>
           </div>
           <div
