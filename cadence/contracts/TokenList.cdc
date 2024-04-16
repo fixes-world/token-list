@@ -1019,6 +1019,9 @@ access(all) contract TokenList {
             }
             let max = self.getFTEntriesAmount()
             let start = page * size
+            if start > max {
+                return []
+            }
             var end = start + size
             if end > max {
                 end = max

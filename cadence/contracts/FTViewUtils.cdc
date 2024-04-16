@@ -458,9 +458,10 @@ access(all) contract FTViewUtils {
         fun getSocials(): {String: MetadataViews.ExternalURL} {
             let ret: {String: MetadataViews.ExternalURL} = {}
             let socialKey = "social:"
+            let socialKeyLen = socialKey.length
             for key in self.metadata.keys {
-                if key.slice(from: 0, upTo: socialKey.length) == socialKey {
-                    let socialName = key.slice(from: socialKey.length - 1, upTo: key.length)
+                if key.length >= socialKeyLen && key.slice(from: 0, upTo: socialKey.length) == socialKey {
+                    let socialName = key.slice(from: socialKey.length, upTo: key.length)
                     ret[socialName] = MetadataViews.ExternalURL(self.metadata[key]!)
                 }
             }

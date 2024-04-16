@@ -151,9 +151,15 @@ export async function getVerifiedReviewers(flowServ: FlowService) {
 
 const parseTokenPaths = (obj: any): TokenPaths => {
   return {
-    vault: obj.vaultPath,
-    receiver: obj.receiverPath,
-    balance: obj.balancePath,
+    vault: obj.vaultPath
+      ? `/${obj.vaultPath.domain}/${obj.vaultPath.identifier}`
+      : "",
+    receiver: obj.receiverPath
+      ? `/${obj.receiverPath.domain}/${obj.receiverPath.identifier}`
+      : "",
+    balance: obj.balancePath
+      ? `/${obj.balancePath.domain}/${obj.balancePath.identifier}`
+      : "",
   };
 };
 
@@ -179,21 +185,21 @@ const parseMedia = (obj: any): Media => {
 
 const parseTokenDisplay = (obj: any): TokenDisplay => {
   const social: Record<string, string> = {};
-  for (const key in obj.social) {
-    social[key] = parseURL(obj.social[key]);
+  for (const key in obj.socials) {
+    social[key] = parseURL(obj.socials[key]);
   }
   return {
     name: obj.name,
     symbol: obj.symbol,
     description: obj.description,
-    externalURL: obj.externalURL,
+    externalURL: parseURL(obj.externalURL),
     logos: obj.logos?.items?.map(parseMedia) ?? [],
     social,
   };
 };
 
 const parseTokenView = (obj: any): StandardTokenView => {
-  return {
+  const ret = {
     identity: {
       address: obj.identity.address,
       contractName: obj.identity.contractName,
@@ -211,6 +217,7 @@ const parseTokenView = (obj: any): StandardTokenView => {
         }
       : undefined,
   };
+  return ret;
 };
 
 /**

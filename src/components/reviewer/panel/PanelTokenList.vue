@@ -64,6 +64,7 @@ async function loadTokenList() {
 
 async function reload() {
   isFirstLoading.value = true
+  currentPage.value = 0
   tokens.splice(0, tokens.length)
   await loadTokenList()
   isFirstLoading.value = false

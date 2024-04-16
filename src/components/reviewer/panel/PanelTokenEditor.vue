@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, inject, watch, h, type VNodeChild, type VNode } from 'vue'
+import { ref, reactive, computed, inject, watch, h, type VNodeChild, toRaw } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import {
   NSkeleton, NEmpty,
@@ -159,7 +159,7 @@ watch(() => props.ft, async (ft, oldFt) => {
     formData.display.externalURL = ft?.display?.display?.externalURL ?? "";
     formData.display.social = Object.entries(ft?.display?.display?.social ?? {}).map(([key, value]) => ({ key, value }));
   }
-});
+}, { immediate: true });
 
 </script>
 
@@ -207,6 +207,7 @@ watch(() => props.ft, async (ft, oldFt) => {
             <ImageUploader
               class="flex-none !w-[96px]"
               v-model:image="imageUrl"
+              :type="ft.display?.display?.logos?.[0]?.type"
             />
             <NButton
               v-if="!formData.paths.vault"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import {
   useMessage,
-  NUpload, NUploadDragger,
+  NUpload, NUploadDragger, NImage,
   type UploadFileInfo, type UploadCustomRequestOptions
 } from 'naive-ui';
 import { NFTStorage } from "nft.storage";
@@ -10,8 +10,10 @@ import appInfo from '@shared/config/info'
 
 const props = withDefaults(defineProps<{
   image?: string
+  type?: string
 }>(), {
-  image: undefined
+  image: undefined,
+  type: 'image/*'
 })
 
 const emit = defineEmits<{
@@ -31,11 +33,12 @@ const fileRef = computed<UploadFileInfo | null>(() => {
       name: name ?? "unknown",
       status: 'finished',
       url: getIPFSUrl(props.image),
+      type: props.type ?? 'image/*',
     }
   }
   return null
 });
-const fileList = computed<UploadFileInfo[]>(() => (fileRef.value ? [fileRef.value] : []))
+const fileList = ref<UploadFileInfo[] | undefined>(undefined)
 
 // Funcations
 
@@ -88,6 +91,19 @@ function getIPFSUrl(ipfsHash: string) {
     return `https://nftstorage.link/ipfs/${ipfsHash}`;
   }
 }
+
+function resetDefaultList() {
+  fileList.value = fileRef.value ? [fileRef.value] : undefined
+}
+
+function handleUploadChange (data: { fileList: UploadFileInfo[] }) {
+  fileList.value = data.fileList
+}
+
+watch(() => props.image, () => {
+  resetDefaultList()
+}, { immediate: true })
+
 </script>
 
 <template>
@@ -95,12 +111,13 @@ function getIPFSUrl(ipfsHash: string) {
     accept="image/png, image/jpeg, image/gif, image/svg+xml"
     list-type="image-card"
     trigger-class=""
-    :default-file-list="fileList"
+    v-model:file-list="fileList"
     :max="1"
     :multiple="false"
     :disabled="uploading"
     :custom-request="uploadToIPFS"
     @before-upload="beforeUpload"
+    @change="handleUploadChange"
   >
     <NUploadDragger>
       <div class="w-hull flex flex-col items-center justify-center text-gray-400/60">
