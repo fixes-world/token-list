@@ -70,7 +70,7 @@ export async function maintainerRegisterCustomizedFT(
   flowSrv: FlowService,
   ft: TokenIdentity,
   paths: TokenPaths,
-  display: CustomizedTokenDto
+  display: CustomizedTokenDto,
 ): Promise<string> {
   return await flowSrv.sendTransaction(
     txMaintainerRegisterCustomizedFT,
@@ -86,18 +86,15 @@ export async function maintainerRegisterCustomizedFT(
       arg(display.description ?? null, t.Optional(t.String)),
       arg(display.externalURL ?? null, t.Optional(t.String)),
       arg(display.logo ?? null, t.Optional(t.String)),
-      arg(
-        Object.entries(display.social).map(([key, value]) => ({ key, value })),
-        t.Dictionary({ key: t.String, value: t.String })
-      ),
-    ]
+      arg(display.social, t.Dictionary({ key: t.String, value: t.String })),
+    ],
   );
 }
 
 export async function maintainerUpdateCustomizedFT(
   flowSrv: FlowService,
   ft: TokenIdentity,
-  display: CustomizedTokenDto
+  display: CustomizedTokenDto,
 ): Promise<string> {
   return await flowSrv.sendTransaction(
     txMaintainerUpdateCustomizedFT,
@@ -109,11 +106,8 @@ export async function maintainerUpdateCustomizedFT(
       arg(display.description ?? null, t.Optional(t.String)),
       arg(display.externalURL ?? null, t.Optional(t.String)),
       arg(display.logo ?? null, t.Optional(t.String)),
-      arg(
-        Object.entries(display.social).map(([key, value]) => ({ key, value })),
-        t.Dictionary({ key: t.String, value: t.String })
-      ),
-    ]
+      arg(display.social, t.Dictionary({ key: t.String, value: t.String })),
+    ],
   );
 }
 

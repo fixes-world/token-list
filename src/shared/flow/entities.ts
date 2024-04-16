@@ -56,9 +56,14 @@ export interface StandardTokenView {
   display?: TokenDisplayWithSource;
 }
 
+export interface SocialKeyPair {
+  key: string;
+  value: string;
+}
+
 export interface CustomizedTokenDto extends TokenDisplayBasic {
   logo: string;
-  social: Record<string, string>;
+  social: SocialKeyPair[];
 }
 
 export interface TokenQueryResult {

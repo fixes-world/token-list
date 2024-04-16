@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, reactive, computed, inject, watch } from 'vue'
+import { ref, reactive, computed, inject, watch, h, type VNodeChild, type VNode } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import {
   NSkeleton, NEmpty,
   NGrid, NGridItem, NFormItemGi, NForm, type FormInst, type FormRules,
-  NInput, NButton,
+  NInput, NButton, NDynamicInput,
+  NSelect, type SelectOption,
 } from 'naive-ui';
-import type { StandardTokenView, Media, CustomizedTokenDto, TokenIdentity, TokenPaths } from '@shared/flow/entities';
+import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
 import { FlowSrvKey } from '@shared/flow/utilitites';
 import { maintainerRegisterCustomizedFT, maintainerUpdateCustomizedFT } from '@shared/flow/action/transactions';
 import { getFTContractStatus } from '@shared/flow/action/scripts';
@@ -56,13 +57,28 @@ const formData = reactive<FormDto>({
     name: "",
     description: "",
     externalURL: "",
-    social: {},
+    social: [],
   },
 });
 const rules = ref<FormRules>({
-  "paths.vault": [
-    { required: true, message: 'Vault is required', trigger: ['change'] }
-  ],
+  paths: {
+    "vault": { required: true, message: 'Vault is required', trigger: ['change'] },
+    "receiver": { required: true, message: 'Receiver is required', trigger: ['change'] },
+    "balance": { required: true, message: 'Balance is required', trigger: ['change'] },
+  },
+  display: {
+    logo: { required: true, message: 'Logo is required', trigger: 'change' },
+    symbol: [
+      { required: true, message: 'Symbol is required', trigger: 'blur' },
+      { type: 'string', pattern: /^[A-Z][A-Z0-9]{2,7}$/, message: 'Please Enter 3~8 Uppercase Letters.', trigger: ['input', 'blur'] },
+    ],
+    name: [
+      { required: true, message: 'Name is required', trigger: 'blur' },
+      { type: 'string', pattern: /^[\w _]{3,25}$/, message: 'Please Enter 3 to 25 Letters.', trigger: ['input', 'blur'] },
+    ],
+    description: { type: 'string', max: 250, message: 'Description is required', trigger: 'blur' },
+    externalURL: { type: 'url', message: 'Invalid URL', trigger: 'blur' },
+  }
 });
 
 const isLoadingFTStatus = ref(false)
@@ -73,6 +89,18 @@ const imageUrl = computed({
     formData.display.logo = value;
   }
 });
+
+const socialTypesOptions: SelectOption[] = [
+  { value: "twitter", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-x w-4 h-4' })) },
+  { value: "telegram", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:send-alt-filled w-4 h-4' })) },
+  { value: "discord", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-discord w-4 h-4' })) },
+  { value: "github", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-github w-4 h-4' })) },
+  { value: "medium", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-medium w-4 h-4' })) },
+  { value: "linkedin", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-linkedin w-4 h-4' })) },
+  { value: "youtube", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-youtube w-4 h-4' })) },
+  { value: "instagram", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-instagram w-4 h-4' })) },
+  { value: "facebook", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-facebook w-4 h-4' })) },
+];
 
 // Handlers and Functions
 
@@ -86,7 +114,6 @@ async function loadFTStatus() {
   if (status) {
     formData.paths.vault = status.vaultPath;
     for (let key in status.publicPaths) {
-      console.log("Path Key: ", key, 'Path Value: ', status.publicPaths[key]);
       if (key.includes("FungibleToken.Receiver")) {
         formData.paths.receiver = status.publicPaths[key];
       } else if (key.includes("FungibleToken.Balance")) {
@@ -96,6 +123,26 @@ async function loadFTStatus() {
   }
   isLoadingFTStatus.value = false;
 }
+
+function onSocialCreate(): SocialKeyPair {
+  let exists = formData.display.social ?? []
+  // add a new social link
+  const unusedSocials: string[] = []
+  for (let one of socialTypesOptions) {
+    if (!exists.find((s) => s.key === one.value)) {
+      unusedSocials.push(String(one.value))
+    }
+  }
+  return { key: unusedSocials[0], value: "" };
+}
+
+function renderLabel(option: SelectOption, icon: VNodeChild): VNodeChild {
+  return h('div', { class: 'w-full flex items-center gap-2' }, [icon, option.value]);
+}
+
+// function renderOption(info: { node: VNode, option: SelectOption }): VNodeChild {
+//   return h('div', { class: 'max-w-12  flex justify-center-center' }, [info.node]);
+// }
 
 // Watchers and Lifecycle Hooks
 
@@ -110,7 +157,7 @@ watch(() => props.ft, async (ft, oldFt) => {
     formData.display.name = ft?.display?.display?.name ?? "";
     formData.display.description = ft?.display?.display?.description ?? "";
     formData.display.externalURL = ft?.display?.display?.externalURL ?? "";
-    formData.display.social = ft?.display?.display?.social ?? {};
+    formData.display.social = Object.entries(ft?.display?.display?.social ?? {}).map(([key, value]) => ({ key, value }));
   }
 });
 
@@ -130,32 +177,33 @@ watch(() => props.ft, async (ft, oldFt) => {
       v-else
       ref="formRef"
       size="large"
-      v-model="formData"
+      :model="formData"
       :rules="rules"
       :disabled="isSending"
       :label-placement="!isNotMobile ? 'top' : 'left'"
+      label-width="auto"
       :show-require-mark="false"
+      :show-feedback="true"
       :style="{
         width: '100%',
         minWidth: '280px'
       }"
     >
       <ItemFungibleTokenStatus
-        class="!mb-3"
+        class="!mb-4"
         :item="ft.identity"
       />
       <NGrid
-        :cols="9"
-        :x-gap="24"
-        :y-gap="12"
+        :cols="6"
+        :x-gap="12"
       >
         <NFormItemGi
-          :span="9"
+          :span="6"
           path="paths.vault"
           :show-label="false"
           :show-feedback="false"
         >
-          <div class="flex items-center justify-between gap-2 md:gap-4">
+          <div class="mb-4 flex items-center justify-between gap-2 md:gap-4">
             <ImageUploader
               class="flex-none !w-[96px]"
               v-model:image="imageUrl"
@@ -199,7 +247,7 @@ watch(() => props.ft, async (ft, oldFt) => {
           </div>
         </NFormItemGi>
         <NFormItemGi
-          :span="9"
+          :span="6"
           path="display.symbol"
         >
           <template #label>
@@ -207,9 +255,8 @@ watch(() => props.ft, async (ft, oldFt) => {
           </template>
           <NInput
             size="small"
-            round
             v-model:value="formData.display.symbol"
-            placeholder="Please input FT Symbol"
+            placeholder="Token Symbol"
             :input-props="{
               autocomplete: 'off',
               autocorrect: 'off',
@@ -217,6 +264,88 @@ watch(() => props.ft, async (ft, oldFt) => {
               spellcheck: 'false',
             }"
           />
+        </NFormItemGi>
+        <NFormItemGi
+          :span="6"
+          path="display.name"
+        >
+          <template #label>
+            <span class="text-sm text-gray-500">Name</span>
+          </template>
+          <NInput
+            size="small"
+            v-model:value="formData.display.name"
+            placeholder="Display Name"
+            :input-props="{ autocomplete: 'off' }"
+          />
+        </NFormItemGi>
+        <NFormItemGi
+          :span="6"
+          path="display.externalURL"
+        >
+          <template #label>
+            <span class="text-sm text-gray-500">Website</span>
+          </template>
+          <NInput
+            size="small"
+            v-model:value="formData.display.externalURL"
+            placeholder="Website or Project Link"
+            :input-props="{ autocomplete: 'off', type: 'url' }"
+          />
+        </NFormItemGi>
+        <NFormItemGi
+          :span="6"
+          path="display.description"
+        >
+          <template #label>
+            <span class="text-sm text-gray-500">Description</span>
+          </template>
+          <NInput
+            size="small"
+            round
+            type="textarea"
+            v-model:value="formData.display.description"
+            placeholder="Description"
+            :input-props="{ autocomplete: 'off' }"
+          />
+        </NFormItemGi>
+        <NFormItemGi
+          :span="6"
+          path="display.social"
+        >
+          <NDynamicInput
+            size="small"
+            :max="9"
+            v-model:value="formData.display.social"
+            :on-create="onSocialCreate"
+          >
+            <template #create-button-default>
+              Add Social Link
+            </template>
+            <template #default="{ index }">
+              <div class="flex items-center w-full gap-2">
+                <NSelect
+                  class="!w-40"
+                  size="small"
+                  placeholder="Social"
+                  v-model:value="formData.display.social[index].key"
+                  :options="socialTypesOptions"
+                  :disabled="isSending"
+                  :input-props="{ autocomplete: 'off' }"
+                />
+                <NInput
+                  v-model:value="formData.display.social[index].value"
+                  placeholder="Input URL"
+                  type="text"
+                  :input-props="{ autocomplete: 'off', type: 'url' }"
+                  size="small"
+                />
+              </div>
+            </template>
+          </NDynamicInput>
+        </NFormItemGi>
+        <NFormItemGi :span="6">
+          {{ formData }}
         </NFormItemGi>
       </NGrid>
     </NForm>

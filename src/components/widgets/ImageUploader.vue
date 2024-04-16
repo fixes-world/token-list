@@ -102,7 +102,7 @@ function getIPFSUrl(ipfsHash: string) {
     :custom-request="uploadToIPFS"
     @before-upload="beforeUpload"
   >
-    <NUploadDragger v-if="!props.image">
+    <NUploadDragger>
       <div class="w-hull flex flex-col items-center justify-center text-gray-400/60">
         <span class="mx-a i-carbon:image w-8 h-8"/>
         <span class="text-xs"> < 256KB</span>
