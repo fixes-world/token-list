@@ -3,7 +3,6 @@ import type {
   TokenIdentity,
   TokenPaths,
 } from "@shared/flow/entities";
-import { FilterType } from "@shared/flow/enums";
 import type { FlowService } from "@shared/flow/flow.service";
 // Transactions
 import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
@@ -77,9 +76,9 @@ export async function maintainerRegisterCustomizedFT(
     (arg, t) => [
       arg(ft.address, t.Address),
       arg(ft.contractName, t.String),
-      arg(paths.vault, t.String),
-      arg(paths.receiver, t.String),
-      arg(paths.balance, t.String),
+      arg(paths.vault.slice("/storage/".length), t.String),
+      arg(paths.receiver.slice("/public/".length), t.String),
+      arg(paths.balance.slice("/public/".length), t.String),
       arg(paths.provider ?? ft.contractName + "_provider", t.String),
       arg(display.name, t.String),
       arg(display.symbol, t.String),

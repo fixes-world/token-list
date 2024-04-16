@@ -18,25 +18,15 @@ transaction(
     prepare(acct: AuthAccount) {
         var maintainer: &{TokenList.FungibleTokenReviewMaintainer}? = nil
         // Try borrow maintainer
-        if acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath) {
-            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath)
-                ?? panic("Failed to load FungibleTokenReviewMaintainer from reviewer")
+        if acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
+            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
+                ?? panic("Failed to load FungibleTokenReviewMaintainer from review maintainer")
         }
         // Try borrow review
-        if !acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
-            log("Creating a new reviewer")
-            let reviewer <- TokenList.createFungibleTokenReviewer()
-            acct.save(<- reviewer, to: TokenList.reviewerStoragePath)
-
-            // public the public capability
-            acct.link<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
-                TokenList.reviewerPublicPath,
-                target: TokenList.reviewerStoragePath
-            )
+        if acct.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
+            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath)
+                    ?? panic("Failed to load FungibleTokenReviewMaintainer from reviewer")
         }
-        maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
-                ?? panic("Failed to load FungibleTokenReviewMaintainer from review maintainer")
-
         self.maintainer = maintainer ?? panic("Missing maintainer")
     }
 

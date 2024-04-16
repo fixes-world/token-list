@@ -9,7 +9,6 @@ import {
 } from 'naive-ui';
 import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
 import { FlowSrvKey } from '@shared/flow/utilitites';
-import { maintainerRegisterCustomizedFT, maintainerUpdateCustomizedFT } from '@shared/flow/action/transactions';
 import { getFTContractStatus } from '@shared/flow/action/scripts';
 import { useGlobalAccount, useSendingTransaction } from '@components/shared'
 
@@ -17,6 +16,7 @@ import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
 import ImageUploader from '@components/widgets/ImageUploader.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
+import FormSubmitCustomizeFT from '@components/reviewer/form/FormSubmitCustomizeFT.vue';
 
 const props = withDefaults(defineProps<{
   ft?: StandardTokenView,
@@ -344,10 +344,18 @@ watch(() => props.ft, async (ft, oldFt) => {
             </template>
           </NDynamicInput>
         </NFormItemGi>
-        <NFormItemGi :span="6">
-          {{ formData }}
-        </NFormItemGi>
       </NGrid>
     </NForm>
+    <template
+      v-if="!!ft"
+      #action
+    >
+      <FormSubmitCustomizeFT
+        :ft="ft"
+        :paths="formData.paths"
+        :display="formData.display"
+        @success="emits('refresh')"
+      />
+    </template>
   </PanelCardWrapper>
 </template>
