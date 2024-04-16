@@ -46,7 +46,7 @@ watch(acctName, refresh, { immediate: true })
 <template>
   <div
     v-if="reviewer"
-    class="inline-flex items-center gap-2 italic text-gray-400/60 font-semibold"
+    class="flex flex-wrap items-center gap-2 italic text-gray-400/60 font-semibold"
   >
     <h2 class="text-lg">Edit as Reviewer</h2>
     <ElementAddressBrowserLink

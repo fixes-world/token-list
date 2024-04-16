@@ -68,7 +68,7 @@ async function uploadToIPFS(options: UploadCustomRequestOptions) {
     emit('update:image', getIPFSUrl(cid));
     options.onProgress({ percent: 100 })
     options.onFinish()
-    message.success('Image uploaded to IPFS successfully! CID: ' + cid)
+    message.success('Image uploaded to IPFS successfully! \n CID: ' + cid)
   } catch (e: any) {
     console.error(e)
     message.error('Failed to upload image to IPFS.')
@@ -97,6 +97,8 @@ function getIPFSUrl(ipfsHash: string) {
     trigger-class=""
     :default-file-list="fileList"
     :max="1"
+    :multiple="false"
+    :disabled="uploading"
     :custom-request="uploadToIPFS"
     @before-upload="beforeUpload"
   >

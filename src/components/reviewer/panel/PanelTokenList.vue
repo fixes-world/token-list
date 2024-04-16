@@ -74,6 +74,10 @@ async function reload() {
 onMounted(async () => {
   await reload()
 })
+
+defineExpose({
+  reload,
+})
 </script>
 
 <template>

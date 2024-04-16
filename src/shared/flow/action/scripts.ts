@@ -44,11 +44,6 @@ function parseFTContractStatus(obj: any): TokenStatus {
   const paths: Record<string, string> = {};
   // add alias for balance and receiver
   for (let key in obj.publicPaths) {
-    if (key.includes("FungibleToken.Balance")) {
-      paths["balance"] = obj.publicPaths[key];
-    } else if (key.includes("FungibleToken.Receiver")) {
-      paths["receiver"] = obj.publicPaths[key];
-    }
     paths[key] = obj.publicPaths[key];
   }
   return {

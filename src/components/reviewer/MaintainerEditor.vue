@@ -16,12 +16,13 @@ import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitRevi
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
 import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
-import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 
 const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
 
 // Reactive Variables
+
+const tokenListRef = ref<typeof PanelTokenList | null>(null);
 
 const addrStatus = ref<AddressStatus | null>(null);
 
@@ -46,7 +47,7 @@ async function loadAddrStatus() {
   addrStatus.value = await getAddressReviewerStatus(flowSrv, acctName.value)
 }
 
-async function refresh() {
+async function reloadAddrStatus() {
   addrStatus.value = null
 
   isFirstLoading.value = true
@@ -54,9 +55,16 @@ async function refresh() {
   isFirstLoading.value = false
 }
 
+async function refreshTokenList() {
+  if (tokenListRef.value) {
+    await tokenListRef.value?.reload()
+  }
+  currentToken.value = undefined
+}
+
 // Watchers and Lifecycle Hooks
 
-watch(acctName, refresh, { immediate: true })
+watch(acctName, reloadAddrStatus, { immediate: true })
 
 </script>
 
@@ -84,6 +92,7 @@ watch(acctName, refresh, { immediate: true })
             class="w-full flex items-start justify-between gap-4"
           >
             <PanelTokenList
+              ref="tokenListRef"
               class="flex-none"
               v-model:ft="currentToken"
             />
@@ -99,6 +108,7 @@ watch(acctName, refresh, { immediate: true })
               <PanelTokenEditor
                 v-else
                 :ft="currentToken"
+                @refresh="refreshTokenList"
               />
             </div>
           </div>
@@ -112,10 +122,10 @@ watch(acctName, refresh, { immediate: true })
             </h2>
             <FormSubmitClaimMaintainer
               :reviewer="addrStatus.reviewerAddr"
-              @success="refresh"
+              @success="reloadAddrStatus"
             />
             <h2 class="text-lg"> or </h2>
-            <FormSubmitInitReviewer @success="refresh" />
+            <FormSubmitInitReviewer @success="reloadAddrStatus" />
           </div>
         </template>
       </EnsureConnected>

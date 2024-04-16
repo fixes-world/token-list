@@ -17,20 +17,24 @@ fun main(
     }
 
     let addrNo0x = addr.toString().slice(from: 2, upTo: addr.toString().length)
-
     log("Loading Contract: ".concat(contractName))
+
+    let ftType = CompositeType("A.".concat(addrNo0x)
+            .concat(".").concat(contractName)
+            .concat(".Vault"))
+    if ftType == nil {
+        log("Failed to create CompositeType for ".concat(contractName))
+        return nil
+    }
+
     var ftViewResolver: &ViewResolver? = nil
     var isValid = false
     if let contract = acct.contracts.borrow<&FungibleToken>(name: contractName) {
-        if let ftType = CompositeType("A.".concat(addrNo0x)
-            .concat(".").concat(contractName)
-            .concat(".Vault")) {
-                isValid = true
-            // Borrow the view resolver for the contract
-            if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
-                log("ViewResolver for ".concat(contractName).concat("is borrowed"))
-                ftViewResolver = viewResolver
-            }
+        isValid = true
+        // Borrow the view resolver for the contract
+        if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
+            log("ViewResolver for ".concat(contractName).concat("is borrowed"))
+            ftViewResolver = viewResolver
         }
     }
     if !isValid {
@@ -40,7 +44,7 @@ fun main(
 
     var ftVaultPath: String? = nil
     acct.forEachStored(fun (path: StoragePath, type: Type): Bool {
-        if type.isSubtype(of: Type<@FungibleToken.Vault>()) {
+        if type.isSubtype(of: ftType!) {
             ftVaultPath = path.toString()
             return false
         }
