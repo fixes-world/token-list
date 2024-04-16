@@ -51,7 +51,7 @@ transaction(
             // @deprecated in Cadence 1.0
             providerPath: PrivatePath(identifier: providerIdentifier) ?? panic("Invalid provider path"),
             receiverType: Type<&AnyResource{FungibleToken.Receiver}>(),
-            metadataType: Type<&AnyResource{FungibleToken.Balance}>(),
+            metadataType: Type<&AnyResource{FungibleToken.Balance, MetadataViews.Resolver}>(),
             // @deprecated in Cadence 1.0
             providerType: Type<&AnyResource{FungibleToken.Provider}>()
         )
