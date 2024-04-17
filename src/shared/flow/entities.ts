@@ -87,3 +87,33 @@ export interface AddressStatus {
   isPendingToClaimReviewMaintainer: boolean;
   reviewerAddr?: string;
 }
+
+export interface ExportedTokenInfo extends TokenIdentity {
+  path: TokenPaths;
+  symbol: string;
+  name: string;
+  decimals: number;
+  description: string;
+  logoURI: string;
+  tags: string[];
+  extensions: Record<string, string>;
+}
+
+export interface TokenTag {
+  name: string;
+  description: string;
+}
+
+export interface TokenList {
+  name: string;
+  logoURI: string;
+  keywords: string[];
+  tags: Record<string, TokenTag>;
+  timestamp: Date;
+  tokens: ExportedTokenInfo[];
+  version: {
+    major: number;
+    minor: number;
+    patch: number;
+  };
+}
