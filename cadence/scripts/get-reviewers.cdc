@@ -1,13 +1,14 @@
+import "FTViewUtils"
 import "TokenList"
 
 access(all)
-fun main(): [ReviewerInfo] {
+fun main(): [FTViewUtils.ReviewerInfo] {
     let registry = TokenList.borrowRegistry()
     let addrs = registry.getReviewers()
-    let ret: [ReviewerInfo] = []
+    let ret: [FTViewUtils.ReviewerInfo] = []
     for addr in addrs {
         if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
-            ret.append(ReviewerInfo(
+            ret.append(FTViewUtils.ReviewerInfo(
                 address: addr,
                 verified: registry.isReviewerVerified(addr),
                 name: reviewerRef.getName(),
@@ -19,39 +20,4 @@ fun main(): [ReviewerInfo] {
         }
     }
     return ret
-}
-
-access(all) struct ReviewerInfo {
-    access(all)
-    let address: Address
-    access(all)
-    let verified: Bool
-    access(all)
-    let name: String?
-    access(all)
-    let url: String?
-    access(all)
-    let managedTokenAmt: Int
-    access(all)
-    let reviewedTokenAmt: Int
-    access(all)
-    let customziedTokenAmt: Int
-
-    init(
-        address: Address,
-        verified: Bool,
-        name: String?,
-        url: String?,
-        _ managedTokenAmt: Int,
-        _ reviewedTokenAmt: Int,
-        _ customziedTokenAmt: Int,
-    ) {
-        self.address = address
-        self.verified = verified
-        self.name = name
-        self.url = url
-        self.managedTokenAmt = managedTokenAmt
-        self.reviewedTokenAmt = reviewedTokenAmt
-        self.customziedTokenAmt = customziedTokenAmt
-    }
 }

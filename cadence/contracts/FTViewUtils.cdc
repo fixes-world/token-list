@@ -174,6 +174,101 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The enum for the Evaluation
+    ///
+    access(all) enum Evaluation: UInt8 {
+        access(all) case UNVERIFIED
+        access(all) case PENDING
+        access(all) case VERIFIED
+        access(all) case FEATURED
+    }
+
+    /// The struct for the Review Comment
+    ///
+    access(all) struct ReviewComment {
+        access(all)
+        let comment: String
+        access(all)
+        let by: Address
+        access(all)
+        let at: UInt64
+
+        init(_ comment: String, _ by: Address) {
+            self.comment = comment
+            self.by = by
+            self.at = UInt64(getCurrentBlock().timestamp)
+        }
+    }
+
+    /// The struct for the FT Review
+    ///
+    access(all) struct FTReview {
+        access(all)
+        let comments: [ReviewComment]
+        access(all)
+        var evalRank: Evaluation
+
+        init(
+            _ rank: Evaluation,
+        ) {
+            self.evalRank = rank
+            self.comments = []
+        }
+
+        /// Update the evaluation rank
+        ///
+        access(all)
+        fun updateEvaluationRank(
+            _ rank: Evaluation
+        ) {
+            self.evalRank = rank
+        }
+
+        /// Add a new comment to the review
+        ///
+        access(all)
+        fun addComment(_ comment: String, _ by: Address) {
+            self.comments.append(ReviewComment(comment, by))
+        }
+    }
+
+    /// The struct for the Reviewer Info
+    ///
+    access(all) struct ReviewerInfo {
+        access(all)
+        let address: Address
+        access(all)
+        let verified: Bool
+        access(all)
+        let name: String?
+        access(all)
+        let url: String?
+        access(all)
+        let managedTokenAmt: Int
+        access(all)
+        let reviewedTokenAmt: Int
+        access(all)
+        let customziedTokenAmt: Int
+
+        init(
+            address: Address,
+            verified: Bool,
+            name: String?,
+            url: String?,
+            _ managedTokenAmt: Int,
+            _ reviewedTokenAmt: Int,
+            _ customziedTokenAmt: Int,
+        ) {
+            self.address = address
+            self.verified = verified
+            self.name = name
+            self.url = url
+            self.managedTokenAmt = managedTokenAmt
+            self.reviewedTokenAmt = reviewedTokenAmt
+            self.customziedTokenAmt = customziedTokenAmt
+        }
+    }
+
     /** Editable FTView */
 
     /// The enum for the FT Capability Path

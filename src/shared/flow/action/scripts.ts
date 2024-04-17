@@ -18,6 +18,7 @@ import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
 import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
 import scGetFTContracts from "@cadence/scripts/get-ft-contracts.cdc?raw";
 import scGetFTContractStatus from "@cadence/scripts/get-ft-contract-status.cdc?raw";
+import scGetReviewerInfo from "@cadence/scripts/get-reviewer-info.cdc?raw";
 import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
 import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
 import scGetAddressReviewerStatus from "@cadence/scripts/get-address-reviewer-status.cdc?raw";
@@ -107,12 +108,12 @@ export async function getFTContractStatus(
  */
 export async function getAddressReviewerStatus(
   flowServ: FlowService,
-  address: string
+  address: string,
 ): Promise<AddressStatus> {
   const ret = await flowServ.executeScript(
     scGetAddressReviewerStatus,
     (arg, t) => [arg(address, t.Address)],
-    {} as any
+    {} as any,
   );
   return {
     isReviewer: ret?.isReviewer ?? false,
@@ -144,9 +145,23 @@ export async function getVerifiedReviewers(flowServ: FlowService) {
   const ret = await flowServ.executeScript(
     scGetVeifiedReviewers,
     (arg, t) => [],
-    []
+    [],
   );
   return ret.map(parseReviewer);
+}
+
+/**
+ * Get the reviewer info
+ * @param flowServ
+ * @param address
+ */
+export async function getReviewerInfo(flowServ: FlowService, address: string) {
+  const ret = await flowServ.executeScript(
+    scGetReviewerInfo,
+    (arg, t) => [arg(address, t.Address)],
+    null,
+  );
+  return ret ? parseReviewer(ret) : null;
 }
 
 const parseTokenPaths = (obj: any): TokenPaths => {

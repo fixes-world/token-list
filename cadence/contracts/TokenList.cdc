@@ -107,16 +107,16 @@ access(all) contract TokenList {
         fun isReviewedBy(_ reviewerId: UInt64): Bool
         /// Get the Fungible Token Review
         access(all) view
-        fun getFTReview(_ reviewerId: UInt64): FTReview?
+        fun getFTReview(_ reviewerId: UInt64): FTViewUtils.FTReview?
         // ----- View Methods -----
         /// Create an empty vault for the FT
         access(all)
         fun createEmptyVault(): @FungibleToken.Vault
         // ----- Internal Methods: Used by Reviewer -----
         access(contract)
-        fun addRewiew(_ reviewerId: UInt64, _ review: FTReview)
+        fun addRewiew(_ reviewerId: UInt64, _ review: FTViewUtils.FTReview)
         access(contract)
-        fun borrowReviewRef(_ reviewerId: UInt64): &FTReview?
+        fun borrowReviewRef(_ reviewerId: UInt64): &FTViewUtils.FTReview?
     }
 
     /// Resource for the Fungible Token Entry
@@ -126,7 +126,7 @@ access(all) contract TokenList {
         let identity: FTViewUtils.FTIdentity
         // ReviewerId => FTReview
         access(self)
-        let reviewers: {UInt64: FTReview}
+        let reviewers: {UInt64: FTViewUtils.FTReview}
         // view resolver
         access(all)
         var viewResolver: @{MetadataViews.Resolver}?
@@ -181,7 +181,7 @@ access(all) contract TokenList {
         /// Get the Fungible Token Review
         ///
         access(all) view
-        fun getFTReview(_ reviewerId: UInt64): FTReview? {
+        fun getFTReview(_ reviewerId: UInt64): FTViewUtils.FTReview? {
             return self.reviewers[reviewerId]
         }
 
@@ -307,7 +307,7 @@ access(all) contract TokenList {
         /// Add a new review to the FT
         ///
         access(contract)
-        fun addRewiew(_ reviewerId: UInt64, _ review: FTReview) {
+        fun addRewiew(_ reviewerId: UInt64, _ review: FTViewUtils.FTReview) {
             pre {
                 self.reviewers[reviewerId] == nil:
                     "Reviewer already exists"
@@ -318,8 +318,8 @@ access(all) contract TokenList {
         /// Borrow the review reference
         ///
         access(contract)
-        fun borrowReviewRef(_ reviewerId: UInt64): &FTReview? {
-            return &self.reviewers[reviewerId] as &FTReview?
+        fun borrowReviewRef(_ reviewerId: UInt64): &FTViewUtils.FTReview? {
+            return &self.reviewers[reviewerId] as &FTViewUtils.FTReview?
         }
 
         /// Borrow the View Resolver
@@ -334,64 +334,6 @@ access(all) contract TokenList {
         access(contract)
         fun borrowFungibleTokenContract(): &FungibleToken {
             return self.identity.borrowFungibleTokenContract()
-        }
-    }
-
-    /// The enum for the Evaluation
-    ///
-    access(all) enum Evaluation: UInt8 {
-        access(all) case UNVERIFIED
-        access(all) case PENDING
-        access(all) case VERIFIED
-        access(all) case FEATURED
-    }
-
-    /// The struct for the Review Comment
-    ///
-    access(all) struct ReviewComment {
-        access(all)
-        let comment: String
-        access(all)
-        let by: Address
-        access(all)
-        let at: UInt64
-
-        init(_ comment: String, _ by: Address) {
-            self.comment = comment
-            self.by = by
-            self.at = UInt64(getCurrentBlock().timestamp)
-        }
-    }
-
-    /// The struct for the FT Review
-    ///
-    access(all) struct FTReview {
-        access(all)
-        let comments: [ReviewComment]
-        access(all)
-        var evalRank: Evaluation
-
-        init(
-            _ rank: Evaluation,
-        ) {
-            self.evalRank = rank
-            self.comments = []
-        }
-
-        /// Update the evaluation rank
-        ///
-        access(all)
-        fun updateEvaluationRank(
-            _ rank: Evaluation
-        ) {
-            self.evalRank = rank
-        }
-
-        /// Add a new comment to the review
-        ///
-        access(all)
-        fun addComment(_ comment: String, _ by: Address) {
-            self.comments.append(ReviewComment(comment, by))
         }
     }
 
@@ -442,7 +384,7 @@ access(all) contract TokenList {
         fun updateMetadata(name: String?, url: String?)
         /// Review the Fungible Token with Evaluation
         access(all)
-        fun reviewFTEvalute(_ type: Type, rank: Evaluation)
+        fun reviewFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation)
         /// Review the Fungible Token with Comment
         access(all)
         fun reviewFTComment(_ type: Type, comment: String)
@@ -479,7 +421,7 @@ access(all) contract TokenList {
         access(self)
         let storedDisplayPatches: @{Type: FTViewUtils.EditableFTDisplay}
         access(self)
-        let reviewed: {Type: Evaluation}
+        let reviewed: {Type: FTViewUtils.Evaluation}
 
         init() {
             self.metadata = {}
@@ -520,7 +462,7 @@ access(all) contract TokenList {
         /// Review the Fungible Token with Evaluation
         ///
         access(all)
-        fun reviewFTEvalute(_ type: Type, rank: Evaluation) {
+        fun reviewFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
             let registery = TokenList.borrowRegistry()
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
@@ -528,7 +470,7 @@ access(all) contract TokenList {
             if let reviewRef = entryRef.borrowReviewRef(self.uuid) {
                 reviewRef.updateEvaluationRank(rank)
             } else {
-                entryRef.addRewiew(self.uuid, FTReview(rank))
+                entryRef.addRewiew(self.uuid, FTViewUtils.FTReview(rank))
             }
             // update reviewed status locally
             self.reviewed[type] = rank
@@ -556,7 +498,7 @@ access(all) contract TokenList {
             if let reviewRef = entryRef.borrowReviewRef(self.uuid) {
                 reviewRef.addComment(comment, reviewerAddr)
             } else {
-                entryRef.addRewiew(self.uuid, FTReview(Evaluation.UNVERIFIED))
+                entryRef.addRewiew(self.uuid, FTViewUtils.FTReview(FTViewUtils.Evaluation.UNVERIFIED))
                 entryRef.borrowReviewRef(self.uuid)!.addComment(comment, reviewerAddr)
             }
 
@@ -713,9 +655,9 @@ access(all) contract TokenList {
         ///
         access(all) view
         fun getFeaturedFTTypes(): [Type] {
-            let reviewedRef = &self.reviewed as &{Type: Evaluation}
+            let reviewedRef = &self.reviewed as &{Type: FTViewUtils.Evaluation}
             return self.reviewed.keys.filter(fun(type: Type): Bool {
-                return reviewedRef[type] == Evaluation.FEATURED
+                return reviewedRef[type] == FTViewUtils.Evaluation.FEATURED
             })
         }
 
@@ -723,9 +665,9 @@ access(all) contract TokenList {
         ///
         access(all) view
         fun getVerifiedFTTypes(): [Type] {
-            let reviewedRef = &self.reviewed as &{Type: Evaluation}
+            let reviewedRef = &self.reviewed as &{Type: FTViewUtils.Evaluation}
             return self.reviewed.keys.filter(fun(type: Type): Bool {
-                return reviewedRef[type] == Evaluation.VERIFIED || reviewedRef[type] == Evaluation.FEATURED
+                return reviewedRef[type] == FTViewUtils.Evaluation.VERIFIED || reviewedRef[type] == FTViewUtils.Evaluation.FEATURED
             })
         }
 
@@ -836,7 +778,7 @@ access(all) contract TokenList {
         /// Review the Fungible Token with Evaluation
         ///
         access(all)
-        fun reviewFTEvalute(_ type: Type, rank: Evaluation) {
+        fun reviewFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
             self._borrowReviewer().reviewFTEvalute(type, rank: rank)
         }
 
