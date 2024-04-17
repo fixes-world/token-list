@@ -40,9 +40,7 @@ const disableReason = computed(() => {
 
 async function onSubmit(): Promise<string> {
   let errStr: string | undefined = undefined
-  if (flowSrv === undefined) {
-    errStr = "Flow Service not available"
-  } else if (!acctName.value) {
+  if (!acctName.value) {
     errStr = "No account name"
   }
   if (errStr !== undefined) {
@@ -50,7 +48,7 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await registerStandardFT(flowSrv!, props.token)
+  return await registerStandardFT(props.token)
 }
 
 async function onSuccess() {

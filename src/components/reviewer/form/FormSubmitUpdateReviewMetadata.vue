@@ -24,7 +24,6 @@ const emits = defineEmits<{
   (e: 'error', msg: string): void
 }>();
 
-const flowSrv = inject(FlowSrvKey)
 const acctName = useGlobalAccount()
 
 // Reactive Data
@@ -55,9 +54,7 @@ const disableReason = computed(() => {
 
 async function onSubmit(): Promise<string> {
   let errStr: string | undefined = undefined
-  if (flowSrv === undefined) {
-    errStr = "Flow Service not available"
-  } else if (!acctName.value) {
+  if (!acctName.value) {
     errStr = "No account name"
   }
   if (errStr !== undefined) {
@@ -65,7 +62,7 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await maintainerUpdateReviwerMetadata(flowSrv!, props.name!, props.url!)
+  return await maintainerUpdateReviwerMetadata(props.name!, props.url!)
 }
 
 async function onSuccess() {

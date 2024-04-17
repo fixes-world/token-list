@@ -36,10 +36,9 @@ const reviewerInfo = ref<ReviewerInfo | null>(null)
 // Functions
 
 async function loadReviewerMetadata() {
-  if (!flowSrv) return
   if (!props.reviewer) return
 
-  reviewerInfo.value = await getReviewerInfo(flowSrv, props.reviewer)
+  reviewerInfo.value = await getReviewerInfo(props.reviewer)
 }
 
 async function refresh() {

@@ -46,9 +46,7 @@ const disableReason = computed(() => {
 
 async function onSubmit(): Promise<string> {
   let errStr: string | undefined = undefined
-  if (flowSrv === undefined) {
-    errStr = "Flow Service not available"
-  } else if (!acctName.value) {
+  if (!acctName.value) {
     errStr = "No account name"
   } else if (!props.reviewer) {
     errStr = "You have not been set as a Maintainer by anyone yet"
@@ -60,7 +58,7 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await maintainerClaim(flowSrv!, props.reviewer!)
+  return await maintainerClaim(props.reviewer!)
 }
 
 async function onSuccess() {

@@ -42,11 +42,8 @@ const tokens = reactive<StandardTokenView[]>([])
 const totalAmount = ref<number>(0)
 
 async function loadTokenList() {
-  if (!flowSrv) return
-
   isLoading.value = true
   const results = await queryTokenList(
-    flowSrv!,
     currentPage.value,
     loadingSize.value,
     props.reviewer,

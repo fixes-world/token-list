@@ -9,10 +9,9 @@ import type {
   TokenQueryResult,
   TokenStatus,
 } from "@shared/flow/entities";
-import { EvaluationType, FilterType } from "@shared/flow/enums";
-import type { FlowService } from "../flow.service";
-// import { } from "../utilitites";
-import appInfo from "@shared/config/info";
+import { FilterType, EvaluationType } from "@shared/flow/enums";
+// import type { FlowService } from "../flow.service";
+import { getFlowInstance } from "../flow.service.factory";
 // Scripts
 import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
 import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
@@ -30,10 +29,8 @@ import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-addr
 /**
  * check if the token is registered
  */
-export async function isTokenRegistered(
-  flowServ: FlowService,
-  ft: TokenIdentity,
-): Promise<boolean> {
+export async function isTokenRegistered(ft: TokenIdentity): Promise<boolean> {
+  const flowServ = await getFlowInstance();
   return await flowServ.executeScript(
     scIsTokenRegistered,
     (arg, t) => [arg(ft.address, t.Address), arg(ft.contractName, t.String)],
@@ -58,10 +55,8 @@ function parseFTContractStatus(obj: any): TokenStatus {
   };
 }
 
-export async function getContractNames(
-  flowServ: FlowService,
-  address: string,
-): Promise<string[]> {
+export async function getContractNames(address: string): Promise<string[]> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetContractNames,
     (arg, t) => [arg(address, t.Address)],
@@ -73,10 +68,8 @@ export async function getContractNames(
 /**
  * Get the FT contracts
  */
-export async function getFTContracts(
-  flowServ: FlowService,
-  address: string,
-): Promise<TokenStatus[]> {
+export async function getFTContracts(address: string): Promise<TokenStatus[]> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetFTContracts,
     (arg, t) => [arg(address, t.Address)],
@@ -91,10 +84,10 @@ export async function getFTContracts(
  * @param contractName
  */
 export async function getFTContractStatus(
-  flowServ: FlowService,
   address: string,
   contractName: string,
 ): Promise<TokenStatus | null> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetFTContractStatus,
     (arg, t) => [arg(address, t.Address), arg(contractName, t.String)],
@@ -107,9 +100,9 @@ export async function getFTContractStatus(
  * Get the address status
  */
 export async function getAddressReviewerStatus(
-  flowServ: FlowService,
   address: string,
 ): Promise<AddressStatus> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetAddressReviewerStatus,
     (arg, t) => [arg(address, t.Address)],
@@ -136,12 +129,14 @@ const parseReviewer = (obj: any): ReviewerInfo => {
   };
 };
 
-export async function getReviewers(flowServ: FlowService) {
+export async function getReviewers() {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(scGetReviewers, (arg, t) => [], []);
   return ret.map(parseReviewer);
 }
 
-export async function getVerifiedReviewers(flowServ: FlowService) {
+export async function getVerifiedReviewers() {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetVeifiedReviewers,
     (arg, t) => [],
@@ -155,7 +150,8 @@ export async function getVerifiedReviewers(flowServ: FlowService) {
  * @param flowServ
  * @param address
  */
-export async function getReviewerInfo(flowServ: FlowService, address: string) {
+export async function getReviewerInfo(address: string) {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetReviewerInfo,
     (arg, t) => [arg(address, t.Address)],
@@ -239,10 +235,10 @@ const parseTokenView = (obj: any): StandardTokenView => {
  * Query token list by address
  */
 export async function queryTokenListByAddress(
-  flowServ: FlowService,
   address: string,
   reviewer?: string,
 ): Promise<TokenQueryResult> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scQueryTokenListByAddress,
     (arg, t) => [arg(address, t.Address), arg(reviewer, t.Optional(t.Address))],
@@ -258,12 +254,12 @@ export async function queryTokenListByAddress(
  * Query token list
  */
 export async function queryTokenList(
-  flowServ: FlowService,
   page: number,
   limit: number,
   reviewer?: string,
   filter: FilterType = FilterType.ALL,
 ): Promise<TokenQueryResult> {
+  const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scQueryTokenList,
     (arg, t) => [

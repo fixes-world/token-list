@@ -3,7 +3,7 @@ import type {
   TokenIdentity,
   TokenPaths,
 } from "@shared/flow/entities";
-import type { FlowService } from "@shared/flow/flow.service";
+import { getFlowInstance } from "../flow.service.factory";
 // Transactions
 import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
 import txReviewerInit from "@cadence/transactions/reviewer-init.cdc?raw";
@@ -20,8 +20,12 @@ import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer
  * @param flowSrv The FlowService instance
  * @param ft The FT to register
  */
-export async function registerStandardFT(flowSrv: FlowService, ft: TokenIdentity): Promise<string> {
-  return await flowSrv.sendTransaction(txRegisterStandardFT, (arg, t) => [arg(ft.address, t.Address), arg(ft.contractName, t.String)]);
+export async function registerStandardFT(ft: TokenIdentity): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txRegisterStandardFT, (arg, t) => [
+    arg(ft.address, t.Address),
+    arg(ft.contractName, t.String),
+  ]);
 }
 
 /**
@@ -29,7 +33,8 @@ export async function registerStandardFT(flowSrv: FlowService, ft: TokenIdentity
  * @param flowSrv The FlowService instance
  * @returns The transaction ID
  */
-export async function reviewerInit(flowSrv: FlowService) {
+export async function reviewerInit() {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(txReviewerInit, (arg, t) => []);
 }
 
@@ -38,12 +43,12 @@ export async function reviewerInit(flowSrv: FlowService) {
  * @param flowSrv The FlowService instance
  */
 export async function reviewerPublishMaintainer(
-  flowSrv: FlowService,
-  maintainer: string
+  maintainer: string,
 ): Promise<string> {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(
     txReviewerPublishMaintainer,
-    (arg, t) => [arg(maintainer, t.Address)]
+    (arg, t) => [arg(maintainer, t.Address)],
   );
 }
 
@@ -52,10 +57,8 @@ export async function reviewerPublishMaintainer(
  * @param flowSrv The FlowService instance
  * @param reviewer The reviewer address
  */
-export async function maintainerClaim(
-  flowSrv: FlowService,
-  reviewer: string
-): Promise<string> {
+export async function maintainerClaim(reviewer: string): Promise<string> {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(txMaintainerClaim, (arg, t) => [
     arg(reviewer, t.Address),
   ]);
@@ -66,11 +69,11 @@ export async function maintainerClaim(
  * @param flowSrv The FlowService instance
  */
 export async function maintainerRegisterCustomizedFT(
-  flowSrv: FlowService,
   ft: TokenIdentity,
   paths: TokenPaths,
   display: CustomizedTokenDto,
 ): Promise<string> {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(
     txMaintainerRegisterCustomizedFT,
     (arg, t) => [
@@ -91,10 +94,10 @@ export async function maintainerRegisterCustomizedFT(
 }
 
 export async function maintainerUpdateCustomizedFT(
-  flowSrv: FlowService,
   ft: TokenIdentity,
   display: CustomizedTokenDto,
 ): Promise<string> {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(
     txMaintainerUpdateCustomizedFT,
     (arg, t) => [
@@ -111,15 +114,15 @@ export async function maintainerUpdateCustomizedFT(
 }
 
 export async function maintainerUpdateReviwerMetadata(
-  flowSrv: FlowService,
   name?: string,
-  url?: string
+  url?: string,
 ): Promise<string> {
+  const flowSrv = await getFlowInstance();
   return await flowSrv.sendTransaction(
     txMaintainerUpdateReviewerMetadata,
     (arg, t) => [
       arg(name ?? null, t.Optional(t.String)),
       arg(url ?? null, t.Optional(t.String)),
-    ]
+    ],
   );
 }

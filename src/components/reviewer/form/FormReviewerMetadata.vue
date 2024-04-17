@@ -5,8 +5,6 @@ import {
   NCollapseTransition, NSwitch,
   NForm, NGrid, NFormItemGi, NInput, type FormInst, type FormRules,
 } from 'naive-ui';
-// import { getReviewerInfo } from '@shared/flow/action/scripts';
-import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { ReviewerInfo } from '@shared/flow/entities';
 import { useGlobalAccount, useSendingTransaction } from '@components/shared';
 

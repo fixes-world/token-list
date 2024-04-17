@@ -105,12 +105,11 @@ const socialTypesOptions: SelectOption[] = [
 // Handlers and Functions
 
 async function loadFTStatus() {
-  if (!flowSrv) return;
   if (!props.ft) return;
 
   isLoadingFTStatus.value = true;
   console.log("Loading FT: ", props.ft?.identity.address, props.ft?.identity.contractName)
-  const status = await getFTContractStatus(flowSrv, props.ft?.identity.address, props.ft?.identity.contractName);
+  const status = await getFTContractStatus(props.ft?.identity.address, props.ft?.identity.contractName);
   if (status) {
     formData.paths.vault = status.vaultPath;
     for (let key in status.publicPaths) {

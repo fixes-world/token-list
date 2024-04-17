@@ -76,31 +76,23 @@ async function reload() {
 }
 
 async function loadFTContracts(addr: string) {
-  if (!flowSrv) {
-    console.error('Flow Service not available');
-    return;
-  }
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
-  ftContracts.value = await getFTContracts(flowSrv, addr);
+  ftContracts.value = await getFTContracts(addr);
   if (ftContracts.value.length > 0) {
     allContractNames.value = ftContracts.value.map((contract) => contract.contractName);
   } else {
-    allContractNames.value = await getContractNames(flowSrv, addr);
+    allContractNames.value = await getContractNames(addr);
   }
   isLoadingData.value = false;
 }
 
 async function loadFTStatus(addr: string, contractName: string) {
-  if (!flowSrv) {
-    console.error('Flow Service not available');
-    return;
-  }
   console.log('Loading contract status:', addr, contractName)
 
   isLoadingData.value = true;
-  const status = await getFTContractStatus(flowSrv, addr, contractName);
+  const status = await getFTContractStatus(addr, contractName);
   if (status) {
     ftContracts.value = [status]
   }

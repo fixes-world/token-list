@@ -4,7 +4,6 @@ import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
 import { FlowSrvKey } from '@shared/flow/utilitites';
 import { maintainerRegisterCustomizedFT, maintainerUpdateCustomizedFT } from '@shared/flow/action/transactions';
-import { getFTContractStatus } from '@shared/flow/action/scripts';
 import { useGlobalAccount, useSendingTransaction } from '@components/shared'
 
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
@@ -31,7 +30,7 @@ const receiverPath = computed(() => props.ft.path?.receiver || props.paths?.rece
 const balancePath = computed(() => props.ft.path?.balance || props.paths?.balance)
 
 const isValidData = computed(() => {
-  return !!acctName.value && !!flowSrv
+  return !!acctName.value
     && !!props.display?.name
     && !!props.display?.symbol
     && !!props.display.logo
@@ -42,7 +41,6 @@ const isValidData = computed(() => {
 
 const disableReason = computed(() => {
   if (!acctName.value) return "No account name"
-  if (!flowSrv) return "Flow Service not available"
   if (!props.display?.symbol) return "No Token Symbol"
   if (!props.display?.name) return "No Display Name"
   if (!props.display?.logo) return "No Token Logo"
@@ -59,9 +57,7 @@ const disableReason = computed(() => {
 
 async function onSubmit(): Promise<string> {
   let errStr: string | undefined = undefined
-  if (flowSrv === undefined) {
-    errStr = "Flow Service not available"
-  } else if (!acctName.value) {
+  if (!acctName.value) {
     errStr = "No account name"
   }
   if (errStr !== undefined) {
@@ -72,7 +68,6 @@ async function onSubmit(): Promise<string> {
   if (props.ft.path === undefined && props.paths !== undefined) {
     // Register new Customized FT
     return maintainerRegisterCustomizedFT(
-      flowSrv!,
       props.ft.identity,
       props.paths,
       props.display!
@@ -80,7 +75,6 @@ async function onSubmit(): Promise<string> {
   } else {
     // Update the existing Customized FT display
     return maintainerUpdateCustomizedFT(
-      flowSrv!,
       props.ft.identity,
       props.display!
     )

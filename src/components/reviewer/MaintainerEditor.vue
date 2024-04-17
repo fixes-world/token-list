@@ -44,8 +44,8 @@ const isPlaceCenter = computed(() => {
 // Functions
 
 async function loadAddrStatus() {
-  if (!flowSrv || !acctName.value) return
-  addrStatus.value = await getAddressReviewerStatus(flowSrv, acctName.value)
+  if (!acctName.value) return
+  addrStatus.value = await getAddressReviewerStatus(acctName.value)
 }
 
 async function reloadAddrStatus() {
