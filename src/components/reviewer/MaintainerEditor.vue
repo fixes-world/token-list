@@ -11,6 +11,7 @@ import { useGlobalAccount } from '@components/shared';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
+import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
@@ -99,7 +100,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             />
             <div class="flex-auto flex flex-col">
               <PanelReviewer :reviewer="addrStatus.reviewerAddr" />
-              <NDivider class="!mt-3 !mb-5" />
+              <NDivider class="!mt-4 !mb-6" />
               <p
                 v-if="!currentToken"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
@@ -118,8 +119,17 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             class="flex flex-col gap-6 items-center justify-start"
           >
             <h2 class="text-lg">
-              <span v-if="isMaintainerClaimable">You can claim as a Maintainer for {{ addrStatus.reviewerAddr }}</span>
-              <span>You can ask any <strong>Reviewer</strong> to set you as a <strong>Maintainer</strong></span>
+              <p
+                v-if="isMaintainerClaimable"
+                class="inline-flex items-center gap-1"
+              >
+                You can claim as a <strong>Maintainer</strong> for
+                <ElementAddressBrowserLink
+                  :address="addrStatus.reviewerAddr!"
+                  :short="false"
+                />
+              </p>
+              <p v-else>You can ask any <strong>Reviewer</strong> to set you as a <strong>Maintainer</strong></p>
             </h2>
             <FormSubmitClaimMaintainer
               :reviewer="addrStatus.reviewerAddr"

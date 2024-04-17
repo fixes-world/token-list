@@ -10,7 +10,7 @@ import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { ReviewerInfo } from '@shared/flow/entities';
 import { useGlobalAccount, useSendingTransaction } from '@components/shared';
 
-import FormSubmitUpdateReviewMetadata from '@components/reviewer/form/FormSubmitUpdateReviewMetadata.vue';
+import FormSubmitAddMaintainer from './FormSubmitAddMaintainer.vue';
 
 const props = withDefaults(defineProps<{
   reviewerInfo: ReviewerInfo | null,
@@ -29,27 +29,33 @@ const isNotMobile = breakpoints.greaterOrEqual('md')
 
 // Reactive Variables
 
-const formEditMetadataRef = ref<FormInst | null>(null);
-const formEditMetadata = reactive({
-  name: "",
-  url: "",
+const formRef = ref<FormInst | null>(null);
+const formData = reactive({
+  address: "",
 });
 const rules = ref<FormRules>({
-  name: [
+  address: [
     { required: true, message: 'Name is required', trigger: 'blur' },
-    { type: 'string', pattern: /^[\w _]{3,25}$/, message: 'Please Enter 3 to 25 Letters.', trigger: ['input', 'blur'] },
-  ],
-  url: { required: true, type: 'url', message: 'Invalid URL', trigger: 'blur' },
+    { type: 'string', pattern: /^0x[0-9A-Fa-f]{16}$/, message: 'Not a valid Flow Address', trigger: 'blur' },
+  ]
 });
 
 // Functions
+
+function reset() {
+  formData.address = ""
+}
+
+function onSuccess() {
+  reset()
+  emits('refresh')
+}
 
 // Watchers and Lifecycle Hooks
 
 watch(() => props.reviewerInfo, (newVal) => {
   if (newVal) {
-    formEditMetadata.name = newVal?.name || ""
-    formEditMetadata.url = newVal?.url || ""
+    reset()
   }
 }, { immediate: true })
 
@@ -57,9 +63,9 @@ watch(() => props.reviewerInfo, (newVal) => {
 
 <template>
   <NForm
-    ref="formEditMetadataRef"
+    ref="formRef"
     size="large"
-    :model="formEditMetadata"
+    :model="formData"
     :rules="rules"
     :disabled="isSending"
     :label-placement="!isNotMobile ? 'top' : 'left'"
@@ -76,32 +82,16 @@ watch(() => props.reviewerInfo, (newVal) => {
       :x-gap="12"
     >
       <NFormItemGi
-        :span="1"
-        path="name"
+        :span="3"
+        path="address"
       >
         <template #label>
-          <span class="text-sm text-gray-400">Name</span>
+          <span class="text-sm text-gray-400">Maintainer</span>
         </template>
         <NInput
           size="small"
-          v-model:value="formEditMetadata.name"
-          placeholder="Reviewer Name"
-          :input-props="{
-            autocomplete: 'off',
-          }"
-        />
-      </NFormItemGi>
-      <NFormItemGi
-        :span="2"
-        path="url"
-      >
-        <template #label>
-          <span class="text-sm text-gray-400">Website</span>
-        </template>
-        <NInput
-          size="small"
-          v-model:value="formEditMetadata.url"
-          placeholder="Reviewer Website URL"
+          v-model:value="formData.address"
+          placeholder="Input Flow Address"
           :input-props="{
             autocomplete: 'off',
           }"
@@ -111,11 +101,10 @@ watch(() => props.reviewerInfo, (newVal) => {
         :span="3"
         :show-feedback="false"
       >
-        <FormSubmitUpdateReviewMetadata
+        <FormSubmitAddMaintainer
           :reviewer-info="reviewerInfo"
-          :name="formEditMetadata.name"
-          :url="formEditMetadata.url"
-          @success="emits('refresh')"
+          :address="formData.address"
+          @success="onSuccess"
         />
       </NFormItemGi>
     </NGrid>

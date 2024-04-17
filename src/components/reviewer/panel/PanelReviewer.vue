@@ -3,7 +3,7 @@ import { ref, reactive, computed, inject, watch } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import {
   NCollapseTransition, NSwitch,
-  NForm, NGrid, NFormItemGi, NInput, type FormInst, type FormRules,
+  NDivider,
 } from 'naive-ui';
 import { getReviewerInfo } from '@shared/flow/action/scripts';
 import { FlowSrvKey } from '@shared/flow/utilitites';
@@ -13,6 +13,7 @@ import { useGlobalAccount, useSendingTransaction } from '@components/shared';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import FormReviewerMetadata from '@components/reviewer/form/FormReviewerMetadata.vue';
+import FormAddMaintainer from '@components/reviewer/form/FormAddMaintainer.vue';
 
 const props = defineProps<{
   reviewer?: string
@@ -42,6 +43,7 @@ async function loadReviewerMetadata() {
 }
 
 async function refresh() {
+  showEdit.value = false
   isFirstLoading.value = true
   // load reviewer metadata
   await loadReviewerMetadata()
@@ -61,9 +63,7 @@ watch(acctName, refresh, { immediate: true })
   >
     <div class="flex items-center justify-between gap-2">
       <div class="flex flex-wrap items-center gap-2 italic text-gray-400/60 font-semibold">
-        <h2 class="text-lg">
-          Edit as Reviewer
-        </h2>
+        <h2 class="text-lg">Reviewer</h2>
         <ElementAddressBrowserLink
           :address="reviewer"
           :short="false"
@@ -77,7 +77,7 @@ watch(acctName, refresh, { immediate: true })
           <span class="text-xs">Edit</span>
         </template>
         <template #unchecked>
-          <span class="text-xs">View</span>
+          <span class="text-xs">More</span>
         </template>
       </NSwitch>
     </div>
@@ -104,7 +104,25 @@ watch(acctName, refresh, { immediate: true })
       </ElementWrapper>
     </div>
     <NCollapseTransition v-else-if="showEdit">
+      <NDivider
+        title-placement="left"
+        class="!my-3"
+      >
+        <span class="text-xs italic text-gray-500">Edit Reviewer Metadata</span>
+      </NDivider>
       <FormReviewerMetadata
+        :reviewer-info="reviewerInfo"
+        @refresh="refresh"
+      />
+      <NDivider
+        v-if="reviewerInfo?.address == acctName"
+        title-placement="left"
+        class="!my-3"
+      >
+        <span class="text-xs italic text-gray-500">Add Maintainers</span>
+      </NDivider>
+      <FormAddMaintainer
+        v-if="reviewerInfo?.address == acctName"
         :reviewer-info="reviewerInfo"
         @refresh="refresh"
       />
