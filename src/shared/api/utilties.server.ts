@@ -5,7 +5,7 @@ import type {
   TokenList,
   TokenTag,
 } from "@shared/flow/entities";
-import type { FilterType } from "@shared/flow/enums";
+import { FilterType } from "@shared/flow/enums";
 import { exportTokenInfo, isValidFlowAddress } from "@shared/flow/utilitites";
 import { executeOrLoadFromRedis } from "@shared/redis";
 
@@ -32,6 +32,7 @@ export async function queryTokenListUsingCache(
 
   let currentPage = Math.max(Math.abs(pagination?.page ?? 0), 0);
   let isAllLoaded = false;
+  let totalAmount = -1;
 
   while (!isAllLoaded) {
     const tokenRequestKey = `token-list/?reviewer=${reviewer}&filter=${filter}&page=${currentPage}&limit=${currentLimit}`;
@@ -39,6 +40,12 @@ export async function queryTokenListUsingCache(
       tokenRequestKey,
       queryTokenList(currentPage, currentLimit, reviewer, filter),
     );
+    if (ret.total === 0) {
+      break;
+    }
+    if (totalAmount === -1) {
+      totalAmount = ret.total;
+    }
     tokens.push(
       ...(ret.list
         .map(exportTokenInfo)
@@ -105,6 +112,8 @@ export async function queryTokenListUsingCache(
     tags: defaultTags,
     timestamp: new Date(),
     tokens,
+    totalAmount: tokens.length,
+    filterType: FilterType[filter],
     version: {
       major: 1,
       minor: 0,

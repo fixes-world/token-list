@@ -111,6 +111,8 @@ export interface TokenList {
   tags: Record<string, TokenTag>;
   timestamp: Date;
   tokens: ExportedTokenInfo[];
+  totalAmount: number;
+  filterType: string;
   version: {
     major: number;
     minor: number;
