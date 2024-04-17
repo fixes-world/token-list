@@ -67,7 +67,7 @@ const rules = ref<FormRules>({
     "balance": { required: true, message: 'Balance is required', trigger: ['change'] },
   },
   display: {
-    logo: { required: true, message: 'Logo is required', trigger: 'change' },
+    logo: { required: true, message: 'Token Icon is required', trigger: ['change', 'blur'] },
     symbol: [
       { required: true, message: 'Symbol is required', trigger: 'blur' },
       { type: 'string', pattern: /^[A-Z][A-Z0-9]{2,7}$/, message: 'Please Enter 3~8 Uppercase Letters.', trigger: ['input', 'blur'] },
@@ -277,6 +277,20 @@ watch(() => props.ft, async (ft, oldFt) => {
             v-model:value="formData.display.name"
             placeholder="Display Name"
             :input-props="{ autocomplete: 'off' }"
+          />
+        </NFormItemGi>
+        <NFormItemGi
+          :span="6"
+          path="display.logo"
+        >
+          <template #label>
+            <span class="text-sm text-gray-500">Icon</span>
+          </template>
+          <NInput
+            size="small"
+            v-model:value="imageUrl"
+            placeholder="Token Icon"
+            :input-props="{ autocomplete: 'off', type: 'url' }"
           />
         </NFormItemGi>
         <NFormItemGi

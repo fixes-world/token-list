@@ -518,12 +518,6 @@ access(all) contract FTViewUtils {
         access(all) view
         fun getLogos(): MetadataViews.Medias {
             let medias: [MetadataViews.Media] = []
-            if self.metadata["logo"] != nil {
-                medias.append(MetadataViews.Media(
-                    file: MetadataViews.HTTPFile(url: self.metadata["logo"]!),
-                    mediaType: "image/*"
-                ))
-            }
             if self.metadata["logo:png"] != nil {
                 medias.append(MetadataViews.Media(
                     file: MetadataViews.HTTPFile(url: self.metadata["logo:png"]!),
@@ -540,6 +534,12 @@ access(all) contract FTViewUtils {
                 medias.append(MetadataViews.Media(
                     file: MetadataViews.HTTPFile(url: self.metadata["logo:jpg"]!),
                     mediaType: "image/jpeg"
+                ))
+            }
+            if self.metadata["logo"] != nil {
+                medias.append(MetadataViews.Media(
+                    file: MetadataViews.HTTPFile(url: self.metadata["logo"]!),
+                    mediaType: "image/*"
                 ))
             }
             // add default icon
