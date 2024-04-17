@@ -95,6 +95,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
               ref="tokenListRef"
               class="flex-none"
               v-model:ft="currentToken"
+              :reviewer="addrStatus.reviewerAddr"
             />
             <div class="flex-auto flex flex-col">
               <PanelReviewer :reviewer="addrStatus.reviewerAddr" />

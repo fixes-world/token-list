@@ -56,6 +56,7 @@ fun main(
         totalAmt = registry.getFTEntriesAmount()
         ftTypes = registry.getFTEntries(page, size)
     }
+    log("Page:".concat(page.toString()).concat(" Size:").concat(size.toString()).concat(" Reviewer:").concat(reviewer?.toString() ?? "").concat(" Total:").concat(totalAmt.toString()))
 
     // load token view
     for ftType in ftTypes {

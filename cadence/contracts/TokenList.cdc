@@ -201,6 +201,7 @@ access(all) contract TokenList {
                 reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
             }
             if let addr = reviewerAddr {
+                log("Reviewer: ".concat(addr.toString()))
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     if let ftDisplayRef = reviewerRef.borrowFTDisplayReader(self.getTokenType()) {
                         let socials = retFTDisplay?.socials ?? {}
