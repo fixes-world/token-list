@@ -100,7 +100,9 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             />
             <div class="flex-auto flex flex-col">
               <PanelReviewer :reviewer="addrStatus.reviewerAddr" />
-              <NDivider class="!mt-4 !mb-6" />
+              <NDivider class="!mt-4 !mb-6">
+                <span class="text-sm italic font-bold text-gray-400/60">Token Metadata Editor</span>
+              </NDivider>
               <p
                 v-if="!currentToken"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
