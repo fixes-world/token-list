@@ -11,6 +11,6 @@ interface ImportMeta {
 
 declare namespace App {
   interface Locals {
-    // TODO: Define your own type
+    isAPIEndpoint: boolean;
   }
 }
