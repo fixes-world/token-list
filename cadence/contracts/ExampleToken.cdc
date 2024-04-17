@@ -1,8 +1,9 @@
 import "FungibleToken"
 import "MetadataViews"
+import "ViewResolver"
 import "FungibleTokenMetadataViews"
 
-pub contract ExampleToken: FungibleToken {
+pub contract ExampleToken: FungibleToken, ViewResolver {
 
     /// Total supply of ExampleTokens in existence
     pub var totalSupply: UFix64
@@ -98,11 +99,7 @@ pub contract ExampleToken: FungibleToken {
         ///         developers to know which parameter to pass to the resolveView() method.
         ///
         pub fun getViews(): [Type] {
-            return [
-                Type<FungibleTokenMetadataViews.FTView>(),
-                Type<FungibleTokenMetadataViews.FTDisplay>(),
-                Type<FungibleTokenMetadataViews.FTVaultData>()
-            ]
+            return ExampleToken.getViews()
         }
 
         /// The way of getting a Metadata View out of the ExampleToken
@@ -111,45 +108,7 @@ pub contract ExampleToken: FungibleToken {
         /// @return A structure representing the requested view.
         ///
         pub fun resolveView(_ view: Type): AnyStruct? {
-            switch view {
-                case Type<FungibleTokenMetadataViews.FTView>():
-                    return FungibleTokenMetadataViews.FTView(
-                        ftDisplay: self.resolveView(Type<FungibleTokenMetadataViews.FTDisplay>()) as! FungibleTokenMetadataViews.FTDisplay?,
-                        ftVaultData: self.resolveView(Type<FungibleTokenMetadataViews.FTVaultData>()) as! FungibleTokenMetadataViews.FTVaultData?
-                    )
-                case Type<FungibleTokenMetadataViews.FTDisplay>():
-                    let media = MetadataViews.Media(
-                        file: MetadataViews.HTTPFile(
-                            url: "https://assets.website-files.com/5f6294c0c7a8cdd643b1c820/5f6294c0c7a8cda55cb1c936_Flow_Wordmark.svg"
-                        ),
-                        mediaType: "image/svg+xml"
-                    )
-                    let medias = MetadataViews.Medias([media])
-                    return FungibleTokenMetadataViews.FTDisplay(
-                        name: "Example Fungible Token",
-                        symbol: "EFT",
-                        description: "This fungible token is used as an example to help you develop your next FT #onFlow.",
-                        externalURL: MetadataViews.ExternalURL("https://example-ft.onflow.org"),
-                        logos: medias,
-                        socials: {
-                            "twitter": MetadataViews.ExternalURL("https://twitter.com/flow_blockchain")
-                        }
-                    )
-                case Type<FungibleTokenMetadataViews.FTVaultData>():
-                    return FungibleTokenMetadataViews.FTVaultData(
-                        storagePath: ExampleToken.VaultStoragePath,
-                        receiverPath: ExampleToken.ReceiverPublicPath,
-                        metadataPath: ExampleToken.VaultPublicPath,
-                        providerPath: /private/exampleTokenVault,
-                        receiverLinkedType: Type<&ExampleToken.Vault{FungibleToken.Receiver}>(),
-                        metadataLinkedType: Type<&ExampleToken.Vault{FungibleToken.Balance, MetadataViews.Resolver}>(),
-                        providerLinkedType: Type<&ExampleToken.Vault{FungibleToken.Provider}>(),
-                        createEmptyVaultFunction: (fun (): @ExampleToken.Vault {
-                            return <-ExampleToken.createEmptyVault()
-                        })
-                    )
-            }
-            return nil
+            return ExampleToken.resolveView(view)
         }
     }
 
@@ -162,6 +121,66 @@ pub contract ExampleToken: FungibleToken {
     ///
     pub fun createEmptyVault(): @Vault {
         return <-create Vault(balance: 0.0)
+    }
+
+    /// The way of getting all the Metadata Views implemented by ExampleToken
+    ///
+    /// @return An array of Types defining the implemented views. This value will be used by
+    ///         developers to know which parameter to pass to the resolveView() method.
+    ///
+    pub fun getViews(): [Type] {
+        return [
+            Type<FungibleTokenMetadataViews.FTView>(),
+            Type<FungibleTokenMetadataViews.FTDisplay>(),
+            Type<FungibleTokenMetadataViews.FTVaultData>()
+        ]
+    }
+
+    /// The way of getting a Metadata View out of the ExampleToken
+    ///
+    /// @param view: The Type of the desired view.
+    /// @return A structure representing the requested view.
+    ///
+    pub fun resolveView(_ view: Type): AnyStruct? {
+        switch view {
+            case Type<FungibleTokenMetadataViews.FTView>():
+                return FungibleTokenMetadataViews.FTView(
+                    ftDisplay: self.resolveView(Type<FungibleTokenMetadataViews.FTDisplay>()) as! FungibleTokenMetadataViews.FTDisplay?,
+                    ftVaultData: self.resolveView(Type<FungibleTokenMetadataViews.FTVaultData>()) as! FungibleTokenMetadataViews.FTVaultData?
+                )
+            case Type<FungibleTokenMetadataViews.FTDisplay>():
+                let media = MetadataViews.Media(
+                    file: MetadataViews.HTTPFile(
+                        url: "https://assets.website-files.com/5f6294c0c7a8cdd643b1c820/5f6294c0c7a8cda55cb1c936_Flow_Wordmark.svg"
+                    ),
+                    mediaType: "image/svg+xml"
+                )
+                let medias = MetadataViews.Medias([media])
+                return FungibleTokenMetadataViews.FTDisplay(
+                    name: "Example Fungible Token",
+                    symbol: "EFT",
+                    description: "This fungible token is used as an example to help you develop your next FT #onFlow.",
+                    externalURL: MetadataViews.ExternalURL("https://example-ft.onflow.org"),
+                    logos: medias,
+                    socials: {
+                        "twitter": MetadataViews.ExternalURL("https://twitter.com/flow_blockchain")
+                    }
+                )
+            case Type<FungibleTokenMetadataViews.FTVaultData>():
+                return FungibleTokenMetadataViews.FTVaultData(
+                    storagePath: ExampleToken.VaultStoragePath,
+                    receiverPath: ExampleToken.ReceiverPublicPath,
+                    metadataPath: ExampleToken.VaultPublicPath,
+                    providerPath: /private/exampleTokenVault,
+                    receiverLinkedType: Type<&ExampleToken.Vault{FungibleToken.Receiver}>(),
+                    metadataLinkedType: Type<&ExampleToken.Vault{FungibleToken.Balance, MetadataViews.Resolver}>(),
+                    providerLinkedType: Type<&ExampleToken.Vault{FungibleToken.Provider}>(),
+                    createEmptyVaultFunction: (fun (): @ExampleToken.Vault {
+                        return <-ExampleToken.createEmptyVault()
+                    })
+                )
+        }
+        return nil
     }
 
     pub resource Administrator {
