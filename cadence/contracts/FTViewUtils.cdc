@@ -206,12 +206,15 @@ access(all) contract FTViewUtils {
         access(all)
         let comments: [ReviewComment]
         access(all)
+        let tags: [String]
+        access(all)
         var evalRank: Evaluation
 
         init(
             _ rank: Evaluation,
         ) {
             self.evalRank = rank
+            self.tags = []
             self.comments = []
         }
 
@@ -229,6 +232,15 @@ access(all) contract FTViewUtils {
         access(all)
         fun addComment(_ comment: String, _ by: Address) {
             self.comments.append(ReviewComment(comment, by))
+        }
+
+        /// Add a new tag to the review
+        ///
+        access(all)
+        fun addTag(_ tag: String) {
+            if !self.tags.contains(tag) {
+                self.tags.append(tag)
+            }
         }
     }
 

@@ -104,19 +104,19 @@ access(all) contract TokenList {
         fun getVaultData(_ reviewer: Address?): FTViewUtils.FTVaultDataWithSource?
         /// Check if the Fungible Token is reviewed by some one
         access(all) view
-        fun isReviewedBy(_ reviewerId: UInt64): Bool
+        fun isReviewedBy(_ reviewer: Address): Bool
         /// Get the Fungible Token Review
         access(all) view
-        fun getFTReview(_ reviewerId: UInt64): FTViewUtils.FTReview?
+        fun getFTReview(_ reviewer: Address): FTViewUtils.FTReview?
         // ----- View Methods -----
         /// Create an empty vault for the FT
         access(all)
         fun createEmptyVault(): @FungibleToken.Vault
         // ----- Internal Methods: Used by Reviewer -----
         access(contract)
-        fun addRewiew(_ reviewerId: UInt64, _ review: FTViewUtils.FTReview)
+        fun addRewiew(_ reviewer: Address, _ review: FTViewUtils.FTReview)
         access(contract)
-        fun borrowReviewRef(_ reviewerId: UInt64): &FTViewUtils.FTReview?
+        fun borrowReviewRef(_ reviewer: Address): &FTViewUtils.FTReview?
     }
 
     /// Resource for the Fungible Token Entry
@@ -124,9 +124,9 @@ access(all) contract TokenList {
     access(all) resource FungibleTokenEntry: FTEntryInterface {
         access(all)
         let identity: FTViewUtils.FTIdentity
-        // ReviewerId => FTReview
+        // Reviewer => FTReview
         access(self)
-        let reviewers: {UInt64: FTViewUtils.FTReview}
+        let reviewers: {Address: FTViewUtils.FTReview}
         // view resolver
         access(all)
         var viewResolver: @{MetadataViews.Resolver}?
@@ -174,15 +174,15 @@ access(all) contract TokenList {
         /// Check if the Fungible Token is reviewed by some one
         ///
         access(all) view
-        fun isReviewedBy(_ reviewerId: UInt64): Bool {
-            return self.reviewers[reviewerId] != nil
+        fun isReviewedBy(_ reviewer: Address): Bool {
+            return self.reviewers[reviewer] != nil
         }
 
         /// Get the Fungible Token Review
         ///
         access(all) view
-        fun getFTReview(_ reviewerId: UInt64): FTViewUtils.FTReview? {
-            return self.reviewers[reviewerId]
+        fun getFTReview(_ reviewer: Address): FTViewUtils.FTReview? {
+            return self.reviewers[reviewer]
         }
 
         /// Get the display metadata of the FT
@@ -307,19 +307,19 @@ access(all) contract TokenList {
         /// Add a new review to the FT
         ///
         access(contract)
-        fun addRewiew(_ reviewerId: UInt64, _ review: FTViewUtils.FTReview) {
+        fun addRewiew(_ reviewer: Address, _ review: FTViewUtils.FTReview) {
             pre {
-                self.reviewers[reviewerId] == nil:
+                self.reviewers[reviewer] == nil:
                     "Reviewer already exists"
             }
-            self.reviewers[reviewerId] = review
+            self.reviewers[reviewer] = review
         }
 
         /// Borrow the review reference
         ///
         access(contract)
-        fun borrowReviewRef(_ reviewerId: UInt64): &FTViewUtils.FTReview? {
-            return &self.reviewers[reviewerId] as &FTViewUtils.FTReview?
+        fun borrowReviewRef(_ reviewer: Address): &FTViewUtils.FTReview? {
+            return &self.reviewers[reviewer] as &FTViewUtils.FTReview?
         }
 
         /// Borrow the View Resolver
@@ -467,10 +467,11 @@ access(all) contract TokenList {
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
-            if let reviewRef = entryRef.borrowReviewRef(self.uuid) {
+            let reviewerAddr = self.getAddress()
+            if let reviewRef = entryRef.borrowReviewRef(reviewerAddr) {
                 reviewRef.updateEvaluationRank(rank)
             } else {
-                entryRef.addRewiew(self.uuid, FTViewUtils.FTReview(rank))
+                entryRef.addRewiew(reviewerAddr, FTViewUtils.FTReview(rank))
             }
             // update reviewed status locally
             self.reviewed[type] = rank
@@ -482,7 +483,7 @@ access(all) contract TokenList {
                 identity.address,
                 identity.contractName,
                 rank.rawValue,
-                self.owner?.address ?? panic("Owner not found")
+                reviewerAddr
             )
         }
 
@@ -494,12 +495,12 @@ access(all) contract TokenList {
             let entryRef = registery.borrowFungibleTokenEntry(type)
                 ?? panic("Failed to load the Fungible Token Entry")
 
-            let reviewerAddr = self.owner?.address ?? panic("Owner not found")
-            if let reviewRef = entryRef.borrowReviewRef(self.uuid) {
+            let reviewerAddr = self.getAddress()
+            if let reviewRef = entryRef.borrowReviewRef(reviewerAddr) {
                 reviewRef.addComment(comment, reviewerAddr)
             } else {
-                entryRef.addRewiew(self.uuid, FTViewUtils.FTReview(FTViewUtils.Evaluation.UNVERIFIED))
-                entryRef.borrowReviewRef(self.uuid)!.addComment(comment, reviewerAddr)
+                entryRef.addRewiew(reviewerAddr, FTViewUtils.FTReview(FTViewUtils.Evaluation.UNVERIFIED))
+                entryRef.borrowReviewRef(reviewerAddr)!.addComment(comment, reviewerAddr)
             }
 
             let identity = entryRef.getIdentity()

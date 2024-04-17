@@ -72,10 +72,13 @@ fun main(
                     receiverPath: data.vaultData.receiverPath,
                 )
             }
+            let review = reviewer != nil
+                ? ftEntry.getFTReview(reviewer!)
+                : nil
             list.append(FTViewUtils.StandardTokenView(
                 identity: identity,
                 decimals: 8,
-                tags: [],
+                tags: review?.tags ?? [],
                 dataSource: source,
                 paths: paths,
                 display: ftEntry.getDisplay(reviewer),
