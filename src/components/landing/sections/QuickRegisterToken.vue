@@ -46,9 +46,9 @@ onMounted(() => {
 
 <template>
   <VueWrapper>
-    <div :class="[
-      'mx-a max-w-xl w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',
-      'flex flex-col items-center justify-center gap-4 md:gap-6'
+    <div :class="['relative mx-a max-w-xl',
+      'flex flex-col items-center justify-center gap-4 md:gap-6',
+      'w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',
     ]">
       <NInput
         passively-activated
@@ -88,6 +88,20 @@ onMounted(() => {
         :token="currentFTContract"
         @success="refresh"
       />
+      <p class="px-4 text-xs text-gray-400">
+        <span class="i-carbon:warning w-3 h-3" />
+        If the fungible token contract is implemented with
+        <a
+          href="https://github.com/onflow/flow-nft/blob/master/contracts/ViewResolver.cdc"
+          class="highlight"
+          target="_blank"
+        >ViewResolver</a> interface,
+        the metadata of <a
+          href="https://github.com/onflow/flow-ft/blob/master/contracts/FungibleTokenMetadataViews.cdc"
+          class="highlight"
+          target="_blank"
+        >FungibleTokenMetadataViews</a> will be automatically fetched from the contract.
+      </p>
     </div>
   </VueWrapper>
 </template>

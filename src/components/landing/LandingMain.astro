@@ -3,6 +3,7 @@ import LandingSlogan from "./sections/LandingSlogan.astro";
 import SectionWrapper from "@components/partials/SectionWrapper.astro";
 import QuickRegisterToken from "./sections/QuickRegisterToken.vue";
 import HowToUse from "./sections/HowToUse.astro";
+import FullList from "./sections/FullList.vue";
 ---
 
 <SectionWrapper>
@@ -14,4 +15,6 @@ import HowToUse from "./sections/HowToUse.astro";
 <SectionWrapper title="How to use">
   <HowToUse />
 </SectionWrapper>
-<SectionWrapper title="Full List"> Section 4 </SectionWrapper>
+<SectionWrapper title="Full List">
+  <FullList client:only="vue" />
+</SectionWrapper>

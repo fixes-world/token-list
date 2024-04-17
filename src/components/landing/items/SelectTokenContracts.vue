@@ -152,19 +152,21 @@ defineExpose({
         description="Failed to fetch FT Contracts automatically"
         class="my-6"
       />
-      <p class="mb-2 text-gray-400 italic font-semibold">Try click the contract name to load again</p>
-      <div class="flex flex-wrap items-center gap-2">
-        <NTag
-          v-for="name in allContractNames"
-          type="primary"
-          size="small"
-          round
-          class="!cursor-pointer"
-          @click="loadFTStatus(address, name)"
-        >
-          {{ name }}
-        </NTag>
-      </div>
+      <template v-if="allContractNames.length > 0">
+        <p class="mb-2 text-gray-400 italic font-semibold">Try click the contract name to load again</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <NTag
+            v-for="name in allContractNames"
+            type="primary"
+            size="small"
+            round
+            class="!cursor-pointer"
+            @click="loadFTStatus(address, name)"
+          >
+            {{ name }}
+          </NTag>
+        </div>
+      </template>
     </template>
     <NSelect
       v-else
