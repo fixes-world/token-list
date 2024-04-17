@@ -3,6 +3,11 @@
 interface ImportMetaEnv {
   readonly PUBLIC_FLOW_NETWORK: string;
   readonly PUBLIC_NFTSTORAGE_KEY: string;
+
+  // Redis
+  readonly KV_URL: string;
+  readonly KV_REST_API_URL: string;
+  readonly KV_REST_API_TOKEN: string;
 }
 
 interface ImportMeta {
