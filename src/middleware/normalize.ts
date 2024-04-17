@@ -31,9 +31,7 @@ export const normalize = defineMiddleware(async ({ locals, request }, next) => {
     }
   } finally {
     if (!response?.ok) {
-      console.error(
-        `Invalid response: ${response?.status}, body: ${response?.body}`,
-      );
+      console.warn(`Invalid response: ${response?.status}`);
     } else {
       if (locals.isAPIEndpoint && request.method === "GET") {
         // ensure all response has cache control

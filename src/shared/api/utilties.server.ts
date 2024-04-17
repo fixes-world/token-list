@@ -39,7 +39,11 @@ export async function queryTokenListUsingCache(
       tokenRequestKey,
       queryTokenList(currentPage, currentLimit, reviewer, filter),
     );
-    tokens.push(...ret.list.map(exportTokenInfo));
+    tokens.push(
+      ...(ret.list
+        .map(exportTokenInfo)
+        .filter((x) => x !== undefined) as ExportedTokenInfo[]),
+    );
     if (isLoadAll && ret.list.length !== 0) {
       currentPage += 1;
     } else {

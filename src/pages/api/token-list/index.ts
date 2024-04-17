@@ -14,6 +14,8 @@ export const GET: APIRoute = async ({ params, request }) => {
         }
       : undefined;
   return new Response(
-    JSON.stringify(queryTokenListUsingCache(undefined, filter, pagination)),
+    JSON.stringify(
+      await queryTokenListUsingCache(undefined, filter, pagination),
+    ),
   );
 };

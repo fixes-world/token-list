@@ -1,4 +1,3 @@
-import Exception from "@shared/exception";
 import type { FlowService } from "@shared/flow/flow.service";
 import type { InjectionKey } from "vue";
 import type { ExportedTokenInfo, StandardTokenView } from "./entities";
@@ -12,7 +11,7 @@ export const FlowSrvKey = Symbol("flowSrv") as InjectionKey<FlowService>;
  * Check if the address is a valid Flow address
  */
 export function isValidFlowAddress(addr: string) {
-  const regExp = /0x[a-fA-F0-9]{16}/gi;
+  const regExp = /^0x[a-fA-F0-9]{16}$/gi;
   return regExp.test(addr);
 }
 
@@ -20,12 +19,14 @@ export function isValidFlowAddress(addr: string) {
  * Export ft info to a standard TokenList format
  * @param ft
  */
-export function exportTokenInfo(ft: StandardTokenView): ExportedTokenInfo {
+export function exportTokenInfo(
+  ft: StandardTokenView,
+): ExportedTokenInfo | undefined {
   if (ft.path === undefined) {
-    throw new Exception(400, "The token path is missing");
+    return undefined;
   }
   if (ft.display === undefined) {
-    throw new Exception(400, "The token display is missing");
+    return undefined;
   }
   const extensions: Record<string, string> = ft.display?.display?.social ?? {};
   if (typeof ft.display.display.externalURL === "string") {
@@ -43,8 +44,8 @@ export function exportTokenInfo(ft: StandardTokenView): ExportedTokenInfo {
     path: ft.path,
     symbol: ft.display.display.symbol,
     name: ft.display.display.name,
-    decimals: ft.decimals,
     description: ft.display?.display?.description ?? "",
+    decimals: ft.decimals,
     logoURI: ft.display.display.logos[0].uri,
     tags: ft.tags ?? [],
     extensions,

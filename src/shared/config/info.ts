@@ -3,17 +3,16 @@ const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 // TODO: Update contract address
 const contractAddr = network === "testnet" ? "0x1" : "0x2";
 
-const baseUrl = import.meta.env.SITE ?? "http://localhost:4321";
-
 export default {
   title: "TokenList",
   titleDesc: "FungibleToken List #onFlow",
   description:
     "TokenList is a platform for registering Fungible Tokens on Flow Blockchain. It supports permissionless on-chain registration of any Flow FT with on-chain MetadataViews and provides an API endpoint to expose the Uniswap standard token list JSON file.",
   author: "FIXeS World",
-  url: baseUrl,
   version: "0.1.0",
-  icon: import.meta.env.PUBLIC_ICON ?? `${baseUrl}/apple-touch-icon.png`,
+  url: import.meta.env.SITE ?? "http://localhost:4321",
+  icon:
+    import.meta.env.PUBLIC_ICON ?? "https://fixes.world/apple-touch-icon.png",
   banner: import.meta.env.PUBLIC_BANNER ?? "https://i.imgur.com/Wdy3GG7.jpg",
   linktree: import.meta.env.PUBLIC_LINKTREE ?? "https://linktr.ee/fixes.world",
   twitter: import.meta.env.PUBLIC_TWITTER ?? "https://x.com/fixesWorld",

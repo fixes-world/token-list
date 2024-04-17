@@ -4,7 +4,10 @@ import appInfo from "@shared/config/info";
 const appKey = "TokenListAPI";
 
 const isRedisCacheEnabled =
-  import.meta.env.KV_REST_API_URL && import.meta.env.KV_REST_API_TOKEN;
+  import.meta.env.PROD &&
+  import.meta.env.SSR &&
+  import.meta.env.KV_REST_API_URL &&
+  import.meta.env.KV_REST_API_TOKEN;
 
 function getCacheKey(methodKey: string) {
   return `${appKey}:SERVICE_CACHE:${appInfo.network}:KEY_VALUE:${methodKey}`;
@@ -18,7 +21,12 @@ export function getRequestURLKey(request: Request) {
 }
 
 export async function loadRedisCached(methodKey: string) {
-  if (!isRedisCacheEnabled) return null;
+  if (!isRedisCacheEnabled) {
+    if (import.meta.env.PROD) {
+      console.warn("Redis cache is not enabled.");
+    }
+    return null;
+  }
 
   const redisKey = getCacheKey(methodKey);
   console.log("Request RedisKey - ", redisKey);
@@ -41,7 +49,12 @@ export async function executeOrLoadFromRedis<T>(
   methodPromise: Promise<T>,
   ttl?: number,
 ): Promise<T> {
-  if (!isRedisCacheEnabled) return await methodPromise;
+  if (!isRedisCacheEnabled) {
+    if (import.meta.env.PROD) {
+      console.warn("Redis cache is not enabled.");
+    }
+    return await methodPromise;
+  }
 
   const cachedResult = await loadRedisCached(methodKey);
 
@@ -49,13 +62,17 @@ export async function executeOrLoadFromRedis<T>(
   if (!cachedResult) {
     result = await methodPromise;
     const ttlValue = ttl ?? 60;
-    await kv.set<string>(
-      getCacheKey(methodKey),
-      typeof result === "string" ? result : JSON.stringify(result),
-      {
-        ex: ttlValue,
-      } /* ex: 1 min cache for all GET method with same methodKey */,
-    );
+    try {
+      await kv.set<string>(
+        getCacheKey(methodKey),
+        typeof result === "string" ? result : JSON.stringify(result),
+        {
+          ex: ttlValue,
+        } /* ex: 1 min cache for all GET method with same methodKey */,
+      );
+    } catch (e) {
+      console.error("Failed to cache result: ", e);
+    }
   } else {
     try {
       result = JSON.parse(cachedResult) as T;
