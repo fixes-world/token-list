@@ -67,10 +67,33 @@ onMounted(() => {
 <template>
   <VueWrapper>
     <div :class="[
-      'relative mx-a max-w-xl',
-      'flex flex-col items-center justify-center',
+  'relative mx-a max-w-xl min-h-[calc(100vh-40rem)]',
+  'flex flex-col items-center justify-start',
       'w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',
     ]">
+      <div class="w-full flex flex-col gap-2 text-xs">
+        <ElementWrapper
+          title="API Endpoint"
+          direction="auto"
+          position="left"
+        >
+          <span class="font-semibold">{{ endpointFull }}</span>
+        </ElementWrapper>
+        <ElementWrapper
+          title="Learn More"
+          direction="auto"
+          position="left"
+        >
+          <a
+            class="font-semibold highlight"
+            href="https://docs.fixes.world/concepts/token-list"
+            target="_blank"
+          >API Reference</a>
+        </ElementWrapper>
+      </div>
+      <NDivider title-placement="left">
+        <span class="text-xs italic text-gray-500">Sample Codes</span>
+      </NDivider>
       <NTabs
         type="line"
         display-directive="show:lazy"
@@ -109,29 +132,6 @@ onMounted(() => {
           />
         </NTabPane>
       </NTabs>
-      <NDivider title-placement="left">
-        <span class="text-xs italic text-gray-500">API Endpoint</span>
-      </NDivider>
-      <div class="w-full flex flex-col gap-2 text-xs">
-        <ElementWrapper
-          title="URL"
-          direction="auto"
-          position="left"
-        >
-          <span class="font-semibold">{{ endpointFull }}</span>
-        </ElementWrapper>
-        <ElementWrapper
-          title="Learn More"
-          direction="auto"
-          position="left"
-        >
-          <a
-            class="font-semibold highlight"
-            href="https://docs.fixes.world/concepts/token-list"
-            target="_blank"
-          >Reference</a>
-        </ElementWrapper>
-      </div>
     </div>
   </VueWrapper>
 </template>

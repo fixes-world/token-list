@@ -52,9 +52,7 @@ onMounted(async () => {
     <NSkeleton
       v-if="isFirstLoading"
       animated
-      text
-      :height="6"
-      round
+      height="10rem"
     />
     <NEmpty
       v-else-if="!tokenList"
