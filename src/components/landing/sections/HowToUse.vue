@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import { NTabs, NTabPane, NDivider, NCode } from 'naive-ui'
+import { NTabs, NTabPane, NDivider } from 'naive-ui'
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
@@ -11,7 +11,7 @@ const breakpoints = useBreakpoints(breakpointsTailwind)
 const isOnPCBrowser = breakpoints.greaterOrEqual('lg')
 
 // tabs
-type TabType = 'js' | 'python' | 'curl' | 'go'
+type TabType = 'js' | 'python' | 'curl'
 const currentTab = ref<TabType>('js')
 
 // Reactive Data
@@ -26,23 +26,27 @@ const endpointFull = computed(() => {
 })
 
 const javaScriptCode = computed(() => {
+  // The JavaScript Code to fetch the token list by GET method
   return `
-  let s = "a";
+const response = await fetch('${endpoint.value}')
+const tokenList = await response.json()
   `
 })
 
 const pythonCode = computed(() => {
+  // The Python Code to fetch the token list by GET method
   return `
+import requests
+
+response = requests.get('${endpoint.value}')
+token_list = response.json()
   `
 })
 
 const curlCode = computed(() => {
+  // The CURL Command to fetch the token list by GET method
   return `
-  `
-})
-
-const goCode = computed(() => {
-  return `
+curl -X GET '${endpoint.value}'
   `
 })
 
@@ -101,16 +105,6 @@ onMounted(() => {
           <CodeBlock
             language="bash"
             :code="curlCode"
-            :use-dark="false"
-          />
-        </NTabPane>
-        <NTabPane
-          name="go"
-          tab="Golang"
-        >
-          <CodeBlock
-            language="go"
-            :code="goCode"
             :use-dark="false"
           />
         </NTabPane>
