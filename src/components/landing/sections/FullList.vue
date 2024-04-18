@@ -46,6 +46,7 @@ onMounted(() => {
       <SelectReviewers />
       <NTabs
         type="line"
+        display-directive="show:lazy"
         v-model:value="currentTab"
         :size="isOnPCBrowser ? 'large' : 'medium'"
         :justify-content="isOnPCBrowser ? undefined : 'space-evenly'"
@@ -62,7 +63,7 @@ onMounted(() => {
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
           >JSON View</h2>
-          <PanelTokensJsonView />
+          <PanelTokensJsonView class="max-h-[calc(100vh-24rem)] overflow-x-auto overflow-y-scroll" />
         </NTabPane>
         <NTabPane name="listView">
           <template #tab>
@@ -76,7 +77,7 @@ onMounted(() => {
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
           >List View</h2>
-          <PanelTokensListView />
+          <PanelTokensListView class="max-h-[calc(100vh-24rem)] overflow-x-auto overflow-y-scroll" />
         </NTabPane>
       </NTabs>
     </div>

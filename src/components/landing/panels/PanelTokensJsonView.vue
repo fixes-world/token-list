@@ -63,10 +63,7 @@ onMounted(async () => {
       description="Failed to fetch the Token List"
       class="my-6"
     />
-    <div
-      v-else
-      class="max-h-[calc(100vh-24rem)] overflow-x-auto overflow-y-scroll"
-    >
+    <div v-else>
       <NCode
         v-if="tokenListJson"
         :hljs="hljs"

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import {
   useMessage,
-  NUpload, NUploadDragger, NImage,
+  NUpload, NUploadDragger,
   type UploadFileInfo, type UploadCustomRequestOptions
 } from 'naive-ui';
 import { NFTStorage } from "nft.storage";

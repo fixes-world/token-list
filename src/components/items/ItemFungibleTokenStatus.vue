@@ -43,7 +43,7 @@ const isHighlight = computed(() => {
         class="pointer-events-none"
         size="tiny"
         round
-        :type="item.isWithDisplay ? 'success' : 'default'"
+        :type="item.isWithDisplay ? 'warning' : 'default'"
         :bordered="!item.isWithDisplay ? false : true"
         :disabled="!item.isWithDisplay"
       >
@@ -55,7 +55,7 @@ const isHighlight = computed(() => {
         class="pointer-events-none"
         size="tiny"
         round
-        :type="item.isWithVaultData ? 'warning' : 'default'"
+        :type="item.isWithVaultData ? 'success' : 'default'"
         :bordered="!item.isWithVaultData ? false : true"
         :disabled="!item.isWithVaultData"
       >

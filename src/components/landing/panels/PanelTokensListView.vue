@@ -53,8 +53,10 @@ defineExpose({
       <ItemTokenInfo
         v-for="token in items"
         :key="`${token.identity.address}.${token.identity.contractName}`"
-        :token="token"
         class="w-full"
+        :token="token"
+        :hoverable="false"
+        :withIcon="true"
       />
     </ListWrapper>
   </div>
