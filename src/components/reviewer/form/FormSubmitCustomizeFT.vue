@@ -28,6 +28,28 @@ const vaultPath = computed(() => props.ft.path?.vault || props.paths?.vault)
 const receiverPath = computed(() => props.ft.path?.receiver || props.paths?.receiver)
 const balancePath = computed(() => props.ft.path?.balance || props.paths?.balance)
 
+const isChanged = computed(() => {
+  let isSocialSame = true
+  const socialArr = props.display?.social ?? []
+  const oldDict = props.ft.display?.display?.social ?? {}
+  for (let social of socialArr) {
+    if (oldDict[social.key] !== social.value) {
+      isSocialSame = false
+      break
+    }
+  }
+
+  return props.ft.display?.display?.name !== props.display?.name
+    || props.ft.display?.display?.symbol !== props.display?.symbol
+    || props.ft.display?.display?.description !== props.display?.description
+    || props.ft.display?.display?.externalURL !== props.display?.externalURL
+    || props.ft.display?.display?.logos?.[0]?.uri !== props.display?.logo
+    || !isSocialSame
+    || props.ft.path?.vault !== vaultPath.value
+    || props.ft.path?.receiver !== receiverPath.value
+    || props.ft.path?.balance !== balancePath.value
+})
+
 const isValidData = computed(() => {
   return !!acctName.value
     && !!props.display?.name
@@ -39,6 +61,7 @@ const isValidData = computed(() => {
 })
 
 const disableReason = computed(() => {
+  if (!isChanged.value) return "No changes"
   if (!acctName.value) return "No account name"
   if (!props.display?.symbol) return "No Token Symbol"
   if (!props.display?.name) return "No Display Name"
@@ -97,7 +120,7 @@ async function onCancel() {
     :without-cancel="true"
     :w-full="true"
     :method="onSubmit"
-    :disabled="!isValidData"
+    :disabled="!isValidData || !isChanged"
     :disabled-reason="disableReason"
     @success="onSuccess"
     @cancel="onCancel"

@@ -41,7 +41,7 @@ async function loadTokenList(page: number, size: number): Promise<QueryResult<St
 }
 
 async function reload() {
-  listWrapperRef.value?.reload()
+  await listWrapperRef.value?.reload()
 }
 
 // Watchers and Lifecycle

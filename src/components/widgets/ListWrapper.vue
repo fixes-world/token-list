@@ -34,17 +34,17 @@ const currentPage = computed<number>({
 const list = reactive<any[]>([])
 const totalAmount = ref<number>(0)
 
-async function loadMore() {
+async function loadMore(forceFirst = false) {
   isLoading.value = true
   const results = await props.loadMore(
-    currentPage.value,
+    forceFirst ? 0 : currentPage.value,
     loadingSize.value,
   )
   hasMore.value = results.list.length === loadingSize.value && currentPage.value * loadingSize.value < results.total
   totalAmount.value = results.total
   // update last start rank
   if (results.list.length > 0) {
-    currentPage.value = currentPage.value ? currentPage.value + 1 : 1
+    currentPage.value = currentPage.value && !forceFirst ? currentPage.value + 1 : 1
     list.push(...results.list)
   }
   isLoading.value = false
@@ -52,9 +52,8 @@ async function loadMore() {
 
 async function reload() {
   isFirstLoading.value = true
-  currentPage.value = 0
   list.splice(0, list.length)
-  await loadMore()
+  await loadMore(true)
   isFirstLoading.value = false
 }
 
@@ -101,7 +100,7 @@ defineExpose({
       size="large"
       :loading="isLoading"
       :disabled="isLoading"
-      @click="loadMore"
+      @click="() => loadMore()"
     >
       Load More
     </NButton>
