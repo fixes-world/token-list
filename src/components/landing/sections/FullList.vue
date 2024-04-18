@@ -63,7 +63,7 @@ onMounted(() => {
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
           >JSON View</h2>
-          <PanelTokensJsonView class="max-h-[calc(100vh-24rem)] overflow-x-auto overflow-y-scroll" />
+          <PanelTokensJsonView class="max-h-[calc(100vh-24rem)]" />
         </NTabPane>
         <NTabPane name="listView">
           <template #tab>
@@ -77,7 +77,7 @@ onMounted(() => {
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
           >List View</h2>
-          <PanelTokensListView class="max-h-[calc(100vh-24rem)] overflow-x-auto overflow-y-scroll" />
+          <PanelTokensListView class="max-h-[calc(100vh-24rem)]" />
         </NTabPane>
       </NTabs>
     </div>

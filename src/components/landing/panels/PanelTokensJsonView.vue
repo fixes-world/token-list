@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, inject, onMounted, watch } from 'vue';
 import { NSkeleton, NEmpty, NCode } from 'naive-ui'
-import hljs from 'highlight.js/lib/core';
-import json from 'highlight.js/lib/languages/json';
 
 import type { TokenList } from '@shared/flow/entities';
 import { FilterType } from '@shared/flow/enums';
 import { queryTokenListByAPI } from '@shared/api/utilties.client';
 
-hljs.registerLanguage('json', json);
+import CodeBlock from '@components/widgets/CodeBlock.vue';
 
 const props = withDefaults(defineProps<{
   reviewer?: string,
@@ -50,7 +48,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full rounded-2 overflow-x-auto overflow-y-scroll">
     <NSkeleton
       v-if="isFirstLoading"
       animated
@@ -63,15 +61,10 @@ onMounted(async () => {
       description="Failed to fetch the Token List"
       class="my-6"
     />
-    <div v-else>
-      <NCode
-        v-if="tokenListJson"
-        :hljs="hljs"
-        :code="tokenListJson"
-        language="json"
-        show-line-numbers
-        word-wrap
-      />
-    </div>
+    <CodeBlock
+      v-else-if="tokenListJson"
+      :code="tokenListJson"
+      language="json"
+    />
   </div>
 </template>

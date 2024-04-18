@@ -42,7 +42,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full overflow-x-auto overflow-y-scroll">
     <ListWrapper
       ref="listWrapperRef"
       emptyMessage="No Token Found"
