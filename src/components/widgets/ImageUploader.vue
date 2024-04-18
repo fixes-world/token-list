@@ -38,7 +38,7 @@ const fileRef = computed<UploadFileInfo | null>(() => {
   }
   return null
 });
-const fileList = ref<UploadFileInfo[] | undefined>(undefined)
+const fileList = ref<UploadFileInfo[]>([])
 
 // Funcations
 
@@ -93,7 +93,7 @@ function getIPFSUrl(ipfsHash: string) {
 }
 
 function resetDefaultList() {
-  fileList.value = fileRef.value ? [fileRef.value] : undefined
+  fileList.value = fileRef.value ? [fileRef.value] : []
 }
 
 function handleUploadChange (data: { fileList: UploadFileInfo[] }) {

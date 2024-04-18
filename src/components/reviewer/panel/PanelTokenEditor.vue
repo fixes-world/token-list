@@ -31,7 +31,6 @@ const emits = defineEmits<{
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isNotMobile = breakpoints.greaterOrEqual('md')
 
-const acctName = useGlobalAccount()
 const isSending = useSendingTransaction()
 
 const logos = computed<Media[]>(() => {
