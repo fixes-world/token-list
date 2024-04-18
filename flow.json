@@ -33,7 +33,8 @@
 		"FTViewUtils": {
 			"source": "./cadence/contracts/FTViewUtils.cdc",
 			"aliases": {
-				"emulator": "f8d6e0586b0a20c7"
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet": "b86f928a1fa7798e"
 			}
 		},
 		"FlowToken": {
@@ -87,7 +88,8 @@
 		"TokenList": {
 			"source": "./cadence/contracts/TokenList.cdc",
 			"aliases": {
-				"emulator": "f8d6e0586b0a20c7"
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet": "b86f928a1fa7798e"
 			}
 		},
 		"ViewResolver": {
@@ -101,7 +103,8 @@
 		"ViewResolvers": {
 			"source": "./cadence/contracts/ViewResolvers.cdc",
 			"aliases": {
-				"emulator": "f8d6e0586b0a20c7"
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet": "b86f928a1fa7798e"
 			}
 		}
 	},
@@ -299,6 +302,13 @@
 				"location": "mainnet-blackhole.pkey"
 			}
 		},
+		"testnet-admin": {
+			"address": "b86f928a1fa7798e",
+			"key": {
+				"type": "file",
+				"location": "testnet-admin.pkey"
+			}
+		},
 		"testnet-blackhole": {
 			"address": "ad26718c4b6b921b",
 			"key": {
@@ -327,6 +337,11 @@
 			]
 		},
 		"testnet": {
+			"testnet-admin": [
+				"FTViewUtils",
+				"ViewResolvers",
+				"TokenList"
+			],
 			"testnet-blackhole": [
 				"BlackHole"
 			]
