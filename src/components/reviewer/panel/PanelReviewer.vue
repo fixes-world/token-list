@@ -19,7 +19,6 @@ const props = defineProps<{
   reviewer?: string
 }>();
 
-const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
 const isSending = useSendingTransaction()
 

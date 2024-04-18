@@ -22,8 +22,6 @@ const emits = defineEmits<{
   (e: 'update:current', value?: TokenStatus): void;
 }>();
 
-const flowSrv = inject(FlowSrvKey);
-
 // Reactive Variables
 
 const isLoadingData = ref(false);

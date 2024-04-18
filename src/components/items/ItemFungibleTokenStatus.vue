@@ -3,6 +3,8 @@ import { computed, h, ref, inject, onMounted, watch, type VNodeChild } from 'vue
 import { NTag } from 'naive-ui';
 import type { TokenStatusBasic } from '@shared/flow/entities';
 
+import ItemHintLabel from "@components/items/ItemHintLabel.vue";
+
 const props = defineProps<{
   item?: TokenStatusBasic;
 }>();
@@ -39,30 +41,46 @@ const isHighlight = computed(() => {
       >
         <span class="px-1">Registered</span>
       </NTag>
-      <NTag
-        class="pointer-events-none"
-        size="tiny"
-        round
-        :type="item.isWithDisplay ? 'warning' : 'default'"
-        :bordered="!item.isWithDisplay ? false : true"
-        :disabled="!item.isWithDisplay"
-      >
-        <span :class="['px-1', { 'decoration-line-through': !item.isWithDisplay }]">
-          Display
-        </span>
-      </NTag>
-      <NTag
-        class="pointer-events-none"
-        size="tiny"
-        round
-        :type="item.isWithVaultData ? 'success' : 'default'"
-        :bordered="!item.isWithVaultData ? false : true"
-        :disabled="!item.isWithVaultData"
-      >
-        <span :class="['px-1', { 'decoration-line-through': !item.isWithVaultData }]">
-          Vault Info
-        </span>
-      </NTag>
+      <ItemHintLabel :with-warning-icon="false">
+        <NTag
+          class="pointer-events-none"
+          size="tiny"
+          round
+          :type="item.isWithDisplay ? 'warning' : 'default'"
+          :bordered="!item.isWithDisplay ? false : true"
+          :disabled="!item.isWithDisplay"
+        >
+          <span :class="['px-1', { 'decoration-line-through': !item.isWithDisplay }]">
+            Display
+          </span>
+        </NTag>
+        <template #hint>
+          <p class="text-xs">
+            <span v-if="!item.isWithDisplay">The display data is not found.</span>
+            <span v-else>The display data is available.</span>
+          </p>
+        </template>
+      </ItemHintLabel>
+      <ItemHintLabel :with-warning-icon="false">
+        <NTag
+          class="pointer-events-none"
+          size="tiny"
+          round
+          :type="item.isWithVaultData ? 'success' : 'default'"
+          :bordered="!item.isWithVaultData ? false : true"
+          :disabled="!item.isWithVaultData"
+        >
+          <span :class="['px-1', { 'decoration-line-through': !item.isWithVaultData }]">
+            Vault Info
+          </span>
+        </NTag>
+        <template #hint>
+          <p class="text-xs">
+            <span v-if="!item.isWithVaultData">The vault data is not found.</span>
+            <span v-else>The vault data is available.</span>
+          </p>
+        </template>
+      </ItemHintLabel>
     </div>
   </div>
   <span v-else />

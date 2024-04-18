@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, inject, onMounted, onBeforeUnmount } from "vue";
 import type { TransactionStatus } from "@onflow/typedefs";
-import { FlowSrvKey } from "@shared/flow/utilitites";
+import appInfo from "@shared/config/info";
+import { getFlowInstance } from '@shared/flow/flow.service.factory';
 import { NProgress } from 'naive-ui';
 
 const props = withDefaults(defineProps<{
@@ -54,8 +55,6 @@ const txidDisplay = computed(() => {
   return str.slice(0, 6) + "..." + str.slice(str.length - 6);
 });
 
-const flowSrv = inject(FlowSrvKey)
-
 let unsub: any;
 
 async function startSubscribe() {
@@ -64,7 +63,8 @@ async function startSubscribe() {
       `%cTX[${props.txid}]: ${getTxURL(props.txid)}`,
       "color:purple;font-weight:bold;font-family:monospace;"
     );
-    unsub = await flowSrv?.watchTransaction(
+    const flowSrv = await getFlowInstance();
+    unsub = await flowSrv.watchTransaction(
       props.txid,
       (status: TransactionStatus) => {
         if (typeof status.status === 'number') {
@@ -92,7 +92,7 @@ function stopSubscribe() {
 }
 
 function getTxURL(txId: string) {
-  const host = flowSrv?.network === 'testnet'
+  const host = appInfo.network === 'testnet'
     ? "https://testnet.flowdiver.io/tx/"
     : "https://www.flowdiver.io/tx/"
   return host + txId;

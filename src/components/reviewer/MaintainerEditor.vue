@@ -18,7 +18,6 @@ import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
 import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
 
-const flowSrv = inject(FlowSrvKey);
 const acctName = useGlobalAccount();
 
 // Reactive Variables

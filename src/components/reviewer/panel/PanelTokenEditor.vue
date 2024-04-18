@@ -31,7 +31,6 @@ const emits = defineEmits<{
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isNotMobile = breakpoints.greaterOrEqual('md')
 
-const flowSrv = inject(FlowSrvKey)
 const acctName = useGlobalAccount()
 const isSending = useSendingTransaction()
 

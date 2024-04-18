@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
-import { FlowSrvKey } from '@shared/flow/utilitites';
+import { NButton } from "naive-ui"
+import { getFlowInstance } from '@shared/flow/flow.service.factory';
 import {
   useCurrentFlowUser,
 } from '@components/shared'
-import { NButton } from "naive-ui"
 import FlowLogoWhite from '@assets/flow-white.svg?component';
 
 const props = withDefaults(defineProps<{
@@ -17,12 +17,12 @@ const props = withDefaults(defineProps<{
   wFull: false,
 })
 
-const flowSrv = inject(FlowSrvKey);
 const current = useCurrentFlowUser();
 
 const isInitializingWalletConnect = ref(false)
 
 async function login() {
+  const flowSrv = await getFlowInstance();
   if (!flowSrv?.isWalletConnectInited) {
     isInitializingWalletConnect.value = true
     try {
@@ -43,7 +43,8 @@ async function login() {
   await flowSrv?.authenticate();
 }
 
-function logout() {
+async function logout() {
+  const flowSrv = await getFlowInstance();
   flowSrv?.unauthenticate();
 }
 

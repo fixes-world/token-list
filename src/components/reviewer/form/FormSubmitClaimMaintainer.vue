@@ -22,7 +22,6 @@ const emits = defineEmits<{
   (e: 'error', msg: string): void
 }>();
 
-const flowSrv = inject(FlowSrvKey)
 const acctName = useGlobalAccount()
 
 // Reactive Data

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import { FlowSrvKey } from '@shared/flow/utilitites';
+import appInfo from '@shared/config/info';
 
 import ElementAddressDisplay from '@components/items/cardElements/ElementAddressDisplay.vue';
 
@@ -13,10 +13,8 @@ withDefaults(defineProps<{
   // notResolve: true,
 })
 
-const flowSrv = inject(FlowSrvKey)
-
 function getAccountURL(addr: string) {
-  const host = flowSrv?.network === 'testnet'
+  const host = appInfo.network === 'testnet'
     ? "https://testnet.flowdiver.io/account/"
     : "https://www.flowdiver.io/account/"
   return host + addr;
