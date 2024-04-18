@@ -9,7 +9,7 @@ import {
  * @param path
  * @param body
  */
-export async function queryTokenList(
+export async function queryTokenListByAPI(
   reviewer?: string,
   filter: FilterType = FilterType.ALL,
   page?: number,

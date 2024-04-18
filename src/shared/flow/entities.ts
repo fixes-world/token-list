@@ -66,10 +66,12 @@ export interface CustomizedTokenDto extends TokenDisplayBasic {
   social: SocialKeyPair[];
 }
 
-export interface TokenQueryResult {
+export interface QueryResult<T> {
   total: number;
-  list: StandardTokenView[];
+  list: T[];
 }
+
+export type TokenQueryResult = QueryResult<StandardTokenView>;
 
 export interface ReviewerInfo {
   address: string;
