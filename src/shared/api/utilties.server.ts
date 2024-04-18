@@ -96,6 +96,10 @@ export async function queryTokenListUsingCache(
   // return the token list
   return {
     name: "Flow Token List",
+    tokens,
+    totalAmount: tokens.length,
+    filterType: FilterType[filter],
+    timestamp: new Date(),
     logoURI:
       "https://cdn.jsdelivr.net/gh/FlowFans/flow-token-list@main/token-registry/A.1654653399040a61.FlowToken/logo.svg",
     keywords: [
@@ -110,10 +114,6 @@ export async function queryTokenListUsingCache(
       "Crypto",
     ],
     tags: defaultTags,
-    timestamp: new Date(),
-    tokens,
-    totalAmount: tokens.length,
-    filterType: FilterType[filter],
     version: {
       major: 1,
       minor: 0,

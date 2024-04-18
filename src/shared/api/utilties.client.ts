@@ -1,37 +1,42 @@
 import { FilterType } from "@shared/flow/enums";
-import Exception from "@shared/exception";
+import {
+  FailedToLoadTokenListJsonError,
+  FailedToParseTokenListJsonError,
+} from "@shared/exception.client";
 
 /**
  * Send a request to the OpenAPI server
  * @param path
  * @param body
  */
-async function queryTokenList(
-  page: number,
-  limit: number,
+export async function queryTokenList(
   reviewer?: string,
   filter: FilterType = FilterType.ALL,
+  page?: number,
+  limit?: number,
 ) {
-  // const res = await fetch("/api/token-list", {
-  //   method: "GET",
-  //   body: JSON.stringify({ path, data: body, verify: verifyDto }),
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  // });
-  // if (res.status >= 200 && res.status < 300) {
-  //   try {
-  //     return await res.json();
-  //   } catch (e) {
-  //     throw new Exception(
-  //       500,
-  //       `Failed to parse response from ${path}: ${e.message}`,
-  //     );
-  //   }
-  // } else {
-  //   throw new Exception(
-  //     res.status,
-  //     `Failed to query tokenlist: ${res.statusText}`,
-  //   );
-  // }
+  let url = "/api/token-list";
+  if (reviewer) {
+    url += `/${reviewer}`;
+  }
+  if (page && limit) {
+    url += `?page=${page}&limit=${limit}&filter=${filter}`;
+  } else {
+    url += `?filter=${filter}`;
+  }
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (res.status >= 200 && res.status < 300) {
+    try {
+      return await res.json();
+    } catch (e) {
+      throw new FailedToParseTokenListJsonError();
+    }
+  } else {
+    throw new FailedToLoadTokenListJsonError();
+  }
 }

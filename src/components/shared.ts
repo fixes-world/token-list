@@ -18,6 +18,10 @@ export const useNetworkCorrect = createGlobalState(() => {
   return ref(false);
 });
 
+export const useSharedAddressNamingCache = createGlobalState(() => {
+  return reactive<Record<string, string>>({});
+});
+
 export const useSendingTransaction = createGlobalState(() => {
   return ref(false);
 });

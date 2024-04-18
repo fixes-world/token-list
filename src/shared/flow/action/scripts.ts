@@ -13,6 +13,7 @@ import { FilterType, EvaluationType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
 import { getFlowInstance } from "../flow.service.factory";
 // Scripts
+import scResolveName from "@cadence/scripts/utils/resolve-name.cdc?raw";
 import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
 import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
 import scGetFTContracts from "@cadence/scripts/get-ft-contracts.cdc?raw";
@@ -25,6 +26,22 @@ import scQueryTokenList from "@cadence/scripts/query-token-list.cdc?raw";
 import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-address.cdc?raw";
 
 /** ---- Scripts ---- */
+
+/**
+ * Resolve address name
+ */
+export async function resolveAddressName(addr: string): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  if (flowSrv.network === "emulator") {
+    return addr;
+  }
+  const ret = await flowSrv.executeScript(
+    scResolveName,
+    (arg, t) => [arg(addr, t.Address)],
+    addr,
+  );
+  return ret ?? addr;
+}
 
 /**
  * check if the token is registered
@@ -132,7 +149,12 @@ const parseReviewer = (obj: any): ReviewerInfo => {
 export async function getReviewers() {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(scGetReviewers, (arg, t) => [], []);
-  return ret.map(parseReviewer);
+  return ret.map(parseReviewer).sort((a, b) => {
+    // Prioritize verified, desc by customziedTokenAmt
+    if (a.verified && !b.verified) return -1;
+    if (!a.verified && b.verified) return 1;
+    return b.customziedTokenAmt - a.customziedTokenAmt;
+  });
 }
 
 export async function getVerifiedReviewers() {
@@ -142,7 +164,9 @@ export async function getVerifiedReviewers() {
     (arg, t) => [],
     [],
   );
-  return ret.map(parseReviewer);
+  return ret.map(parseReviewer).sort((a, b) => {
+    return b.customziedTokenAmt - a.customziedTokenAmt;
+  });
 }
 
 /**

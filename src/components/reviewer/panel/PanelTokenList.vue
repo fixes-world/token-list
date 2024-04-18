@@ -8,7 +8,7 @@ import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { StandardTokenView } from '@shared/flow/entities';
 import { FilterType } from '@shared/flow/enums';
 
-import ItemTokenInfo from '../items/ItemTokenInfo.vue';
+import ItemTokenInfo from '@components/items/ItemTokenInfo.vue';
 
 const props = withDefaults(defineProps<{
   ft?: StandardTokenView,
