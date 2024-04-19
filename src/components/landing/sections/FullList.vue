@@ -29,9 +29,9 @@ onMounted(() => {
 <template>
   <VueWrapper>
     <div :class="[
-      'relative mx-a max-w-xl pt-4',
+      'relative mx-a max-w-3xl pt-4',
       'flex flex-col items-center justify-center',
-      'w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',
+      'w-full sm:w-[95%] md:w-[90%] lg:w-[85%] xl:w-[80%]',
     ]">
       <p class="absolute -top-8 px-2 text-xs text-gray-400">
         <span class="i-carbon:warning w-3 h-3" />
