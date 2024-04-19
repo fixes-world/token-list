@@ -30,6 +30,7 @@ const isSystemTag = computed(() => {
     size="tiny"
     round
     :type="isFeatured ? 'warning' : isVerified ? 'success' : isPending ? 'default' : 'info'"
+    :bordered="false"
   >
     <ItemHintLabel
       v-if="isSystemTag"
