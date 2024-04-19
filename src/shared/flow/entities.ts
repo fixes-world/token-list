@@ -26,7 +26,7 @@ export interface TokenStatusBasic extends TokenIdentity {
 }
 
 export interface TokenStatus extends TokenStatusBasic {
-  vaultPath: string;
+  vaultPath?: string;
   publicPaths: Record<string, string>;
 }
 

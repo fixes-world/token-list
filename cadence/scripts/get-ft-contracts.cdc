@@ -60,9 +60,6 @@ fun main(
     let ret: [FTStatus] = []
     for ftType in ftDic.keys {
         let contractName = ftDic[ftType]!
-        if ftVaultPathsDic[ftType] == nil || ftPublicPathsDic[ftType] == nil {
-            continue
-        }
         let supportedViews = ftViewResolverDic[ftType]?.getViews() ?? []
         let status = FTStatus(
             address: addr,
@@ -70,8 +67,8 @@ fun main(
             isRegistered: TokenList.isFungibleTokenRegistered(addr, contractName),
             isWithDisplay: supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),
             isWithVaultData: supportedViews.contains(Type<FungibleTokenMetadataViews.FTVaultData>()),
-            vaultPath: ftVaultPathsDic[ftType]!,
-            publicPaths: ftPublicPathsDic[ftType]!
+            vaultPath: ftVaultPathsDic[ftType],
+            publicPaths: ftPublicPathsDic[ftType] ?? {}
         )
         ret.append(status)
     }
@@ -90,7 +87,7 @@ access(all) struct FTStatus {
     access(all)
     let isWithVaultData: Bool
     access(all)
-    let vaultPath: String
+    let vaultPath: String?
     // TypeIdentifier => Path
     access(all)
     let publicPaths: {String: String}
@@ -101,7 +98,7 @@ access(all) struct FTStatus {
         isRegistered: Bool,
         isWithDisplay: Bool,
         isWithVaultData: Bool,
-        vaultPath: String,
+        vaultPath: String?,
         publicPaths: {String: String}
     ) {
         self.address = address

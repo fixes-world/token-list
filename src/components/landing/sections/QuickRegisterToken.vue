@@ -74,7 +74,7 @@ onMounted(() => {
         <template #title>
           <span class="px-1 inline-flex items-center gap-2 text-sm font-semibold">
             List of FT Contracts in
-            <ElementAddressBrowserLink :address="currentAddress" />
+            <ElementAddressBrowserLink :address="currentAddress" :short="false" />
           </span>
         </template>
         <SelectTokenContracts
