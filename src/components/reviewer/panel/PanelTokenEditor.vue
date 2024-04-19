@@ -68,7 +68,7 @@ const rules = ref<FormRules>({
     logo: { required: true, message: 'Token Icon is required', trigger: ['change', 'blur'] },
     symbol: [
       { required: true, message: 'Symbol is required', trigger: 'blur' },
-      { type: 'string', pattern: /^[A-Z][A-Z0-9]{2,7}$/, message: 'Please Enter 3~8 Uppercase Letters.', trigger: ['input', 'blur'] },
+      { type: 'string', pattern: /^[A-Za-z][A-Za-z0-9]{2,7}$/, message: 'Please Enter 3~8 Letters.', trigger: ['input', 'blur'] },
     ],
     name: [
       { required: true, message: 'Name is required', trigger: 'blur' },
