@@ -296,6 +296,15 @@ export async function queryTokenList(
   );
   return {
     total: parseInt(ret.total),
-    list: ret.list.map(parseTokenView),
+    list: ret.list.map(parseTokenView).sort((a, b) => {
+      // Featured first, then Verified, then by contract name
+      if (a.tags.includes("Featured") && !b.tags.includes("Featured"))
+        return -1;
+      if (!a.tags.includes("Featured") && b.tags.includes("Featured")) return 1;
+      if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
+        return -1;
+      if (!a.tags.includes("Verified") && b.tags.includes("Verified")) return 1;
+      return a.identity.contractName.localeCompare(b.identity.contractName);
+    }),
   };
 }
