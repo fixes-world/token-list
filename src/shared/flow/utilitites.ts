@@ -1,6 +1,7 @@
 import type { FlowService } from "@shared/flow/flow.service";
 import type { InjectionKey } from "vue";
 import type { ExportedTokenInfo, StandardTokenView } from "./entities";
+import { EvaluationType } from "./enums";
 
 /**
  * Injection key for FlowService
@@ -13,6 +14,33 @@ export const FlowSrvKey = Symbol("flowSrv") as InjectionKey<FlowService>;
 export function isValidFlowAddress(addr: string) {
   const regExp = /^0x[a-fA-F0-9]{16}$/gi;
   return regExp.test(addr);
+}
+
+/**
+ * Parse the review data from the token view
+ */
+export function parseReviewData(ft: StandardTokenView): {
+  rank: EvaluationType;
+  tags: string[];
+} {
+  const data = {
+    rank: EvaluationType.UNVERIFIED,
+    tags: [] as string[],
+  };
+  const tags = new Set(ft?.tags ?? []);
+  if (tags.has("Featured")) {
+    data.rank = EvaluationType.FEATURED;
+    tags.delete("Featured");
+    tags.delete("Verified");
+  } else if (tags.has("Verified")) {
+    data.rank = EvaluationType.VERIFIED;
+    tags.delete("Verified");
+  } else if (tags.has("Pending")) {
+    data.rank = EvaluationType.PENDING;
+    tags.delete("Pending");
+  }
+  data.tags = Array.from(tags);
+  return data;
 }
 
 /**

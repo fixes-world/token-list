@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import Exception from "@shared/exception";
 import type { FilterType } from "@shared/flow/enums";
 import { queryTokenListUsingCache } from "@shared/api/utilties.server";
 

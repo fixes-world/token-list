@@ -237,10 +237,12 @@ access(all) contract FTViewUtils {
         /// Add a new tag to the review
         ///
         access(all)
-        fun addTag(_ tag: String) {
+        fun addTag(_ tag: String): Bool {
             if !self.tags.contains(tag) {
                 self.tags.append(tag)
+                return true
             }
+            return false
         }
     }
 

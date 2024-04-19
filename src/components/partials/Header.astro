@@ -1,15 +1,33 @@
 ---
 import ThemeToggle from "@components/widgets/ThemeToggle.vue";
 import AuthBox from "@components/auth/AuthBox.vue";
-import Aside from "@components/partials/Aside.vue";
+import appInfo from "@shared/config/info";
+
+const network = appInfo.network;
 ---
 
 <header class="container mx-a p-4" transition:persist-props>
   <div class="w-full flex items-center justify-between gap-2">
     <div class="flex-auto hidden md:block">
-      <a class="title-base highlight italic text-3xl" href="/"> TokenList </a>
+      <a class="relative text-3xl" href="/">
+        <span class="italic highlight title-base">TokenList</span>
+        {
+          appInfo.network !== "mainnet" && (
+            <span
+              class:list={[
+                "absolute top-0 left-[104%] px-2 text-xs font-semibold",
+                "text-[var(--warn-color-light)] bg-[var(--warn-color)] rounded-2",
+              ]}
+            >
+              {network}
+            </span>
+          )
+        }
+      </a>
     </div>
-    <div class="flex-auto md:flex-none flex items-center justify-between md:justify-end gap-2 md:gap-4">
+    <div
+      class="flex-auto md:flex-none flex items-center justify-between md:justify-end gap-2 md:gap-4"
+    >
       <ThemeToggle client:load />
       <AuthBox client:only="vue" transition:persist-props />
     </div>

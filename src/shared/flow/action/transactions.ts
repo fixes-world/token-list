@@ -12,6 +12,8 @@ import txMaintainerClaim from "@cadence/transactions/maintainer-claim.cdc?raw";
 import txMaintainerRegisterCustomizedFT from "@cadence/transactions/maintainer-register-customized-ft.cdc?raw";
 import txMaintainerUpdateCustomizedFT from "@cadence/transactions/maintainer-update-customized-ft-display.cdc?raw";
 import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer-update-reviewer-metadata.cdc?raw";
+import txMaintainerReviewFT from "@cadence/transactions/maintainer-reivew-ft.cdc?raw";
+import type { EvaluationType } from "../enums";
 
 /** ---- Transactions ---- */
 
@@ -125,4 +127,18 @@ export async function maintainerUpdateReviwerMetadata(
       arg(url ?? null, t.Optional(t.String)),
     ],
   );
+}
+
+export async function maintainerReviewFT(
+  ft: TokenIdentity,
+  tags: string[],
+  rank?: EvaluationType,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txMaintainerReviewFT, (arg, t) => [
+    arg(ft.address, t.Address),
+    arg(ft.contractName, t.String),
+    arg(rank ? rank.toFixed(0) : null, t.Optional(t.UInt8)),
+    arg(tags, t.Array(t.String)),
+  ]);
 }

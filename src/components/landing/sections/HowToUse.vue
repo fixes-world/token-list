@@ -67,9 +67,9 @@ onMounted(() => {
 <template>
   <VueWrapper>
     <div :class="[
-  'relative mx-a max-w-xl min-h-[calc(100vh-40rem)]',
-  'flex flex-col items-center justify-start',
-      'w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',
+      'relative mx-a max-w-4xl min-h-[calc(100vh-40rem)]',
+      'flex flex-col items-center justify-start',
+      'w-full sm:w-[95%] md:w-[90%] lg:w-[85%] xl:w-[80%]',
     ]">
       <div class="w-full flex flex-col gap-2 text-xs">
         <ElementWrapper

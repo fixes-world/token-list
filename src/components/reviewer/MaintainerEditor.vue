@@ -15,8 +15,9 @@ import ElementAddressBrowserLink from '@components/items/cardElements/ElementAdd
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
-import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
 import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
+import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
+import PanelTokenReview from '@components/reviewer/panel/PanelTokenReview.vue';
 
 const acctName = useGlobalAccount();
 
@@ -37,7 +38,7 @@ const isMaintainerClaimable = computed(() => {
   return addrStatus.value && addrStatus.value.isPendingToClaimReviewMaintainer && addrStatus.value.reviewerAddr
 })
 const isPlaceCenter = computed(() => {
-  return !addrStatus.value || isMaintainerClaimable.value || !isEditorAvailable.value
+  return !isFirstLoading && (!addrStatus.value || isMaintainerClaimable.value || !isEditorAvailable.value)
 })
 
 // Functions
@@ -99,20 +100,28 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             />
             <div class="flex-auto flex flex-col">
               <PanelReviewer :reviewer="addrStatus.reviewerAddr" />
-              <NDivider class="!mt-4 !mb-6">
-                <span class="text-sm italic font-bold text-gray-400/60">Token Metadata Editor</span>
-              </NDivider>
               <p
                 v-if="!currentToken"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
               >
                 Select a fungible token to edit
               </p>
-              <PanelTokenEditor
-                v-else
-                :ft="currentToken"
-                @refresh="refreshTokenList"
-              />
+              <template v-else>
+                <NDivider class="!mt-4 !mb-6">
+                  <span class="text-sm italic font-bold text-gray-400/60">Token Metadata Editor</span>
+                </NDivider>
+                <PanelTokenEditor
+                  :ft="currentToken"
+                  @refresh="refreshTokenList"
+                />
+                <NDivider>
+                  <span class="text-sm italic font-bold text-gray-400/60">Token Review</span>
+                </NDivider>
+                <PanelTokenReview
+                  :ft="currentToken"
+                  @refresh="refreshTokenList"
+                />
+              </template>
             </div>
           </div>
           <div

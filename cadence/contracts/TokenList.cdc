@@ -76,6 +76,13 @@ access(all) contract TokenList {
         _ comment: String,
         _ by: Address
     )
+    /// Event emitted when a Fungible Token is tagged
+    access(all) event FungibleTokenTagsAdded(
+        _ address: Address,
+        _ contractName: String,
+        _ tags: [String],
+        _ by: Address
+    )
 
     /* --- Variable, Enums and Structs --- */
 
@@ -90,16 +97,20 @@ access(all) contract TokenList {
     /// Interface for the FT Entry
     ///
     access(all) resource interface FTEntryInterface {
+        // ----- View Methods: N -----
+        /// Create an empty vault for the FT
+        access(all)
+        fun createEmptyVault(): @FungibleToken.Vault
         // ----- View Methods -----
         access(all) view
         fun getIdentity(): FTViewUtils.FTIdentity
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type
-        /// Get the display metadata of the FT
+        /// Get the display metadata of the FT, fallback to the highest rank reviewer
         access(all) view
         fun getDisplay(_ reviewer: Address?): FTViewUtils.FTDisplayWithSource?
-        /// Get the vault info the FT
+        /// Get the vault info the FT, fallback to the highest rank reviewer
         access(all) view
         fun getVaultData(_ reviewer: Address?): FTViewUtils.FTVaultDataWithSource?
         /// Check if the Fungible Token is reviewed by some one
@@ -108,13 +119,53 @@ access(all) contract TokenList {
         /// Get the Fungible Token Review
         access(all) view
         fun getFTReview(_ reviewer: Address): FTViewUtils.FTReview?
-        // ----- View Methods -----
-        /// Create an empty vault for the FT
-        access(all)
-        fun createEmptyVault(): @FungibleToken.Vault
+        // ----- Quick Access For FTViews -----
+        /// Get the evaluation rank of the Fungible Token, no fallback
+        access(all) view
+        fun getEvaluatedRank(_ reviewer: Address?): FTViewUtils.Evaluation? {
+            if let reviewerAddr = reviewer {
+                if let reviewRef = self.borrowReviewRef(reviewerAddr) {
+                    return reviewRef.evalRank
+                }
+            }
+            return nil
+        }
+        /// Get the tags of the Fungiuble Token, fallback to the highest rank reviewer
+        access(all) view
+        fun getTags(_ reviewer: Address?): [String] {
+            if let fallbackedReviewerAddr = self.tryGetReviewer(reviewer) {
+                if let reviewRef = self.borrowReviewRef(fallbackedReviewerAddr) {
+                    let returnTags = reviewRef.tags
+                    // Add extra tags based on the evaluation rank if the reviewer is the fallbackedReviewer
+                    if reviewer == fallbackedReviewerAddr {
+                        if reviewRef.evalRank == FTViewUtils.Evaluation.FEATURED {
+                            returnTags.insert(at: 0, "Featured")
+                            returnTags.insert(at: 0, "Verified")
+                        } else if reviewRef.evalRank == FTViewUtils.Evaluation.VERIFIED {
+                            returnTags.insert(at: 0, "Verified")
+                        } else if reviewRef.evalRank == FTViewUtils.Evaluation.PENDING {
+                            returnTags.insert(at: 0, "Pending")
+                        }
+                    }
+                    return returnTags
+                }
+            }
+            return []
+        }
         // ----- Internal Methods: Used by Reviewer -----
+        /// Try to get a reviewer address
         access(contract)
-        fun addRewiew(_ reviewer: Address, _ review: FTViewUtils.FTReview)
+        fun tryGetReviewer(_ reviewer: Address?): Address? {
+            let tokenType = self.getTokenType()
+            var reviewerAddr = reviewer
+            if reviewerAddr == nil {
+                let registry = TokenList.borrowRegistry()
+                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+            }
+            return reviewerAddr
+        }
+        access(contract)
+        fun addReview(_ reviewer: Address, _ review: FTViewUtils.FTReview)
         access(contract)
         fun borrowReviewRef(_ reviewer: Address): &FTViewUtils.FTReview?
     }
@@ -194,12 +245,7 @@ access(all) contract TokenList {
             if let viewResolver = self.borrowViewResolver() {
                 retFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
             }
-            let tokenType = self.getTokenType()
-            var reviewerAddr = reviewer
-            if reviewerAddr == nil {
-                let registry = TokenList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
-            }
+            var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 log("Reviewer: ".concat(addr.toString()))
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
@@ -241,11 +287,7 @@ access(all) contract TokenList {
             }
             // If not found, then try to get the data from the reviewer
             let tokenType = self.getTokenType()
-            var reviewerAddr = reviewer
-            if reviewerAddr == nil {
-                let registry = TokenList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
-            }
+            var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     let ref = reviewerRef.borrowFTViewReader(tokenType)
@@ -307,7 +349,7 @@ access(all) contract TokenList {
         /// Add a new review to the FT
         ///
         access(contract)
-        fun addRewiew(_ reviewer: Address, _ review: FTViewUtils.FTReview) {
+        fun addReview(_ reviewer: Address, _ review: FTViewUtils.FTReview) {
             pre {
                 self.reviewers[reviewer] == nil:
                     "Reviewer already exists"
@@ -388,6 +430,9 @@ access(all) contract TokenList {
         /// Review the Fungible Token with Comment
         access(all)
         fun reviewFTComment(_ type: Type, comment: String)
+        /// Review the Fungible Token, add tags
+        access(all)
+        fun reviewFTAddTags(_ type: Type, tags: [String])
         /// Register a new Fungible Token with the Editable FTView
         access(all)
         fun registerFungibleTokenWithEditableFTView(
@@ -468,11 +513,22 @@ access(all) contract TokenList {
                 ?? panic("Failed to load the Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
+            var isUpdated = false
             if let reviewRef = entryRef.borrowReviewRef(reviewerAddr) {
-                reviewRef.updateEvaluationRank(rank)
+                if reviewRef.evalRank != rank {
+                    reviewRef.updateEvaluationRank(rank)
+                    isUpdated = true
+                }
             } else {
-                entryRef.addRewiew(reviewerAddr, FTViewUtils.FTReview(rank))
+                entryRef.addReview(reviewerAddr, FTViewUtils.FTReview(rank))
+                isUpdated = true
             }
+
+            // If not updated, then return
+            if !isUpdated {
+                return
+            }
+
             // update reviewed status locally
             self.reviewed[type] = rank
 
@@ -496,12 +552,13 @@ access(all) contract TokenList {
                 ?? panic("Failed to load the Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
-            if let reviewRef = entryRef.borrowReviewRef(reviewerAddr) {
-                reviewRef.addComment(comment, reviewerAddr)
-            } else {
-                entryRef.addRewiew(reviewerAddr, FTViewUtils.FTReview(FTViewUtils.Evaluation.UNVERIFIED))
-                entryRef.borrowReviewRef(reviewerAddr)!.addComment(comment, reviewerAddr)
+            if entryRef.borrowReviewRef(reviewerAddr) == nil {
+                // add the review with UNVERIFIED evaluation
+                self.reviewFTEvalute(type, rank: FTViewUtils.Evaluation.UNVERIFIED)
             }
+            let reviewRef = entryRef.borrowReviewRef(reviewerAddr)
+                ?? panic("Failed to load the Fungible Token Review")
+            reviewRef.addComment(comment, reviewerAddr)
 
             let identity = entryRef.getIdentity()
             // emit the event
@@ -509,6 +566,51 @@ access(all) contract TokenList {
                 identity.address,
                 identity.contractName,
                 comment,
+                reviewerAddr
+            )
+        }
+
+        /// Review the Fungible Token, add tags
+        ///
+        access(all)
+        fun reviewFTAddTags(_ type: Type, tags: [String]) {
+            pre {
+                tags.length > 0: "Tags should not be empty"
+            }
+
+            let registery = TokenList.borrowRegistry()
+            let entryRef = registery.borrowFungibleTokenEntry(type)
+                ?? panic("Failed to load the Fungible Token Entry")
+
+            let reviewerAddr = self.getAddress()
+            if entryRef.borrowReviewRef(reviewerAddr) == nil {
+                // add the review with UNVERIFIED evaluation
+                self.reviewFTEvalute(type, rank: FTViewUtils.Evaluation.UNVERIFIED)
+            }
+            let ref = entryRef.borrowReviewRef(reviewerAddr)
+                ?? panic("Failed to load the Fungible Token Review")
+            var isUpdated = false
+            for tag in tags {
+                // ingore the eval tags
+                if tag == "Verified" || tag == "Featured" || tag == "Pending" {
+                    continue
+                }
+                if ref.addTag(tag) {
+                    isUpdated = true
+                }
+            }
+
+            // If not updated, then return
+            if !isUpdated {
+                return
+            }
+
+            let identity = entryRef.getIdentity()
+            // emit the event
+            emit FungibleTokenTagsAdded(
+                identity.address,
+                identity.contractName,
+                tags,
                 reviewerAddr
             )
         }
@@ -788,6 +890,13 @@ access(all) contract TokenList {
         access(all)
         fun reviewFTComment(_ type: Type, comment: String) {
             self._borrowReviewer().reviewFTComment(type, comment: comment)
+        }
+
+        /// Review the Fungible Token, add tags
+        ///
+        access(all)
+        fun reviewFTAddTags(_ type: Type, tags: [String]) {
+            self._borrowReviewer().reviewFTAddTags(type, tags: tags)
         }
 
         /// Register a new Fungible Token with the Editable FTView
