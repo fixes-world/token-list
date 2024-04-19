@@ -72,7 +72,7 @@ const rules = ref<FormRules>({
     ],
     name: [
       { required: true, message: 'Name is required', trigger: 'blur' },
-      { type: 'string', pattern: /^[\w _]{3,25}$/, message: 'Please Enter 3 to 25 Letters.', trigger: ['input', 'blur'] },
+      { type: 'string', pattern: /^[\w _()]{3,25}$/, message: 'Please Enter 3 to 25 Letters.', trigger: ['input', 'blur'] },
     ],
     description: { type: 'string', max: 250, message: 'Description is required', trigger: 'blur' },
     externalURL: { type: 'url', message: 'Invalid URL', trigger: 'blur' },
@@ -80,6 +80,8 @@ const rules = ref<FormRules>({
 });
 
 const isLoadingFTStatus = ref(false)
+const showExtraVaultInput = ref(false)
+const extraVaultAddr = ref<string | null>(null)
 
 const imageUrl = computed({
   get: () => formData?.display?.logo,
@@ -107,11 +109,12 @@ const socialTypesOptions: SelectOption[] = [
 async function loadFTStatus() {
   if (!props.ft) return;
 
-  isLoadingFTStatus.value = true;
   console.log("Loading FT: ", props.ft?.identity.address, props.ft?.identity.contractName)
-  const status = await getFTContractStatus(props.ft?.identity.address, props.ft?.identity.contractName);
-  if (status) {
-    formData.paths.vault = status.vaultPath;
+  isLoadingFTStatus.value = true;
+  showExtraVaultInput.value = false;
+  const status = await getFTContractStatus(props.ft?.identity.address, props.ft?.identity.contractName, extraVaultAddr.value);
+  if (status && status.vaultPath) {
+    formData.paths.vault = status.vaultPath ?? "";
     for (let key in status.publicPaths) {
       if (key.includes("FungibleToken.Receiver")) {
         formData.paths.receiver = status.publicPaths[key];
@@ -119,6 +122,9 @@ async function loadFTStatus() {
         formData.paths.balance = status.publicPaths[key];
       }
     }
+  } else {
+    showExtraVaultInput.value = true;
+    extraVaultAddr.value = null;
   }
   isLoadingFTStatus.value = false;
 }
@@ -148,6 +154,8 @@ function renderLabel(option: SelectOption, icon: VNodeChild): VNodeChild {
 watch(() => props.ft, async (ft, oldFt) => {
   if (ft?.identity.address !== oldFt?.identity.address
     || ft?.identity.contractName !== oldFt?.identity.contractName) {
+    showExtraVaultInput.value = false;
+    extraVaultAddr.value = null;
     formData.paths.vault = ft?.path?.vault ?? "";
     formData.paths.receiver = ft?.path?.receiver ?? "";
     formData.paths.balance = ft?.path?.balance ?? "";
@@ -207,16 +215,37 @@ watch(() => props.ft, async (ft, oldFt) => {
               v-model:image="imageUrl"
               :type="ft.display?.display?.logos?.[0]?.type"
             />
-            <NButton
+            <div
               v-if="!formData.paths.vault"
-              size="medium"
-              type="primary"
-              strong
-              round
-              :loading="isLoadingFTStatus"
-              :disabled="isSending"
-              @click="loadFTStatus"
-            > Load Vault Info </NButton>
+              class="flex flex-col gap-2"
+            >
+              <ElementWrapper
+                v-if="showExtraVaultInput"
+                direction="col"
+                position="left"
+                title="Vault Account"
+              >
+                <NInput
+                  size="small"
+                  v-model:value="extraVaultAddr"
+                  placeholder="Input account with FT vault."
+                  :input-props="{
+                    autocomplete: 'off',
+                    autocorrect: 'off',
+                    spellcheck: 'false',
+                  }"
+                />
+              </ElementWrapper>
+              <NButton
+                size="medium"
+                type="primary"
+                strong
+                round
+                :loading="isLoadingFTStatus"
+                :disabled="isSending"
+                @click="loadFTStatus"
+              > Load Vault Info </NButton>
+            </div>
             <div
               v-else
               class="flex-auto my-2 flex flex-col justify-center gap-1"
@@ -258,8 +287,7 @@ watch(() => props.ft, async (ft, oldFt) => {
             placeholder="Token Symbol"
             :input-props="{
               autocomplete: 'off',
-              autocorrect: 'off',
-              autocapitalize: 'characters',
+  autocorrect: 'off',
               spellcheck: 'false',
             }"
           />

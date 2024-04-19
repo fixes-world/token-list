@@ -8,7 +8,8 @@ import "ViewResolvers"
 access(all)
 fun main(
     addr: Address,
-    contractName: String
+    contractName: String,
+    vaultAddr: Address?
 ): FTStatus? {
     let acct = getAuthAccount(addr)
     let contractNames = acct.contracts.names
@@ -42,22 +43,22 @@ fun main(
         return nil
     }
 
+    let vaultAcct = vaultAddr != nil
+        ? getAuthAccount(vaultAddr!)
+        : acct
+
     var ftVaultPath: String? = nil
-    acct.forEachStored(fun (path: StoragePath, type: Type): Bool {
+    vaultAcct.forEachStored(fun (path: StoragePath, type: Type): Bool {
         if type.isSubtype(of: ftType!) {
             ftVaultPath = path.toString()
             return false
         }
         return true
     })
-    if ftVaultPath == nil {
-        log("Failed to find vault path for ".concat(contractName))
-        return nil
-    }
 
     let ftPublicPaths: {String: String} = {}
-    acct.forEachPublic(fun (path: PublicPath, type: Type): Bool {
-        if let storagePath = acct.getLinkTarget(path) {
+    vaultAcct.forEachPublic(fun (path: PublicPath, type: Type): Bool {
+        if let storagePath = vaultAcct.getLinkTarget(path) {
             if storagePath.toString() == ftVaultPath {
                 ftPublicPaths[type.identifier] = path.toString()
             }
@@ -72,7 +73,7 @@ fun main(
         isRegistered: TokenList.isFungibleTokenRegistered(addr, contractName),
         isWithDisplay: supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),
         isWithVaultData: supportedViews.contains(Type<FungibleTokenMetadataViews.FTVaultData>()),
-        vaultPath: ftVaultPath!,
+        vaultPath: ftVaultPath,
         publicPaths: ftPublicPaths
     )
     return ret
@@ -90,7 +91,7 @@ access(all) struct FTStatus {
     access(all)
     let isWithVaultData: Bool
     access(all)
-    let vaultPath: String
+    let vaultPath: String?
     // TypeIdentifier => Path
     access(all)
     let publicPaths: {String: String}
@@ -101,7 +102,7 @@ access(all) struct FTStatus {
         isRegistered: Bool,
         isWithDisplay: Bool,
         isWithVaultData: Bool,
-        vaultPath: String,
+        vaultPath: String?,
         publicPaths: {String: String}
     ) {
         self.address = address

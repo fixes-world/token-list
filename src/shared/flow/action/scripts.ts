@@ -103,11 +103,16 @@ export async function getFTContracts(address: string): Promise<TokenStatus[]> {
 export async function getFTContractStatus(
   address: string,
   contractName: string,
+  extraVaultAddr: string | null = null,
 ): Promise<TokenStatus | null> {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetFTContractStatus,
-    (arg, t) => [arg(address, t.Address), arg(contractName, t.String)],
+    (arg, t) => [
+      arg(address, t.Address),
+      arg(contractName, t.String),
+      arg(extraVaultAddr, t.Optional(t.Address)),
+    ],
     null,
   );
   return ret ? parseFTContractStatus(ret) : null;
