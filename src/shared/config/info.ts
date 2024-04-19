@@ -1,7 +1,7 @@
 const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 
-// TODO: Update contract address
-const contractAddr = network === "testnet" ? "0xb86f928a1fa7798e" : "0x2";
+const contractAddr =
+  network === "testnet" ? "0xb86f928a1fa7798e" : "0x15a918087ab12d86";
 
 export default {
   title: "TokenList",
