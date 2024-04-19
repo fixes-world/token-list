@@ -98,6 +98,8 @@ const socialTypesOptions: SelectOption[] = [
   { value: "youtube", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-youtube w-4 h-4' })) },
   { value: "instagram", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-instagram w-4 h-4' })) },
   { value: "facebook", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-facebook w-4 h-4' })) },
+  { value: "documentation", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:book w-4 h-4' })) },
+  { value: "coingeckoId", label: (opt) => h('span', {}, "CoinGecko ID") },
 ];
 
 // Handlers and Functions
@@ -332,7 +334,7 @@ watch(() => props.ft, async (ft, oldFt) => {
             :on-create="onSocialCreate"
           >
             <template #create-button-default>
-              Add Social Link
+              Add Social Links or Extensions
             </template>
             <template #default="{ index }">
               <div class="flex items-center w-full gap-2">
@@ -347,7 +349,7 @@ watch(() => props.ft, async (ft, oldFt) => {
                 />
                 <NInput
                   v-model:value="formData.display.social[index].value"
-                  placeholder="Input URL"
+                  placeholder="Input Link or ID Handle"
                   type="text"
                   :input-props="{ autocomplete: 'off', type: 'url' }"
                   size="small"
