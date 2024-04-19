@@ -38,7 +38,7 @@ const isMaintainerClaimable = computed(() => {
   return addrStatus.value && addrStatus.value.isPendingToClaimReviewMaintainer && addrStatus.value.reviewerAddr
 })
 const isPlaceCenter = computed(() => {
-  return !addrStatus.value || isMaintainerClaimable.value || !isEditorAvailable.value
+  return !isFirstLoading && (!addrStatus.value || isMaintainerClaimable.value || !isEditorAvailable.value)
 })
 
 // Functions
