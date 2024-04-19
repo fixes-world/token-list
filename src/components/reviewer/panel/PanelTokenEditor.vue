@@ -167,6 +167,9 @@ watch(() => props.ft, async (ft, oldFt) => {
     size="medium"
     class="min-h-lg min-w-sm"
   >
+    <template #header>
+      <h2 class="py-1 italic highlight font-semibold">Token Metadata</h2>
+    </template>
     <NEmpty
       v-if="!ft"
       description="Failed to load fungible token."
@@ -188,10 +191,6 @@ watch(() => props.ft, async (ft, oldFt) => {
         minWidth: '280px'
       }"
     >
-      <ItemFungibleTokenStatus
-        class="!mb-4"
-        :item="ft.identity"
-      />
       <NGrid
         :cols="6"
         :x-gap="12"

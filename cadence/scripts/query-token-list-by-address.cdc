@@ -31,7 +31,7 @@ fun main(
             list.append(FTViewUtils.StandardTokenView(
                 identity: identity,
                 decimals: 8,
-                tags: reviewer != nil ? ftEntry.getTags(reviewer!) : [],
+                tags: ftEntry.getTags(reviewer),
                 dataSource: source,
                 paths: paths,
                 display: ftEntry.getDisplay(reviewer),

@@ -46,7 +46,7 @@ const isHighlight = computed(() => {
           class="pointer-events-none"
           size="tiny"
           round
-          :type="item.isWithDisplay ? 'warning' : 'default'"
+          :type="item.isWithDisplay ? 'success' : 'default'"
           :bordered="!item.isWithDisplay ? false : true"
           :disabled="!item.isWithDisplay"
         >
@@ -61,14 +61,17 @@ const isHighlight = computed(() => {
           </p>
         </template>
       </ItemHintLabel>
-      <ItemHintLabel :with-warning-icon="false">
+      <ItemHintLabel
+        v-if=!item.isWithVaultData
+        :with-warning-icon="false"
+      >
         <NTag
           class="pointer-events-none"
           size="tiny"
           round
-          :type="item.isWithVaultData ? 'success' : 'default'"
-          :bordered="!item.isWithVaultData ? false : true"
-          :disabled="!item.isWithVaultData"
+          type="default"
+          bordered
+          disabled
         >
           <span :class="['px-1', { 'decoration-line-through': !item.isWithVaultData }]">
             Vault Info

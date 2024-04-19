@@ -97,6 +97,10 @@ access(all) contract TokenList {
     /// Interface for the FT Entry
     ///
     access(all) resource interface FTEntryInterface {
+        // ----- View Methods: N -----
+        /// Create an empty vault for the FT
+        access(all)
+        fun createEmptyVault(): @FungibleToken.Vault
         // ----- View Methods -----
         access(all) view
         fun getIdentity(): FTViewUtils.FTIdentity
@@ -118,34 +122,45 @@ access(all) contract TokenList {
         // ----- Quick Access For FTViews -----
         /// Get the evaluation rank of the Fungible Token
         access(all) view
-        fun getEvaluatedRank(_ reviewer: Address): FTViewUtils.Evaluation? {
-            if let reviewRef = self.borrowReviewRef(reviewer) {
-                return reviewRef.evalRank
+        fun getEvaluatedRank(_ reviewer: Address?): FTViewUtils.Evaluation? {
+            if let reviewerAddr = self.tryGetReviewer(reviewer) {
+                if let reviewRef = self.borrowReviewRef(reviewerAddr) {
+                    return reviewRef.evalRank
+                }
             }
             return nil
         }
         /// Get the tags of the Fungiuble Token
         access(all) view
-        fun getTags(_ reviewer: Address): [String] {
-            if let reviewRef = self.borrowReviewRef(reviewer) {
-                let returnTags = reviewRef.tags
-                if reviewRef.evalRank == FTViewUtils.Evaluation.FEATURED {
-                    returnTags.insert(at: 0, "Featured")
-                    returnTags.insert(at: 0, "Verified")
-                } else if reviewRef.evalRank == FTViewUtils.Evaluation.VERIFIED {
-                    returnTags.insert(at: 0, "Verified")
-                } else if reviewRef.evalRank == FTViewUtils.Evaluation.PENDING {
-                    returnTags.insert(at: 0, "Pending")
+        fun getTags(_ reviewer: Address?): [String] {
+            if let reviewerAddr = self.tryGetReviewer(reviewer) {
+                if let reviewRef = self.borrowReviewRef(reviewerAddr) {
+                    let returnTags = reviewRef.tags
+                    if reviewRef.evalRank == FTViewUtils.Evaluation.FEATURED {
+                        returnTags.insert(at: 0, "Featured")
+                        returnTags.insert(at: 0, "Verified")
+                    } else if reviewRef.evalRank == FTViewUtils.Evaluation.VERIFIED {
+                        returnTags.insert(at: 0, "Verified")
+                    } else if reviewRef.evalRank == FTViewUtils.Evaluation.PENDING {
+                        returnTags.insert(at: 0, "Pending")
+                    }
+                    return returnTags
                 }
-                return returnTags
             }
             return []
         }
-        // ----- View Methods -----
-        /// Create an empty vault for the FT
-        access(all)
-        fun createEmptyVault(): @FungibleToken.Vault
         // ----- Internal Methods: Used by Reviewer -----
+        /// Try to get a reviewer address
+        access(contract)
+        fun tryGetReviewer(_ reviewer: Address?): Address? {
+            let tokenType = self.getTokenType()
+            var reviewerAddr = reviewer
+            if reviewerAddr == nil {
+                let registry = TokenList.borrowRegistry()
+                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+            }
+            return reviewerAddr
+        }
         access(contract)
         fun addReview(_ reviewer: Address, _ review: FTViewUtils.FTReview)
         access(contract)
@@ -227,12 +242,7 @@ access(all) contract TokenList {
             if let viewResolver = self.borrowViewResolver() {
                 retFTDisplay = FungibleTokenMetadataViews.getFTDisplay(viewResolver)
             }
-            let tokenType = self.getTokenType()
-            var reviewerAddr = reviewer
-            if reviewerAddr == nil {
-                let registry = TokenList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
-            }
+            var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 log("Reviewer: ".concat(addr.toString()))
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
@@ -274,11 +284,7 @@ access(all) contract TokenList {
             }
             // If not found, then try to get the data from the reviewer
             let tokenType = self.getTokenType()
-            var reviewerAddr = reviewer
-            if reviewerAddr == nil {
-                let registry = TokenList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
-            }
+            var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 if let reviewerRef = TokenList.borrowReviewerPublic(addr) {
                     let ref = reviewerRef.borrowFTViewReader(tokenType)
