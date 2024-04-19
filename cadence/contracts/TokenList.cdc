@@ -107,10 +107,10 @@ access(all) contract TokenList {
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type
-        /// Get the display metadata of the FT
+        /// Get the display metadata of the FT, fallback to the highest rank reviewer
         access(all) view
         fun getDisplay(_ reviewer: Address?): FTViewUtils.FTDisplayWithSource?
-        /// Get the vault info the FT
+        /// Get the vault info the FT, fallback to the highest rank reviewer
         access(all) view
         fun getVaultData(_ reviewer: Address?): FTViewUtils.FTVaultDataWithSource?
         /// Check if the Fungible Token is reviewed by some one
@@ -120,29 +120,32 @@ access(all) contract TokenList {
         access(all) view
         fun getFTReview(_ reviewer: Address): FTViewUtils.FTReview?
         // ----- Quick Access For FTViews -----
-        /// Get the evaluation rank of the Fungible Token
+        /// Get the evaluation rank of the Fungible Token, no fallback
         access(all) view
         fun getEvaluatedRank(_ reviewer: Address?): FTViewUtils.Evaluation? {
-            if let reviewerAddr = self.tryGetReviewer(reviewer) {
+            if let reviewerAddr = reviewer {
                 if let reviewRef = self.borrowReviewRef(reviewerAddr) {
                     return reviewRef.evalRank
                 }
             }
             return nil
         }
-        /// Get the tags of the Fungiuble Token
+        /// Get the tags of the Fungiuble Token, fallback to the highest rank reviewer
         access(all) view
         fun getTags(_ reviewer: Address?): [String] {
-            if let reviewerAddr = self.tryGetReviewer(reviewer) {
-                if let reviewRef = self.borrowReviewRef(reviewerAddr) {
+            if let fallbackedReviewerAddr = self.tryGetReviewer(reviewer) {
+                if let reviewRef = self.borrowReviewRef(fallbackedReviewerAddr) {
                     let returnTags = reviewRef.tags
-                    if reviewRef.evalRank == FTViewUtils.Evaluation.FEATURED {
-                        returnTags.insert(at: 0, "Featured")
-                        returnTags.insert(at: 0, "Verified")
-                    } else if reviewRef.evalRank == FTViewUtils.Evaluation.VERIFIED {
-                        returnTags.insert(at: 0, "Verified")
-                    } else if reviewRef.evalRank == FTViewUtils.Evaluation.PENDING {
-                        returnTags.insert(at: 0, "Pending")
+                    // Add extra tags based on the evaluation rank if the reviewer is the fallbackedReviewer
+                    if reviewer == fallbackedReviewerAddr {
+                        if reviewRef.evalRank == FTViewUtils.Evaluation.FEATURED {
+                            returnTags.insert(at: 0, "Featured")
+                            returnTags.insert(at: 0, "Verified")
+                        } else if reviewRef.evalRank == FTViewUtils.Evaluation.VERIFIED {
+                            returnTags.insert(at: 0, "Verified")
+                        } else if reviewRef.evalRank == FTViewUtils.Evaluation.PENDING {
+                            returnTags.insert(at: 0, "Pending")
+                        }
                     }
                     return returnTags
                 }

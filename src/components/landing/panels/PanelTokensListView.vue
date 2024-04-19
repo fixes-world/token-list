@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { NSkeleton, NEmpty, NButton } from 'naive-ui'
 
 import type { StandardTokenView, QueryResult } from '@shared/flow/entities';
@@ -35,6 +35,12 @@ async function reload() {
 }
 
 // Watchers and Lifecycle
+
+watch(() => props.reviewer, async (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    await reload()
+  }
+})
 
 defineExpose({
   reload,
