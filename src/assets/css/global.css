@@ -9,6 +9,7 @@
   --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
+  --warn-color-light: hsl(39, 40%, 95%);
   --bg-color-active: hsl(184, 51%, 90%);
   --bg-color-dark: #e9ebeb;
   --bg-color: #f0f4f4;
@@ -21,6 +22,7 @@
   --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
+  --warn-color-light: hsl(39, 40%, 95%);
   --primary-hover-color: hsl(189, 28%, 37%);
   --bg-color-active: hsl(191, 20%, 22%);
   --bg-color-dark: #1c282d;
