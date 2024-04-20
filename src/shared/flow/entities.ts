@@ -21,6 +21,7 @@ export interface TokenPaths {
 
 export interface TokenStatusBasic extends TokenIdentity {
   isRegistered?: boolean;
+  isRegisteredWithNativeViewResolver?: boolean;
   isWithDisplay: boolean;
   isWithVaultData: boolean;
 }

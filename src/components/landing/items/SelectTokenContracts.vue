@@ -5,7 +5,6 @@ import {
   NSelect, type SelectOption,
 } from 'naive-ui';
 import { getContractNames, getFTContracts, getFTContractStatus } from '@shared/flow/action/scripts'
-import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { TokenStatus } from '@shared/flow/entities';
 
 import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
@@ -34,7 +33,7 @@ const options = computed<SelectOption[]>(() => {
     return {
       label: identifier,
       value: identifier,
-      disabled: contract.isRegistered,
+      disabled: contract.isRegisteredWithNativeViewResolver,
     }
   }) || [];
 })

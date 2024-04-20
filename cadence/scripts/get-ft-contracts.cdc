@@ -65,6 +65,7 @@ fun main(
             address: addr,
             contractName: contractName,
             isRegistered: TokenList.isFungibleTokenRegistered(addr, contractName),
+            isRegisteredWithNativeViewResolver: TokenList.isFungibleTokenRegisteredWithNativeViewResolver(addr, contractName),
             isWithDisplay: supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),
             isWithVaultData: supportedViews.contains(Type<FungibleTokenMetadataViews.FTVaultData>()),
             vaultPath: ftVaultPathsDic[ftType],
@@ -83,6 +84,8 @@ access(all) struct FTStatus {
     access(all)
     let isRegistered: Bool
     access(all)
+    let isRegisteredWithNativeViewResolver: Bool
+    access(all)
     let isWithDisplay: Bool
     access(all)
     let isWithVaultData: Bool
@@ -96,6 +99,7 @@ access(all) struct FTStatus {
         address: Address,
         contractName: String,
         isRegistered: Bool,
+        isRegisteredWithNativeViewResolver: Bool,
         isWithDisplay: Bool,
         isWithVaultData: Bool,
         vaultPath: String?,
@@ -104,6 +108,7 @@ access(all) struct FTStatus {
         self.address = address
         self.contractName = contractName
         self.isRegistered = isRegistered
+        self.isRegisteredWithNativeViewResolver = isRegisteredWithNativeViewResolver
         self.isWithDisplay = isWithDisplay
         self.isWithVaultData = isWithVaultData
         self.vaultPath = vaultPath
