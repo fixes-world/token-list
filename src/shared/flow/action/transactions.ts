@@ -4,8 +4,10 @@ import type {
   TokenPaths,
 } from "@shared/flow/entities";
 import { getFlowInstance } from "../flow.service.factory";
+import type { EvaluationType } from "../enums";
 // Transactions
 import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
+import txUpdateViewResolver from "@cadence/transactions/update-ft-view-resolver.cdc?raw";
 import txReviewerInit from "@cadence/transactions/reviewer-init.cdc?raw";
 import txReviewerPublishMaintainer from "@cadence/transactions/reviewer-publish-maintainer.cdc?raw";
 import txMaintainerClaim from "@cadence/transactions/maintainer-claim.cdc?raw";
@@ -13,13 +15,11 @@ import txMaintainerRegisterCustomizedFT from "@cadence/transactions/maintainer-r
 import txMaintainerUpdateCustomizedFT from "@cadence/transactions/maintainer-update-customized-ft-display.cdc?raw";
 import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer-update-reviewer-metadata.cdc?raw";
 import txMaintainerReviewFT from "@cadence/transactions/maintainer-reivew-ft.cdc?raw";
-import type { EvaluationType } from "../enums";
 
 /** ---- Transactions ---- */
 
 /**
  * Register a standard FT
- * @param flowSrv The FlowService instance
  * @param ft The FT to register
  */
 export async function registerStandardFT(ft: TokenIdentity): Promise<string> {
@@ -31,8 +31,19 @@ export async function registerStandardFT(ft: TokenIdentity): Promise<string> {
 }
 
 /**
+ * Update the view resolver
+ * @param ft The FT to register
+ */
+export async function updateViewResolver(ft: TokenIdentity): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txUpdateViewResolver, (arg, t) => [
+    arg(ft.address, t.Address),
+    arg(ft.contractName, t.String),
+  ]);
+}
+
+/**
  * Initialize the reviewer
- * @param flowSrv The FlowService instance
  * @returns The transaction ID
  */
 export async function reviewerInit() {
@@ -42,7 +53,6 @@ export async function reviewerInit() {
 
 /**
  * Publish a maintainer
- * @param flowSrv The FlowService instance
  */
 export async function reviewerPublishMaintainer(
   maintainer: string,
@@ -56,7 +66,6 @@ export async function reviewerPublishMaintainer(
 
 /**
  * Claim maintainer by reviewer address
- * @param flowSrv The FlowService instance
  * @param reviewer The reviewer address
  */
 export async function maintainerClaim(reviewer: string): Promise<string> {
@@ -68,7 +77,6 @@ export async function maintainerClaim(reviewer: string): Promise<string> {
 
 /**
  * Register a customized FT
- * @param flowSrv The FlowService instance
  */
 export async function maintainerRegisterCustomizedFT(
   ft: TokenIdentity,

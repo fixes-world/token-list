@@ -65,6 +65,7 @@ function parseFTContractStatus(obj: any): TokenStatus {
     address: obj.address,
     contractName: obj.contractName,
     isRegistered: obj.isRegistered,
+    isRegisteredWithNativeViewResolver: obj.isRegisteredWithNativeViewResolver,
     isWithDisplay: obj.isWithDisplay,
     isWithVaultData: obj.isWithVaultData,
     vaultPath: obj.vaultPath,

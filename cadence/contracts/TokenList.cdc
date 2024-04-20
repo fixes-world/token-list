@@ -107,6 +107,9 @@ access(all) contract TokenList {
         /// Get the FT Type
         access(all) view
         fun getTokenType(): Type
+        /// Check if the Fungible Token has a native view resolver
+        access(all) view
+        fun isNativeViewResolver(): Bool
         /// Get the display metadata of the FT, fallback to the highest rank reviewer
         access(all) view
         fun getDisplay(_ reviewer: Address?): FTViewUtils.FTDisplayWithSource?
@@ -153,6 +156,9 @@ access(all) contract TokenList {
             return []
         }
         // ----- Internal Methods: Used by Reviewer -----
+        /// Update the view resolver
+        access(contract)
+        fun updateViewResolver()
         /// Try to get a reviewer address
         access(contract)
         fun tryGetReviewer(_ reviewer: Address?): Address? {
@@ -306,6 +312,12 @@ access(all) contract TokenList {
             return self.identity.buildType()
         }
 
+        /// Check if the Fungible Token has a native view resolver
+        access(all) view
+        fun isNativeViewResolver(): Bool {
+            return self.viewResolver != nil
+        }
+
         /// Create an empty vault for the FT
         ///
         access(all)
@@ -321,6 +333,9 @@ access(all) contract TokenList {
         ///
         access(contract)
         fun updateViewResolver() {
+            if self.viewResolver != nil {
+                return // existing view resolver
+            }
             if ViewResolvers.borrowContractViewResolver(
                 self.identity.address,
                 self.identity.contractName,
@@ -1315,6 +1330,19 @@ access(all) contract TokenList {
         return false
     }
 
+    /// Check if the Fungible Token is registered with the native view resolver
+    ///
+    access(all) view
+    fun isFungibleTokenRegisteredWithNativeViewResolver(_ address: Address, _ contractName: String): Bool {
+        let registry: &TokenList.Registry{TokenList.TokenListViewer} = self.borrowRegistry()
+        if let ftType = FTViewUtils.buildFTVaultType(address, contractName) {
+            if let entryRef = registry.borrowFungibleTokenEntry(ftType) {
+                return entryRef.isNativeViewResolver()
+            }
+        }
+        return false
+    }
+
     /// Try to register a new Fungible Token, if already registered, then do nothing
     ///
     access(all)
@@ -1322,6 +1350,22 @@ access(all) contract TokenList {
         if !self.isFungibleTokenRegistered(ftAddress, ftContractName) {
             let registry = self.borrowRegistry()
             registry.registerStandardFungibleToken(ftAddress, ftContractName)
+        }
+    }
+
+    /// Update View Resolver for the Fungible Token
+    ///
+    access(all)
+    fun updateFungibleTokenViewResolver(
+        _ ftAddress: Address,
+        _ ftContractName: String,
+    ) {
+        self.ensureFungibleTokenRegistered(ftAddress, ftContractName)
+        let registry = self.borrowRegistry()
+        if let ftType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName) {
+            if let entryRef = registry.borrowFungibleTokenEntry(ftType) {
+                entryRef.updateViewResolver()
+            }
         }
     }
 

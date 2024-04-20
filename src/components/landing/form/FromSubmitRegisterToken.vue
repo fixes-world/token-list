@@ -2,8 +2,7 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { FlowSrvKey } from '@shared/flow/utilitites';
-import { registerStandardFT } from '@shared/flow/action/transactions';
+import { registerStandardFT, updateViewResolver } from '@shared/flow/action/transactions';
 import type { TokenStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
@@ -26,11 +25,18 @@ const acctName = useGlobalAccount()
 
 // Reactive Data
 
-const isValidData = computed(() => !props.token.isRegistered)
+const isValidData = computed(() => !props.token.isRegisteredWithNativeViewResolver && !isNotChanged.value)
+const isNotChanged = computed(() => props.token.isRegistered && !props.token.isRegisteredWithNativeViewResolver && (!props.token.isWithDisplay || !props.token.isWithVaultData))
 
 const disableReason = computed(() => {
+  if (!acctName.value) {
+    return "No account name"
+  }
+  if (isNotChanged.value) {
+    return "Registered, But still without ViewResolver"
+  }
   if (!isValidData.value) {
-    return "Token Already Registered"
+    return "Token Already Registered with Display"
   }
   return undefined
 })
@@ -46,8 +52,12 @@ async function onSubmit(): Promise<string> {
     emits('error', errStr)
     throw new Error(errStr)
   }
-
-  return await registerStandardFT(props.token)
+  // If token is already registered, update the view resolver
+  if (props.token.isRegistered) {
+    return await updateViewResolver(props.token)
+  } else {
+    return await registerStandardFT(props.token)
+  }
 }
 
 async function onSuccess() {
@@ -79,7 +89,8 @@ async function onCancel() {
       <template #icon>
         <span class="i-carbon:list w-5 h-5" />
       </template>
-      Register to List
+      <span v-if="!token.isRegistered">Register to List</span>
+      <span v-else>Update View Resolver</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>
