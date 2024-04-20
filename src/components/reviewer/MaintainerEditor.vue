@@ -5,7 +5,6 @@ import {
 } from 'naive-ui';
 
 import { getAddressReviewerStatus } from '@shared/flow/action/scripts';
-import { FlowSrvKey } from '@shared/flow/utilitites';
 import type { StandardTokenView, AddressStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
@@ -70,7 +69,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
 </script>
 
 <template>
-  <VueWrapper>
+  <VueWrapper id="MaintainerEditor">
     <div :class="['min-h-[calc(100vh-36rem)] flex flex-col', isPlaceCenter ? 'items-center justify-center' : '']">
       <EnsureConnected type="primary">
         <template #not-connected>

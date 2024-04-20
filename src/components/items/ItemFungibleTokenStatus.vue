@@ -30,7 +30,7 @@ const isHighlight = computed(() => {
       item.isRegistered ? 'i-carbon:checkmark-filled highlight' : 'i-carbon:radio-button text-gray-400 opacity-60'
     ]" />
     <div class="relative inline-flex flex-wrap items-center gap-1">
-      <span :class="['w-full md:w-fit title-base text-sm', isHighlight ? 'highlight' : 'text-[var(--base-color)]']">
+      <span :class="['w-fit title-base text-sm', isHighlight ? 'highlight' : 'text-[var(--base-color)]']">
         {{ item.contractName }}
       </span>
       <NTag

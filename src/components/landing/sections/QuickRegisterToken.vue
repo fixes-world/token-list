@@ -45,7 +45,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VueWrapper>
+  <VueWrapper id="QuickRegisterToken">
     <div :class="['relative mx-a max-w-xl',
       'flex flex-col items-center justify-center gap-4 md:gap-6',
       'w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%]',

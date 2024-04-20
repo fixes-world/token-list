@@ -1,4 +1,5 @@
 ---
+import Loading from "@components/widgets/Loading.astro";
 import LandingSlogan from "./sections/LandingSlogan.astro";
 import SectionWrapper from "@components/partials/SectionWrapper.astro";
 import QuickRegisterToken from "./sections/QuickRegisterToken.vue";
@@ -10,11 +11,14 @@ import FullList from "./sections/FullList.vue";
   <LandingSlogan />
 </SectionWrapper>
 <SectionWrapper title="Quick Register">
+  <Loading id="QuickRegisterToken" classNames={["max-w-xl", "h-20"]} />
   <QuickRegisterToken client:only="vue" />
 </SectionWrapper>
 <SectionWrapper title="Full List of FTs">
+  <Loading id="FullListSection" classNames={["max-w-3xl", "h-24"]} />
   <FullList client:only="vue" />
 </SectionWrapper>
 <SectionWrapper title="How to use">
+  <Loading id="HowToUseSection" classNames={["max-w-3xl", "h-24"]} />
   <HowToUse client:only="vue" />
 </SectionWrapper>

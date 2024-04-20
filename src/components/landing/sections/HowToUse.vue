@@ -69,7 +69,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VueWrapper>
+  <VueWrapper id="HowToUseSection">
     <div :class="[
       'relative mx-a max-w-4xl min-h-[calc(100vh-40rem)]',
       'flex flex-col items-center justify-start',

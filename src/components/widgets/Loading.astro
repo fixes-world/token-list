@@ -1,0 +1,18 @@
+---
+interface Props {
+  id: string;
+  classNames: string[];
+}
+
+const { id, classNames } = Astro.props;
+---
+
+<div
+  id={id}
+  class:list={[
+    "min-w-fit min-h-4 animate-pulse rounded-2 bg-white/20",
+    "mx-a p-2 flex items-center justify-center",
+  ].concat(classNames)}
+>
+  <span class="text-xs text-gray-400/50">Loading...</span>
+</div>
