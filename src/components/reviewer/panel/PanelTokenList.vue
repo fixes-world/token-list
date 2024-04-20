@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, inject } from 'vue'
+import { NInput } from 'naive-ui'
 import { queryTokenList } from '@shared/flow/action/scripts';
 import type { StandardTokenView, QueryResult } from '@shared/flow/entities';
 import { FilterType } from '@shared/flow/enums';
@@ -30,6 +31,7 @@ const current = computed({
 const listWrapperRef = ref<typeof ListWrapper | null>(null)
 
 const currentPage = ref<number>(0)
+const filterName = ref<string>("")
 
 async function loadTokenList(page: number, size: number): Promise<QueryResult<StandardTokenView>> {
   return await queryTokenList(
@@ -52,24 +54,40 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    class="max-h-[calc(100vh-15rem)] md:min-w-[10rem] max-w-[10rem] md:max-w-[20rem] overflow-x-auto overflow-y-scroll"
-  >
+  <div class="max-h-[calc(100vh-15rem)] w-[10rem] md:w-[14rem] overflow-x-auto overflow-y-scroll">
     <ListWrapper
       ref="listWrapperRef"
       emptyMessage="No Token Found"
       v-model:page="currentPage"
       :loadMore="loadTokenList"
-      v-slot="{ items }"
+      :filter="filterName"
+      :getItemName="token => token.identity.contractName"
     >
-      <ItemTokenInfo
-        v-for="token in items"
-        :key="`${token.identity.address}.${token.identity.contractName}`"
-        :token="token"
-        class="w-full"
-        :active="current?.identity.address === token.identity.address && current?.identity.contractName === token.identity.contractName"
-        @select="current = token"
-      />
+      <template #header>
+        <NInput
+          size="small"
+          round
+          v-model:value="filterName"
+          placeholder="Search"
+          :input-props="{
+            autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false', inputmode: 'search', enterKeyHint: 'search'
+          }"
+        >
+          <template #suffix>
+            <div class="i-carbon:search w-5 h-5 text-gray-400/50" />
+          </template>
+        </NInput>
+      </template>
+      <template #="{ items }">
+        <ItemTokenInfo
+          v-for="token in items"
+          :key="`${token.identity.address}.${token.identity.contractName}`"
+          :token="token"
+          class="w-full"
+          :active="current?.identity.address === token.identity.address && current?.identity.contractName === token.identity.contractName"
+          @select="current = token"
+        />
+      </template>
     </ListWrapper>
   </div>
 </template>
