@@ -64,8 +64,9 @@ onMounted(async () => {
 <template>
   <VueWrapper
     :class="[
-    'flex flex-col items-center', !isLoggedIn ? 'gap-2' : 'gap-0',
-]"
+      'flex items-center',
+      !isLoggedIn ? 'gap-2' : 'gap-0',
+    ]"
     :is-global="true"
   >
     <AuthBoxNotLoggedIn v-if="!isLoggedIn" />
