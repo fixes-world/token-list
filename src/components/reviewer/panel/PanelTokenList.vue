@@ -54,7 +54,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="max-h-[calc(100vh-15rem)] w-[10rem] md:w-[14rem] overflow-x-auto overflow-y-scroll">
+  <div class="max-h-[calc(100vh)] w-[10rem] md:w-[14rem] overflow-x-auto overflow-y-scroll">
     <ListWrapper
       ref="listWrapperRef"
       emptyMessage="No Token Found"
