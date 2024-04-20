@@ -54,7 +54,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="max-h-[calc(100vh-15rem)] w-[10rem] md:w-[14rem] overflow-x-auto overflow-y-scroll">
+  <div class="max-h-[calc(100vh)] w-[10rem] md:w-[14rem] overflow-x-auto overflow-y-scroll">
     <ListWrapper
       ref="listWrapperRef"
       emptyMessage="No Token Found"
@@ -74,7 +74,7 @@ defineExpose({
           }"
         >
           <template #suffix>
-            <div class="i-carbon:search w-5 h-5 text-gray-400/50" />
+            <div class="i-carbon:search w-4 h-4 text-gray-400/50" />
           </template>
         </NInput>
       </template>
