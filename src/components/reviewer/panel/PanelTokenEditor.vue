@@ -8,14 +8,12 @@ import {
   NSelect, type SelectOption,
 } from 'naive-ui';
 import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
-import { FlowSrvKey } from '@shared/flow/utilitites';
 import { getFTContractStatus } from '@shared/flow/action/scripts';
-import { useGlobalAccount, useSendingTransaction } from '@components/shared'
+import { useSendingTransaction } from '@components/shared'
 
 import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
 import ImageUploader from '@components/widgets/ImageUploader.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
-import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
 import FormSubmitCustomizeFT from '@components/reviewer/form/FormSubmitCustomizeFT.vue';
 
 const props = withDefaults(defineProps<{
@@ -102,6 +100,8 @@ const socialTypesOptions: SelectOption[] = [
   { value: "facebook", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:logo-facebook w-4 h-4' })) },
   { value: "documentation", label: (opt) => renderLabel(opt, h('span', { class: 'i-carbon:book w-4 h-4' })) },
   { value: "coingeckoId", label: (opt) => h('span', {}, "CoinGecko ID") },
+  { value: "bridgeContract", label: (opt) => h('span', {}, "Bridge Contract") },
+  { value: "other", label: (opt) => h('span', {}, "Other") },
 ];
 
 // Handlers and Functions
