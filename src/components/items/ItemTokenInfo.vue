@@ -33,7 +33,7 @@ function onClick() {
 <template>
   <div
     :class="[
-      'flex flex-wrap items-center justify-between gap-2',
+  'flex items-center justify-between gap-2',
       'px-4 py-3 rounded-lg',
       props.hoverable ? 'cursor-pointer' : '',
       !props.active
@@ -42,7 +42,7 @@ function onClick() {
     ]"
     @click="onClick"
   >
-    <div class="flex flex-col items-start gap-1">
+    <div class="flex-auto flex flex-col items-start gap-1">
       <div class="text-xs text-gray-400 italic font-semibold">
         <ElementAddressDisplay
           :address="token.identity.address"
@@ -62,7 +62,7 @@ function onClick() {
     </div>
     <div
       v-if="withDisplay"
-      class="flex items-center items-end gap-2 md:gap-4"
+      class="flex-none flex items-center items-end gap-2 md:gap-4"
     >
       <span class="title-base highlight text-2xl">
         ${{ token.display?.display?.symbol }}

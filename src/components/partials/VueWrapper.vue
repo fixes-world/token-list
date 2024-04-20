@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue';
 import {
   useSharedDark
 } from '@components/shared';
@@ -7,13 +8,13 @@ import {
   NConfigProvider, NGlobalStyle, NMessageProvider,
 } from 'naive-ui'
 import type { GlobalThemeOverrides } from 'naive-ui'
-import { computed } from 'vue';
 
-defineProps({
-  isGlobal: {
-    type: Boolean,
-    default: false
-  }
+const props = withDefaults(defineProps<{
+  id?: string
+  isGlobal?: boolean,
+}>(), {
+  id: undefined,
+  isGlobal: false,
 })
 
 const isDark = useSharedDark()
@@ -56,6 +57,16 @@ function addNaiveUIStyleMeta() {
   document.head.appendChild(meta);
 }
 addNaiveUIStyleMeta()
+
+onMounted(() => {
+  if (props.id && document) {
+    // Hide the element
+    const el = document.getElementById(props.id)
+    if (el) {
+      el.style.display = "none"
+    }
+  }
+})
 
 </script>
 

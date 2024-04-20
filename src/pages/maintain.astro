@@ -1,11 +1,13 @@
 ---
 import Layout from "@layouts/Layout.astro";
+import Loading from "@components/widgets/Loading.astro";
 import SectionWrapper from "@components/partials/SectionWrapper.astro";
 import MaintainerEditor from "@components/reviewer/MaintainerEditor.vue";
 ---
 
 <Layout title="Maintain Extra Token Metadata">
   <SectionWrapper title="Maintain Extra Metadata for Fungible Tokens">
+    <Loading id="MaintainerEditor" classNames={["container", "h-30"]} />
     <MaintainerEditor client:only="vue" />
   </SectionWrapper>
 </Layout>

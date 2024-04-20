@@ -31,7 +31,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VueWrapper>
+  <VueWrapper id="FullListSection">
     <div :class="[
       'relative mx-a max-w-3xl pt-4',
       'flex flex-col items-center justify-center',
