@@ -8,9 +8,13 @@ const props = withDefaults(defineProps<{
   loadMore: (page: number, size: number) => Promise<QueryResult<any>>,
   page?: number,
   emptyMessage?: string,
+  filter?: string,
+  getItemName?: (item: any) => string,
 }>(), {
   page: 0,
-  emptyMessage: 'No Item Found'
+  emptyMessage: 'No Item Found',
+  filter: "",
+  getItemName: (item: any) => item.name,
 })
 
 const emits = defineEmits<{
@@ -33,6 +37,13 @@ const currentPage = computed<number>({
 
 const list = reactive<any[]>([])
 const totalAmount = ref<number>(0)
+
+const filteredList = computed(() => {
+  return !!props.filter ? list.filter((item) => {
+    const name = props.getItemName(item)?.toLowerCase()
+    return name.includes(props.filter.toLowerCase())
+  }) : list
+})
 
 async function loadMore(forceFirst = false) {
   isLoading.value = true
@@ -72,6 +83,7 @@ defineExpose({
   <div :class="['flex flex-col items-start gap-2', {
     'justify-center': list.length === 0,
   }]">
+    <slot name="header" />
     <NSkeleton
       v-if="isFirstLoading"
       animate
@@ -85,7 +97,7 @@ defineExpose({
         class="my-8"
       />
       <template v-else>
-        <slot :items="list" />
+        <slot :items="filteredList" />
       </template>
     </template>
   </div>
