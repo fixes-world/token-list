@@ -74,7 +74,7 @@ defineExpose({
           }"
         >
           <template #suffix>
-            <div class="i-carbon:search w-5 h-5 text-gray-400/50" />
+            <div class="i-carbon:search w-4 h-4 text-gray-400/50" />
           </template>
         </NInput>
       </template>

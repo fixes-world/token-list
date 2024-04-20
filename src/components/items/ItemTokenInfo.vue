@@ -12,11 +12,11 @@ const props = withDefaults(defineProps<{
   token: StandardTokenView,
   active?: boolean,
   hoverable?: boolean,
-  withIcon?: boolean
+  withDisplay?: boolean
 }>(), {
   active: false,
   hoverable: true,
-  withIcon: false
+  withDisplay: false
 });
 
 const emits = defineEmits<{
@@ -60,10 +60,17 @@ function onClick() {
         </template>
       </div>
     </div>
-    <ItemTokenIcon
-      v-if="withIcon"
-      :token="token"
-      :width="40"
-    />
+    <div
+      v-if="withDisplay"
+      class="flex items-center items-end gap-2 md:gap-4"
+    >
+      <span class="title-base highlight text-2xl">
+        ${{ token.display?.display?.symbol }}
+      </span>
+      <ItemTokenIcon
+        :token="token"
+        :width="40"
+      />
+    </div>
   </div>
 </template>

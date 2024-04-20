@@ -285,11 +285,7 @@ watch(() => props.ft, async (ft, oldFt) => {
             size="small"
             v-model:value="formData.display.symbol"
             placeholder="Token Symbol"
-            :input-props="{
-              autocomplete: 'off',
-  autocorrect: 'off',
-              spellcheck: 'false',
-            }"
+            :input-props="{ autocomplete: 'off', autocorrect: 'off', spellcheck: 'false' }"
           />
         </NFormItemGi>
         <NFormItemGi
