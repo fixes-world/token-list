@@ -61,7 +61,7 @@ function onClick() {
       </div>
     </div>
     <div
-      v-if="withDisplay"
+      v-if="withDisplay && token.display?.display"
       class="flex-none flex items-center items-end gap-2 md:gap-4"
     >
       <span class="title-base highlight text-2xl">
