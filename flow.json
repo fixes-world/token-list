@@ -86,6 +86,22 @@
 				"testnet": "31ad40c07a2a9788"
 			}
 		},
+		"SwapConfig": {
+			"source": "./imports/b78ef7afa52ff906/SwapConfig.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
+		"SwapInterfaces": {
+			"source": "./imports/b78ef7afa52ff906/SwapInterfaces.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
 		"TokenList": {
 			"source": "./cadence/contracts/TokenList.cdc",
 			"aliases": {
@@ -273,6 +289,24 @@
 				"testnet": "31ad40c07a2a9788"
 			}
 		},
+		"SwapConfig": {
+			"source": "mainnet://b78ef7afa52ff906.SwapConfig",
+			"hash": "5680309531a1373e12086df8a3770afabbbeda0dc52f43a1fb231b626236fbc3",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
+		"SwapInterfaces": {
+			"source": "mainnet://b78ef7afa52ff906.SwapInterfaces",
+			"hash": "600b3a9eeee86cd44ef08b1263fb1b6f29ec5fb422d93d008d34d6cd1caea139",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
 		"ViewResolver": {
 			"source": "mainnet://1d7e57aa55817448.ViewResolver",
 			"hash": "9fa41186f38899625a6b4774f1a9addf8d16b76022d52a99174b4493499dc3de",
@@ -335,6 +369,8 @@
 				"StringUtils",
 				"ArrayUtils",
 				"FungibleTokenMetadataViews",
+				"SwapConfig",
+				"SwapInterfaces",
 				"ExampleToken",
 				"ViewResolvers",
 				"FTViewUtils",

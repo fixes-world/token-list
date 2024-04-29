@@ -12,6 +12,9 @@
 */
 import "FungibleToken"
 import "StringUtils"
+// IncrementFi Swap
+import "SwapConfig"
+import "SwapInterfaces"
 
 /// BlackHole contract
 ///
@@ -79,13 +82,47 @@ access(all) contract BlackHole {
                 self.isValid(): "The BlackHole Resource should be valid"
                 from.balance > UFix64(0): "The balance should be greater than zero"
             }
+            let blackHoleAddr = self.owner?.address ?? panic("Invalid BlackHole Address")
+
+            // get basic information
             let fromType = from.getType()
-            let receiverRef = self._borrowOrCreateBlackHoleVault(fromType)
             let vanishedAmount = from.balance
+
+            // should be A.{address}.{contractName}.Vault
+            let fromIdentifierArr = StringUtils.split(fromType.identifier, ".")
+            // check if the from vault is an IncrementFi LP
+            if fromIdentifierArr[2] == "SwapPair" {
+                let pairAddr = Address.fromString("0x".concat(fromIdentifierArr[1]))!
+                // @deprecated in Cadence 1.0
+                if let pairPubRef = getAccount(pairAddr)
+                    .getCapability<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)
+                    .borrow() {
+                    if pairPubRef.getLpTokenVaultType() == fromType {
+                        // Now we can confirm that the from vault is an IncrementFi LP
+                        // check if there is a LP Collection in the BlackHole Account
+                        if let lpTokenCollectionRef = getAccount(blackHoleAddr)
+                            .getCapability<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath)
+                            .borrow() {
+                            // Deposit the LP Token into the LP Collection
+                            lpTokenCollectionRef.deposit(pairAddr: pairAddr, lpTokenVault: <- from)
+
+                            emit BlackHole.FungibleTokenVanished(
+                                blackHoleAddr: blackHoleAddr,
+                                blackHoleId: self.uuid,
+                                vaultIdentifier: fromType,
+                                amount: vanishedAmount
+                            )
+                            return
+                        }
+                    }
+                }
+            }
+            // Deposit the Fungible Token into the BlackHole Vault
+            let receiverRef = self._borrowOrCreateBlackHoleVault(fromType)
             receiverRef.deposit(from: <- from)
 
             emit BlackHole.FungibleTokenVanished(
-                blackHoleAddr: self.owner?.address ?? panic("Invalid BlackHole Address"),
+                blackHoleAddr: blackHoleAddr,
                 blackHoleId: self.uuid,
                 vaultIdentifier: fromType,
                 amount: vanishedAmount
