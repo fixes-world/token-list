@@ -432,9 +432,9 @@ access(all) contract TokenList {
         access(all)
         view fun getVerifiedFTTypes(): [Type]
         access(all)
-        view fun borrowFTViewReader(_ tokenType: Type): &{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.EditableFTViewDisplayInterface}?
+        view fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView?
         access(all)
-        view fun borrowFTDisplayReader(_ tokenType: Type): &{FTViewUtils.EditableFTViewDisplayInterface}?
+        view fun borrowFTDisplayReader(_ tokenType: Type): &{FTViewUtils.FTViewDisplayEditor}?
     }
 
     /// Maintainer interface for the Fungible Token Reviewer
@@ -467,10 +467,10 @@ access(all) contract TokenList {
         )
         /// Borrow the FTView editor
         access(Maintainer)
-        view fun borrowFTViewEditor(_ tokenType: Type): &{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}?
+        view fun borrowFTViewEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &FTViewUtils.EditableFTView?
         /// Borrow or create the FTDisplay editor
         access(Maintainer)
-        view fun borrowFTDisplayEditor(_ tokenType: Type): &{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}?
+        view fun borrowFTDisplayEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &{FTViewUtils.FTViewDisplayEditor}?
     }
 
     /// The resource for the FT Reviewer
@@ -670,9 +670,7 @@ access(all) contract TokenList {
         /// Borrow the FTView editor
         ///
         access(Maintainer)
-        view fun borrowFTViewEditor(
-            _ tokenType: Type
-        ): &{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
+        view fun borrowFTViewEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &FTViewUtils.EditableFTView? {
             return self._borrowEditableFTView(tokenType)
         }
 
@@ -715,9 +713,7 @@ access(all) contract TokenList {
         /// Borrow or create the FTDisplay editor
         ///
         access(Maintainer)
-        view fun borrowFTDisplayEditor(
-            _ tokenType: Type
-        ): &{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
+        view fun borrowFTDisplayEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &{FTViewUtils.FTViewDisplayEditor}? {
             let registery = TokenList.borrowRegistry()
             if let ref = self._borrowEditableFTDisplay(tokenType) {
                 return ref
@@ -791,14 +787,14 @@ access(all) contract TokenList {
         /// Borrow the reference of Editable FT View
         ///
         access(all)
-        view fun borrowFTViewReader(_ tokenType: Type): &{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.EditableFTViewDisplayInterface}? {
+        view fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView? {
             return self._borrowEditableFTView(tokenType)
         }
 
         /// Borrow the FTDisplay editor
         ///
         access(all)
-        view fun borrowFTDisplayReader(_ tokenType: Type): &{FTViewUtils.EditableFTViewDisplayInterface}? {
+        view fun borrowFTDisplayReader(_ tokenType: Type): &{FTViewUtils.FTViewDisplayEditor}? {
             let ref = self._borrowEditableFTDisplay(tokenType)
             if ref != nil {
                 return ref
@@ -850,14 +846,14 @@ access(all) contract TokenList {
         /// Borrow the Editable FT View
         ///
         access(self)
-        view fun _borrowEditableFTView(_ tokenType: Type): &FTViewUtils.EditableFTView? {
+        view fun _borrowEditableFTView(_ tokenType: Type): auth(FTViewUtils.Editable) &FTViewUtils.EditableFTView? {
             return &self.storedDatas[tokenType]
         }
 
         /// Borrow the Editable FT Display
         ///
         access(self)
-        view fun _borrowEditableFTDisplay(_ tokenType: Type): &FTViewUtils.EditableFTDisplay? {
+        view fun _borrowEditableFTDisplay(_ tokenType: Type): auth(FTViewUtils.Editable) &{FTViewUtils.FTViewDisplayEditor}? {
             return &self.storedDisplayPatches[tokenType]
         }
     }
@@ -923,13 +919,6 @@ access(all) contract TokenList {
             self._borrowReviewer().registerFungibleTokenWithEditableFTView(ftAddress, ftContractName, at: at)
         }
 
-        /// Borrow the FTView editor
-        ///
-        access(Maintainer)
-        view fun borrowFTViewEditor(_ tokenType: Type): &{FTViewUtils.EditableFTViewDataInterface, FTViewUtils.FTViewDataEditor, FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
-            return self._borrowReviewer().borrowFTViewEditor(tokenType)
-        }
-
         /// Register the Fungible Token Display Patch
         ///
         access(Maintainer)
@@ -940,10 +929,17 @@ access(all) contract TokenList {
             self._borrowReviewer().registerFungibleTokenDisplayPatch(ftAddress, ftContractName)
         }
 
+        /// Borrow the FTView editor
+        ///
+        access(Maintainer)
+        view fun borrowFTViewEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &FTViewUtils.EditableFTView? {
+            return self._borrowReviewer().borrowFTViewEditor(tokenType)
+        }
+
         /// Borrow the FTDisplay editor
         ///
         access(Maintainer)
-        view fun borrowFTDisplayEditor(_ tokenType: Type): &{FTViewUtils.FTViewDisplayEditor, FTViewUtils.EditableFTViewDisplayInterface}? {
+        view fun borrowFTDisplayEditor(_ tokenType: Type): auth(FTViewUtils.Editable) &{FTViewUtils.FTViewDisplayEditor}? {
             return self._borrowReviewer().borrowFTDisplayEditor(tokenType)
         }
 

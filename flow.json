@@ -383,7 +383,7 @@
 			}
 		},
 		"previewnet-admin": {
-			"address": "74c94ebb43da9101",
+			"address": "8dd0a0cc07a1e596",
 			"key": {
 				"type": "file",
 				"location": "testnet-admin.pkey"

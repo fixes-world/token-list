@@ -371,7 +371,7 @@ access(all) contract FTViewUtils {
 
     /// The interface for the Editable FT View Display
     ///
-    access(all) resource interface EditableFTViewDisplayInterface {
+    access(all) resource interface EditableFTViewDisplayInterface: ViewResolver.Resolver {
         /// Identity of the FT
         access(all)
         let identity: FTIdentity
@@ -406,7 +406,7 @@ access(all) contract FTViewUtils {
 
     /// The interface for the FT View Data Editor
     ///
-    access(all) resource interface FTViewDataEditor {
+    access(all) resource interface FTViewDataEditor: EditableFTViewDataInterface {
         /// Update the Storage Path
         access(Editable)
         fun updateStoragePath(_ storagePath: StoragePath)
@@ -422,7 +422,7 @@ access(all) contract FTViewUtils {
 
     /// The interface for the FT View Display Editor
     ///
-    access(all) resource interface FTViewDisplayEditor {
+    access(all) resource interface FTViewDisplayEditor: EditableFTViewDisplayInterface {
         /// Set the FT Display
         access(Editable)
         fun setFTDisplay(
@@ -437,7 +437,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT Display
     ///
-    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface, ViewResolver.Resolver {
+    access(all) resource EditableFTDisplay: FTViewDisplayEditor {
         access(all)
         let identity: FTIdentity
         access(contract)
@@ -624,7 +624,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT View
     ///
-    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor, EditableFTViewDataInterface, EditableFTViewDisplayInterface, ViewResolver.Resolver {
+    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor {
         access(self)
         let display: @EditableFTDisplay
         access(all)
