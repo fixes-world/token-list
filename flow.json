@@ -1,11 +1,29 @@
 {
 	"contracts": {
+		"ArrayUtils": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "a340dc0a4ec828ab",
+				"testnet": "31ad40c07a2a9788",
+				"previewnet": "7d29f084fc7b2b84"
+			}
+		},
 		"BlackHole": {
 			"source": "./cadence/contracts/BlackHole.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "4396883a58c3a2d1",
 				"testnet": "ad26718c4b6b921b"
+			}
+		},
+		"Burner": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7",
+				"previewnet": "b6763b4399a888c8"
 			}
 		},
 		"ExampleToken": {
@@ -22,12 +40,91 @@
 				"testnet": "b86f928a1fa7798e"
 			}
 		},
+		"FlowToken": {
+			"source": "",
+			"aliases": {
+				"emulator": "0ae53cb6e3f42a79",
+				"mainnet": "1654653399040a61",
+				"testnet": "7e60df042a9c0868",
+				"previewnet": "4445e7ad11568276"
+			}
+		},
+		"FungibleToken": {
+			"source": "",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7",
+				"previewnet": "a0225e7000ac82a9"
+			}
+		},
+		"FungibleTokenMetadataViews": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7",
+				"previewnet": "a0225e7000ac82a9"
+			}
+		},
+		"MetadataViews": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"previewnet": "b6763b4399a888c8"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"previewnet": "b6763b4399a888c8"
+			}
+		},
+		"StringUtils": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "a340dc0a4ec828ab",
+				"testnet": "31ad40c07a2a9788",
+				"previewnet": "7d29f084fc7b2b84"
+			}
+		},
+		"SwapConfig": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
+		"SwapInterfaces": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "b78ef7afa52ff906",
+				"testnet": "ddb929038d45d4b3"
+			}
+		},
 		"TokenList": {
 			"source": "./cadence/contracts/TokenList.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "15a918087ab12d86",
 				"testnet": "b86f928a1fa7798e"
+			}
+		},
+		"ViewResolver": {
+			"source": "",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"previewnet": "b6763b4399a888c8"
 			}
 		},
 		"ViewResolvers": {
