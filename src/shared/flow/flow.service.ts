@@ -4,7 +4,7 @@ import * as uuid from "uuid";
 import type { Account, TransactionStatus } from "@onflow/typedefs";
 import appInfo from "@shared/config/info";
 
-export type NetworkType = "mainnet" | "testnet" | "emulator";
+export type NetworkType = "mainnet" | "testnet" | "previewnet" | "emulator";
 
 let isGloballyInited = false;
 let isGloballyWalletConnectInit = false;
@@ -47,33 +47,41 @@ export class FlowService {
     });
     await cfg.put(
       "service.OpenID.scopes",
-      "email email_verified name zoneinfo"
+      "email email_verified name zoneinfo",
     );
     switch (this.network) {
       case "mainnet":
         await cfg.put(
           "accessNode.api",
           import.meta.env.PUBLIC_MAINNET_ENDPOINT ??
-            "https://mainnet.onflow.org"
+            "https://mainnet.onflow.org",
         );
         await cfg.put(
           "discovery.wallet",
-          "https://fcl-discovery.onflow.org/authn"
+          "https://fcl-discovery.onflow.org/authn",
         );
         await cfg.put(
           "discovery.authn.endpoint",
-          "https://fcl-discovery.onflow.org/api/authn"
+          "https://fcl-discovery.onflow.org/api/authn",
         );
         break;
       case "testnet":
         await cfg.put("accessNode.api", "https://testnet.onflow.org");
         await cfg.put(
           "discovery.wallet",
-          "https://fcl-discovery.onflow.org/testnet/authn"
+          "https://fcl-discovery.onflow.org/testnet/authn",
         );
         await cfg.put(
           "discovery.authn.endpoint",
-          "https://fcl-discovery.onflow.org/api/testnet/authn"
+          "https://fcl-discovery.onflow.org/api/testnet/authn",
+        );
+        break;
+      case "previewnet":
+        await cfg.put("accessNode.api", "https://rest-previewnet.onflow.org");
+        await cfg.put("discovery.wallet.method", "EXT/RPC");
+        await cfg.put(
+          "discovery.wallet",
+          "chrome-extension://hpclkefagolihohboafpheddmmgdffjm/popup.html",
         );
         break;
       case "emulator":
@@ -178,7 +186,7 @@ export class FlowService {
     code: string,
     args: fcl.ArgumentFunction,
     mainAuthz?: fcl.FclAuthorization,
-    extraAuthz?: fcl.FclAuthorization[]
+    extraAuthz?: fcl.FclAuthorization[],
   ): Promise<string> {
     await this.ensureInited();
     try {
@@ -221,9 +229,9 @@ export class FlowService {
     onSealed: (
       txId: string,
       status: TransactionStatus,
-      errorMsg?: string
+      errorMsg?: string,
     ) => void | undefined,
-    onErrorOccured?: (errorMsg: string) => void | undefined
+    onErrorOccured?: (errorMsg: string) => void | undefined,
   ) {
     await this.ensureInited();
     const unsub = await fcl.tx(transactionId).subscribe((res) => {
@@ -242,7 +250,7 @@ export class FlowService {
           onSealed(
             transactionId,
             res,
-            res.errorMessage ? res.errorMessage : undefined
+            res.errorMessage ? res.errorMessage : undefined,
           );
         }
       }
@@ -254,7 +262,7 @@ export class FlowService {
    * Get transaction status
    */
   async getTransactionStatus(
-    transactionId: string
+    transactionId: string,
   ): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceExecuted();
@@ -272,7 +280,7 @@ export class FlowService {
    * listen to the transaction status: once sealed
    */
   async onceTransactionSealed(
-    transactionId: string
+    transactionId: string,
   ): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceSealed();
@@ -296,7 +304,7 @@ export class FlowService {
   async executeScript<T>(
     code: string,
     args: fcl.ArgumentFunction,
-    defaultValue: T
+    defaultValue: T,
   ): Promise<T> {
     await this.ensureInited();
     try {
@@ -316,7 +324,7 @@ export class FlowService {
    */
   async verifyAccountProof(
     appIdentifier: string,
-    opt: fcl.AccountProofData
+    opt: fcl.AccountProofData,
   ): Promise<boolean> {
     if (this.network === "emulator") return true;
     await this.ensureInited();
@@ -341,7 +349,7 @@ export class FlowService {
           this.network === "mainnet"
             ? "0xdb6b70764af4ff68"
             : "0x5b250a8a85b44a67",
-      }
+      },
     );
   }
 }
