@@ -13,9 +13,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "deploy:emulator": "flow project deploy --update",
-		"deploy:preview": "flow project deploy --update --network previewnet",
-    "deploy:testnet": "flow project deploy --update --network testnet",
-    "deploy:mainnet": "flow project deploy --update --network mainnet"
+		"deploy:preview": "flow-c1 project deploy --update --network=previewnet",
+		"deploy:testnet": "flow project deploy --update --network=testnet",
+		"deploy:mainnet": "flow project deploy --update --network=mainnet"
   },
   "keywords": [
     "Astro",
