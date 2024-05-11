@@ -92,7 +92,9 @@ export interface AddressStatus {
 }
 
 export interface ExportedTokenInfo extends TokenIdentity {
+  chainId: number;
   path: TokenPaths;
+  evmAddress?: string;
   symbol: string;
   name: string;
   decimals: number;
