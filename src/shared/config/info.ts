@@ -31,8 +31,10 @@ export default {
   banner: import.meta.env.PUBLIC_BANNER ?? "https://i.imgur.com/Wdy3GG7.jpg",
   linktree: import.meta.env.PUBLIC_LINKTREE ?? "https://linktr.ee/fixes.world",
   twitter: import.meta.env.PUBLIC_TWITTER ?? "https://x.com/fixesWorld",
-  github: import.meta.env.PUBLIC_GITHUB ?? "https://github.com/fixes-world",
-  discord: import.meta.env.PUBLIC_DISCORD ?? "https://discord.gg/flow",
+  github:
+    import.meta.env.PUBLIC_GITHUB ??
+    "https://github.com/fixes-world/token-list",
+  documentation: "https://docs.fixes.world/concepts/token-list",
   // API Keys
   nftStorageKey: import.meta.env.PUBLIC_NFTSTORAGE_KEY ?? undefined,
   // Blockchain info
