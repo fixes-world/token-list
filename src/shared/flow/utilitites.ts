@@ -72,7 +72,7 @@ export function exportTokenInfo(
     address: ft.identity.address,
     contractName: ft.identity.contractName,
     path: ft.path,
-    evmAddress: "", // TODO: add EVM address from View
+    evmAddress: undefined, // TODO: add EVM address from View
     symbol: ft.display.display.symbol,
     name: ft.display.display.name,
     description: ft.display?.display?.description ?? "",
