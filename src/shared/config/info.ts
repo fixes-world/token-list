@@ -13,7 +13,7 @@ const chainId =
     : network === "mainnet"
       ? 747
       : network === "testnet"
-        ? 0 // TODO: update to testnet chainId
+        ? 545
         : 0;
 
 export default {
