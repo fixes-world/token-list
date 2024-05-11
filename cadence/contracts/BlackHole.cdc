@@ -12,6 +12,9 @@
 */
 import "FungibleToken"
 import "StringUtils"
+// IncrementFi Swap
+import "SwapConfig"
+import "SwapInterfaces"
 
 /// BlackHole contract
 ///
@@ -45,11 +48,11 @@ access(all) contract BlackHole {
     ///
     access(all) resource interface BlackHolePublic {
         /// Check if the BlackHole Resource is valid
-        access(all) view
-        fun isValid(): Bool
+        access(all)
+        view fun isValid(): Bool
         /// Get the balance by the type of the Fungible Token
-        access(all) view
-        fun getVanishedBalanced(_ type: Type): UFix64
+        access(all)
+        view fun getVanishedBalanced(_ type: Type): UFix64
     }
 
     /// The resource of BlackHole Fungible Token Receiver
@@ -79,13 +82,47 @@ access(all) contract BlackHole {
                 self.isValid(): "The BlackHole Resource should be valid"
                 from.balance > UFix64(0): "The balance should be greater than zero"
             }
+            let blackHoleAddr = self.owner?.address ?? panic("Invalid BlackHole Address")
+
+            // get basic information
             let fromType = from.getType()
-            let receiverRef = self._borrowOrCreateBlackHoleVault(fromType)
             let vanishedAmount = from.balance
+
+            // should be A.{address}.{contractName}.Vault
+            let fromIdentifierArr = StringUtils.split(fromType.identifier, ".")
+            // check if the from vault is an IncrementFi LP
+            if fromIdentifierArr[2] == "SwapPair" {
+                let pairAddr = Address.fromString("0x".concat(fromIdentifierArr[1]))!
+                // @deprecated in Cadence 1.0
+                if let pairPubRef = getAccount(pairAddr)
+                    .getCapability<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)
+                    .borrow() {
+                    if pairPubRef.getLpTokenVaultType() == fromType {
+                        // Now we can confirm that the from vault is an IncrementFi LP
+                        // check if there is a LP Collection in the BlackHole Account
+                        if let lpTokenCollectionRef = getAccount(blackHoleAddr)
+                            .getCapability<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath)
+                            .borrow() {
+                            // Deposit the LP Token into the LP Collection
+                            lpTokenCollectionRef.deposit(pairAddr: pairAddr, lpTokenVault: <- from)
+
+                            emit BlackHole.FungibleTokenVanished(
+                                blackHoleAddr: blackHoleAddr,
+                                blackHoleId: self.uuid,
+                                vaultIdentifier: fromType,
+                                amount: vanishedAmount
+                            )
+                            return
+                        }
+                    }
+                }
+            }
+            // Deposit the Fungible Token into the BlackHole Vault
+            let receiverRef = self._borrowOrCreateBlackHoleVault(fromType)
             receiverRef.deposit(from: <- from)
 
             emit BlackHole.FungibleTokenVanished(
-                blackHoleAddr: self.owner?.address ?? panic("Invalid BlackHole Address"),
+                blackHoleAddr: blackHoleAddr,
                 blackHoleId: self.uuid,
                 vaultIdentifier: fromType,
                 amount: vanishedAmount
@@ -97,8 +134,8 @@ access(all) contract BlackHole {
         /// Check if the BlackHole Resource is valid
         /// Valid means that the owner's account should have all keys revoked
         ///
-        access(all) view
-        fun isValid(): Bool {
+        access(all)
+        view fun isValid(): Bool {
             /// The Keys in the owner's account should be all revoked
             if let ownerAddr = self.owner?.address {
                 let ownerAcct = getAccount(ownerAddr)
@@ -108,6 +145,9 @@ access(all) contract BlackHole {
                     isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
                     return isAllKeyRevoked
                 })
+
+                // TODO: Check no owned account (Hybrid custodial account)
+
                 return isAllKeyRevoked
             }
             return false
@@ -115,8 +155,8 @@ access(all) contract BlackHole {
 
         /// Get the balance by the type of the Fungible Token
         ///
-        access(all) view
-        fun getVanishedBalanced(_ type: Type): UFix64 {
+        access(all)
+        view fun getVanishedBalanced(_ type: Type): UFix64 {
             return self.pools[type]?.balance ?? 0.0
         }
 
@@ -151,8 +191,8 @@ access(all) contract BlackHole {
     ///
     /// @return The PublicPath for the generic BlackHole receiver
     ///
-    access(all) view
-    fun getBlackHoleReceiverPublicPath(): PublicPath {
+    access(all)
+    view fun getBlackHoleReceiverPublicPath(): PublicPath {
         return /public/BlackHoleFTReceiver
     }
 
@@ -160,8 +200,8 @@ access(all) contract BlackHole {
     ///
     /// @return The StoragePath for the generic BlackHole receiver
     ///
-    access(all) view
-    fun getBlackHoleReceiverStoragePath(): StoragePath {
+    access(all)
+    view fun getBlackHoleReceiverStoragePath(): StoragePath {
         return self.storagePath
     }
 
@@ -204,8 +244,8 @@ access(all) contract BlackHole {
 
     /// Check if is the address a valid BlackHole address
     ///
-    access(all) view
-    fun isValidBlackHole(_ addr: Address): Bool {
+    access(all)
+    view fun isValidBlackHole(_ addr: Address): Bool {
         return self.borrowBlackHoleReceiver(addr)?.isValid() == true
     }
 
@@ -222,9 +262,16 @@ access(all) contract BlackHole {
 
     /// Get the registered BlackHoles addresses
     ///
-    access(all) view
-    fun getRegisteredBlackHoles(): [Address] {
+    access(all)
+    view fun getRegisteredBlackHoles(): [Address] {
         return self.blackHoles.keys
+    }
+
+    /// Check if there is any BlackHole Resource available
+    ///
+    access(all)
+    view fun isAnyBlackHoleAvailable(): Bool {
+        return self.blackHoles.keys.length > 0
     }
 
     /// Burn the Fungible Token by sending it to the BlackHole Resource

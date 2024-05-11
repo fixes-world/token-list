@@ -7,6 +7,7 @@ import type {
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 import { exportTokenInfo, isValidFlowAddress } from "@shared/flow/utilitites";
+import appInfo from "@shared/config/info";
 import { executeOrLoadFromRedis } from "@shared/redis";
 
 export async function queryTokenListUsingCache(
@@ -96,6 +97,8 @@ export async function queryTokenListUsingCache(
   // return the token list
   return {
     name: "Flow Token List",
+    network: appInfo.network,
+    chainId: appInfo.chainId,
     tokens,
     totalAmount: tokens.length,
     filterType: FilterType[filter],

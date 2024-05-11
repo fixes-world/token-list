@@ -2,6 +2,7 @@ import type { FlowService } from "@shared/flow/flow.service";
 import type { InjectionKey } from "vue";
 import type { ExportedTokenInfo, StandardTokenView } from "./entities";
 import { EvaluationType } from "./enums";
+import appInfo from "@shared/config/info";
 
 /**
  * Injection key for FlowService
@@ -67,9 +68,11 @@ export function exportTokenInfo(
     extensions["pathSource"] = ft.dataSource;
   }
   return {
+    chainId: appInfo.chainId,
     address: ft.identity.address,
     contractName: ft.identity.contractName,
     path: ft.path,
+    evmAddress: undefined, // TODO: add EVM address from View
     symbol: ft.display.display.symbol,
     name: ft.display.display.name,
     description: ft.display?.display?.description ?? "",
