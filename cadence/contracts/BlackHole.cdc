@@ -19,6 +19,11 @@ import "SwapInterfaces"
 /// BlackHole contract
 ///
 access(all) contract BlackHole {
+
+    /* --- Entitlement --- */
+
+    // NOTHING
+
     /* --- Events --- */
 
     /// Event emitted when a new BlackHole Resource is registered
@@ -59,15 +64,10 @@ access(all) contract BlackHole {
     ///
     access(all) resource Receiver: FungibleToken.Receiver, BlackHolePublic {
         /// The dictionary of Fungible Token Pools
-        access(self) let pools: @{Type: FungibleToken.Vault}
+        access(self) let pools: @{Type: {FungibleToken.Vault}}
 
         init() {
             self.pools <- {}
-        }
-
-        /// @deprecated in Cadence 1.0
-        destroy() {
-            destroy self.pools
         }
 
         /** ---- FungibleToken Receiver Interface ---- */
@@ -77,10 +77,10 @@ access(all) contract BlackHole {
         /// @param from: The Vault resource containing the funds that will be deposited
         ///
         access(all)
-        fun deposit(from: @FungibleToken.Vault) {
+        fun deposit(from: @{FungibleToken.Vault}) {
             pre {
                 self.isValid(): "The BlackHole Resource should be valid"
-                from.balance > UFix64(0): "The balance should be greater than zero"
+                from.balance > 0.0: "The balance should be greater than zero"
             }
             let blackHoleAddr = self.owner?.address ?? panic("Invalid BlackHole Address")
 
@@ -95,14 +95,14 @@ access(all) contract BlackHole {
                 let pairAddr = Address.fromString("0x".concat(fromIdentifierArr[1]))!
                 // @deprecated in Cadence 1.0
                 if let pairPubRef = getAccount(pairAddr)
-                    .getCapability<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)
-                    .borrow() {
+                    .capabilities
+                    .borrow<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath) {
                     if pairPubRef.getLpTokenVaultType() == fromType {
                         // Now we can confirm that the from vault is an IncrementFi LP
                         // check if there is a LP Collection in the BlackHole Account
                         if let lpTokenCollectionRef = getAccount(blackHoleAddr)
-                            .getCapability<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath)
-                            .borrow() {
+                            .capabilities
+                            .borrow<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath) {
                             // Deposit the LP Token into the LP Collection
                             lpTokenCollectionRef.deposit(pairAddr: pairAddr, lpTokenVault: <- from)
 
@@ -129,6 +129,19 @@ access(all) contract BlackHole {
             )
         }
 
+        /// getSupportedVaultTypes returns a dictionary of Vault types
+        /// and whether the type is currently supported by this Receiver
+        access(all) view fun getSupportedVaultTypes(): {Type: Bool} {
+            // All Vault types are supported by default, so return an empty dictionary
+            return {}
+        }
+
+        /// Returns whether or not the given type is accepted by the Receiver
+        /// A vault that can accept any type should just return true by default
+        access(all) view fun isSupportedVaultType(type: Type): Bool {
+            return true
+        }
+
         /** ---- BlackHolePublic Interface ---- */
 
         /// Check if the BlackHole Resource is valid
@@ -141,11 +154,14 @@ access(all) contract BlackHole {
                 let ownerAcct = getAccount(ownerAddr)
                 // Check if all keys are revoked
                 var isAllKeyRevoked = true
-                ownerAcct.keys.forEach(fun (key: AccountKey): Bool {
-                    isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
-                    return isAllKeyRevoked
-                })
-
+                let totalKeyAmount = Int(ownerAcct.keys.count)
+                var i = 0
+                while i < totalKeyAmount {
+                    if let key = ownerAcct.keys.get(keyIndex: i) {
+                        isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
+                    }
+                    i = i + 1
+                }
                 // TODO: Check no owned account (Hybrid custodial account)
 
                 return isAllKeyRevoked
@@ -165,22 +181,22 @@ access(all) contract BlackHole {
         /// Borrow the FungibleToken Vault
         ///
         access(self)
-        fun _borrowOrCreateBlackHoleVault(_ type: Type): &FungibleToken.Vault {
+        fun _borrowOrCreateBlackHoleVault(_ type: Type): &{FungibleToken.Vault} {
             pre {
-                type.isSubtype(of: Type<@FungibleToken.Vault>()): "The type should be a subtype of FungibleToken.Vault"
+                type.isSubtype(of: Type<@{FungibleToken.Vault}>()): "The type should be a subtype of FungibleToken.Vault"
             }
-            if let ref = &self.pools[type] as &FungibleToken.Vault? {
+            if let ref = &self.pools[type] as &{FungibleToken.Vault}? {
                 return ref
             } else {
                 let ftArr = StringUtils.split(type.identifier, ".")
                 let ftAddress = Address.fromString("0x".concat(ftArr[1])) ?? panic("Invalid Fungible Token Address")
                 let ftContractName = ftArr[2]
                 let ftContract = getAccount(ftAddress)
-                    .contracts.borrow<&FungibleToken>(name: ftContractName)
+                    .contracts.borrow<&{FungibleToken}>(name: ftContractName)
                     ?? panic("Could not borrow the FungibleToken contract reference")
                 // @deprecated in Cadence 1.0
-                self.pools[type] <-! ftContract.createEmptyVault()
-                return &self.pools[type] as &FungibleToken.Vault? ?? panic("Invalid Fungible Token Vault")
+                self.pools[type] <-! ftContract.createEmptyVault(vaultType: type)
+                return &self.pools[type] as &{FungibleToken.Vault}? ?? panic("Invalid Fungible Token Vault")
             }
         }
     }
@@ -236,10 +252,9 @@ access(all) contract BlackHole {
     /// Borrow a BlackHole Resource by the address
     ///
     access(all)
-    fun borrowBlackHoleReceiver(_ addr: Address): &Receiver{FungibleToken.Receiver, BlackHolePublic}? {
+    view fun borrowBlackHoleReceiver(_ addr: Address): &{FungibleToken.Receiver, BlackHolePublic}? {
         return getAccount(addr)
-            .getCapability<&Receiver{FungibleToken.Receiver, BlackHolePublic}>(self.getBlackHoleReceiverPublicPath())
-            .borrow()
+            .capabilities.borrow<&Receiver>(self.getBlackHoleReceiverPublicPath())
     }
 
     /// Check if is the address a valid BlackHole address
@@ -252,11 +267,11 @@ access(all) contract BlackHole {
     /// Register a BlackHole Resource
     ///
     access(all)
-    fun borrowRandomBlackHoleReceiver(): &Receiver{FungibleToken.Receiver} {
-        let max = self.blackHoles.keys.length
+    fun borrowRandomBlackHoleReceiver(): &{FungibleToken.Receiver, BlackHolePublic} {
+        let max = UInt64(self.blackHoles.keys.length)
         assert(max > 0, message: "There is no BlackHole Resource")
-        let rand = revertibleRandom()
-        let blackHoleAddr = self.blackHoles.keys[Int(rand) % max]
+        let rand = revertibleRandom<UInt64>()
+        let blackHoleAddr = self.blackHoles.keys[rand % max]
         return self.borrowBlackHoleReceiver(blackHoleAddr) ?? panic("Could not borrow the BlackHole Resource")
     }
 
@@ -277,7 +292,7 @@ access(all) contract BlackHole {
     /// Burn the Fungible Token by sending it to the BlackHole Resource
     ///
     access(all)
-    fun vanish(_ vault: @FungibleToken.Vault) {
+    fun vanish(_ vault: @{FungibleToken.Vault}) {
         let blackHole = self.borrowRandomBlackHoleReceiver()
         blackHole.deposit(from: <- vault)
     }
