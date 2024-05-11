@@ -32,7 +32,7 @@ import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-addr
  */
 export async function resolveAddressName(addr: string): Promise<string> {
   const flowSrv = await getFlowInstance();
-  if (flowSrv.network === "emulator") {
+  if (flowSrv.network !== "mainnet") {
     return addr;
   }
   const ret = await flowSrv.executeScript(
