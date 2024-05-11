@@ -1,7 +1,20 @@
 const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 
 const contractAddr =
-  network === "testnet" ? "0xb86f928a1fa7798e" : "0x15a918087ab12d86";
+  network === "testnet"
+    ? "0xb86f928a1fa7798e"
+    : network === "mainnet"
+      ? "0x15a918087ab12d86"
+      : "";
+
+const chainId =
+  network === "previewnet"
+    ? 646
+    : network === "mainnet"
+      ? 747
+      : network === "testnet"
+        ? 0 // TODO: update to testnet chainId
+        : 0;
 
 export default {
   title: "TokenList",
@@ -22,6 +35,7 @@ export default {
   nftStorageKey: import.meta.env.PUBLIC_NFTSTORAGE_KEY ?? undefined,
   // Blockchain info
   network: network,
+  chainId: chainId,
   contractAddr: contractAddr,
   walletConnectProjectId:
     import.meta.env.PUBLIC_WALLET_CONNECT_PROJECT_ID ??

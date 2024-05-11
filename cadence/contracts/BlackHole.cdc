@@ -145,6 +145,9 @@ access(all) contract BlackHole {
                     isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
                     return isAllKeyRevoked
                 })
+
+                // TODO: Check no owned account (Hybrid custodial account)
+
                 return isAllKeyRevoked
             }
             return false

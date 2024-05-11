@@ -109,6 +109,8 @@ export interface TokenTag {
 
 export interface TokenList {
   name: string;
+  network: string;
+  chainId?: number;
   logoURI: string;
   keywords: string[];
   tags: Record<string, TokenTag>;
