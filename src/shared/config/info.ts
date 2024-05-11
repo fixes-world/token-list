@@ -1,11 +1,13 @@
 const network = import.meta.env.PUBLIC_FLOW_NETWORK ?? "emulator";
 
 const contractAddr =
-  network === "testnet"
-    ? "0xb86f928a1fa7798e"
-    : network === "mainnet"
-      ? "0x15a918087ab12d86"
-      : "";
+  network === "previewnet"
+    ? "0x8dd0a0cc07a1e596"
+    : network === "testnet"
+      ? "0xb86f928a1fa7798e"
+      : network === "mainnet"
+        ? "0x15a918087ab12d86"
+        : "";
 
 const chainId =
   network === "previewnet"
