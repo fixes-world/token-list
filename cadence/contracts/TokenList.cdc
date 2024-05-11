@@ -1300,7 +1300,7 @@ access(all) contract TokenList {
     /// Borrow the public capability of the Fungible Token Reviewer
     ///
     access(all)
-    view fun borrowReviewerPublic(_ addr: Address): &{FungibleTokenReviewerInterface, ViewResolver.ResolverCollection}? {
+    view fun borrowReviewerPublic(_ addr: Address): &FungibleTokenReviewer? {
         return self.getReviewerCapability(addr).borrow()
     }
 

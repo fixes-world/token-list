@@ -5,7 +5,7 @@ access(all)
 fun main(
     _ addr: Address
 ): Status {
-    let acct = getAuthAccount(addr)
+    let acct = getAuthAccount<auth(Capabilities, Storage, Inbox) &Account>(addr)
     let registry = TokenList.borrowRegistry()
     let registryAddr = registry.owner?.address ?? panic("Failed to get registry address")
 
@@ -17,7 +17,7 @@ fun main(
     var isPendingToClaimReviewMaintainer = false
     for one in reviewers {
         let cap = acct.inbox
-            .claim<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewMaintainer, TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
+            .claim<auth(TokenList.Maintainer) &TokenList.FungibleTokenReviewer>(
                 maintainerId,
                 provider: one
             )
@@ -28,9 +28,9 @@ fun main(
         }
     }
 
-    let isReviewMaintainer = acct.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
+    let isReviewMaintainer = acct.storage.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
     if isReviewMaintainer {
-        let maintainer = acct.borrow<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
+        let maintainer = acct.storage.borrow<&TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
         reviewerAddr = maintainer?.getReviewerAddress()
     }
 
