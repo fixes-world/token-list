@@ -284,6 +284,13 @@
 				"type": "file",
 				"location": "testnet-blackhole.pkey"
 			}
+		},
+		"previewnet-admin": {
+			"address": "74c94ebb43da9101",
+			"key": {
+				"type": "file",
+				"location": "testnet-admin.pkey"
+			}
 		}
 	},
 	"deployments": {
@@ -320,6 +327,13 @@
 			],
 			"testnet-blackhole": [
 				"BlackHole"
+			]
+		},
+		"previewnet": {
+			"previewnet-admin": [
+				"FTViewUtils",
+				"ViewResolvers",
+				"TokenList"
 			]
 		}
 	}
