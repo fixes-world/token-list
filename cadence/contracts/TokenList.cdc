@@ -22,7 +22,7 @@ access(all) contract TokenList {
     /* --- Entitlement --- */
 
     access(all) entitlement Maintainer
-    access(all) entitlement Administer
+    access(all) entitlement SuperAdmin
 
     /* --- Events --- */
 
@@ -1147,7 +1147,7 @@ access(all) contract TokenList {
 
         /// Update the reviewer verified status
         ///
-        access(Administer)
+        access(SuperAdmin)
         fun updateReviewerVerified(_ reviewer: Address, _ verified: Bool) {
             pre {
                 TokenList.borrowReviewerPublic(reviewer) != nil: "FT Reviewer not found"
