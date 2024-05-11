@@ -5,10 +5,10 @@ import "BlackHole"
 transaction(
     amount: UFix64
 ) {
-    let flowVaultRef: &FlowToken.Vault
+    let flowVaultRef: auth(FungibleToken.Withdraw) &FlowToken.Vault
 
-    prepare(acct: AuthAccount) {
-        self.flowVaultRef = acct.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.flowVaultRef = acct.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault)
             ?? panic("Could not borrow a reference to the Flow Vault!")
     }
 

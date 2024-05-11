@@ -1,4 +1,4 @@
-import "MetadataViews"
+import "ViewResolver"
 import "FungibleToken"
 import "FTViewUtils"
 import "TokenList"
@@ -17,18 +17,18 @@ transaction(
     logo: String?,
     socials: {String: String},
 ) {
-    let maintainer: &{TokenList.FungibleTokenReviewMaintainer}
+    let maintainer: auth(TokenList.Maintainer) &{TokenList.FungibleTokenReviewMaintainer}
 
-    prepare(acct: AuthAccount) {
-        var maintainer: &{TokenList.FungibleTokenReviewMaintainer}? = nil
+    prepare(acct: auth(Storage) &Account) {
+        var maintainer: auth(TokenList.Maintainer) &{TokenList.FungibleTokenReviewMaintainer}? = nil
         // Try borrow maintainer
-        if acct.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
-            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
+        if acct.storage.check<@{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath) {
+            maintainer = acct.storage.borrow<auth(TokenList.Maintainer) &{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.maintainerStoragePath)
                 ?? panic("Failed to load FungibleTokenReviewMaintainer from review maintainer")
         }
         // Try borrow review
-        if acct.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
-            maintainer = acct.borrow<&{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath)
+        if acct.storage.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
+            maintainer = acct.storage.borrow<auth(TokenList.Maintainer) &{TokenList.FungibleTokenReviewMaintainer}>(from: TokenList.reviewerStoragePath)
                     ?? panic("Failed to load FungibleTokenReviewMaintainer from reviewer")
         }
         self.maintainer = maintainer ?? panic("Missing maintainer")
@@ -48,12 +48,8 @@ transaction(
         ftviewRef.initializeVaultData(
             receiverPath: PublicPath(identifier: receiverIdentifier) ?? panic("Invalid receiver path"),
             metadataPath: PublicPath(identifier: metadataIdentifier) ?? panic("Invalid metadata path"),
-            // @deprecated in Cadence 1.0
-            providerPath: PrivatePath(identifier: providerIdentifier) ?? panic("Invalid provider path"),
-            receiverType: Type<&AnyResource{FungibleToken.Receiver}>(),
-            metadataType: Type<&AnyResource{FungibleToken.Balance, MetadataViews.Resolver}>(),
-            // @deprecated in Cadence 1.0
-            providerType: Type<&AnyResource{FungibleToken.Provider}>()
+            receiverType: Type<&{FungibleToken.Receiver}>(),
+            metadataType: Type<&{FungibleToken.Balance, ViewResolver.Resolver}>(),
         )
         // init FT Display
         ftviewRef.setFTDisplay(
