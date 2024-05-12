@@ -437,7 +437,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT Display
     ///
-    access(all) resource EditableFTDisplay: FTViewDisplayEditor {
+    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface, ViewResolver.Resolver {
         access(all)
         let identity: FTIdentity
         access(contract)
@@ -624,7 +624,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT View
     ///
-    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor {
+    access(all) resource EditableFTView: FTViewDataEditor, EditableFTViewDataInterface, FTViewDisplayEditor, EditableFTViewDisplayInterface, ViewResolver.Resolver {
         access(self)
         let display: @EditableFTDisplay
         access(all)
