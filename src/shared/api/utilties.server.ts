@@ -1,7 +1,8 @@
 import Exception from "@shared/exception";
-import { queryTokenList } from "@shared/flow/action/scripts";
+import { queryTokenList, getReviewers } from "@shared/flow/action/scripts";
 import type {
   ExportedTokenInfo,
+  ReviewerInfo,
   TokenList,
   TokenTag,
 } from "@shared/flow/entities";
@@ -9,6 +10,17 @@ import { FilterType } from "@shared/flow/enums";
 import { exportTokenInfo, isValidFlowAddress } from "@shared/flow/utilitites";
 import appInfo from "@shared/config/info";
 import { executeOrLoadFromRedis } from "@shared/redis";
+
+export async function queryReviewersUsingCache(): Promise<ReviewerInfo[]> {
+  const reviewersRequestKey = "reviewers/";
+  const cacheTime = 60 * 60; // 1 hours
+  const ret = await executeOrLoadFromRedis(
+    reviewersRequestKey,
+    getReviewers,
+    cacheTime,
+  );
+  return ret;
+}
 
 export async function queryTokenListUsingCache(
   reviewer: string | undefined,
@@ -39,7 +51,7 @@ export async function queryTokenListUsingCache(
     const tokenRequestKey = `token-list/?reviewer=${reviewer}&filter=${filter}&page=${currentPage}&limit=${currentLimit}`;
     const ret = await executeOrLoadFromRedis(
       tokenRequestKey,
-      queryTokenList(currentPage, currentLimit, reviewer, filter),
+      queryTokenList.bind(null, currentPage, currentLimit, reviewer, filter),
     );
     if (ret.total === 0) {
       break;

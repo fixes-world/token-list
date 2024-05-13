@@ -140,6 +140,7 @@ dist/
 
 # Flow Cadence dependencies
 imports/
+imports-*/
 *.pkey
 
 # Vercel dist

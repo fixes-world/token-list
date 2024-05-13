@@ -46,21 +46,21 @@ export async function loadRedisCached(methodKey: string) {
 
 export async function executeOrLoadFromRedis<T>(
   methodKey: string,
-  methodPromise: Promise<T>,
+  methodPromise: () => Promise<T>,
   ttl?: number,
 ): Promise<T> {
   if (!isRedisCacheEnabled) {
     if (import.meta.env.PROD) {
       console.warn("Redis cache is not enabled.");
     }
-    return await methodPromise;
+    return await methodPromise();
   }
 
   const cachedResult = await loadRedisCached(methodKey);
 
   let result: T;
   if (!cachedResult) {
-    result = await methodPromise;
+    result = await methodPromise();
     const ttlValue = ttl ?? 60;
     try {
       await kv.set<string>(
