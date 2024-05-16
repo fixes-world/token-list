@@ -81,13 +81,13 @@ access(all) contract ViewResolvers {
     access(all) resource CollectionViewResolver: MetadataViews.Resolver {
         // FTView Resolver Collection Capability
         access(self)
-        let cap: Capability<&AnyResource{MetadataViews.ResolverCollection}>
+        let cap: Capability<&{MetadataViews.ResolverCollection}>
         // FTView Id
         access(self)
         let id: UInt64
 
         init(
-            _ cap: Capability<&AnyResource{MetadataViews.ResolverCollection}>,
+            _ cap: Capability<&{MetadataViews.ResolverCollection}>,
             id: UInt64
         ) {
             pre {
@@ -119,7 +119,7 @@ access(all) contract ViewResolvers {
         // ---- Local Methods ----
 
         access(self) view
-        fun borrowViewResolver(): &AnyResource{MetadataViews.Resolver}? {
+        fun borrowViewResolver(): &{MetadataViews.Resolver}? {
             let ref = self.cap.borrow()
                 ?? panic("Collection view resolver not found")
             return ref.borrowViewResolver(id: self.id)
@@ -130,7 +130,7 @@ access(all) contract ViewResolvers {
     ///
     access(all)
     fun createCollectionViewResolver(
-        _ cap: Capability<&AnyResource{MetadataViews.ResolverCollection}>,
+        _ cap: Capability<&{MetadataViews.ResolverCollection}>,
         id: UInt64
     ): @CollectionViewResolver {
         return <- create CollectionViewResolver(cap, id: id)

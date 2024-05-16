@@ -50,10 +50,10 @@ transaction(
             metadataPath: PublicPath(identifier: metadataIdentifier) ?? panic("Invalid metadata path"),
             // @deprecated in Cadence 1.0
             providerPath: PrivatePath(identifier: providerIdentifier) ?? panic("Invalid provider path"),
-            receiverType: Type<&AnyResource{FungibleToken.Receiver}>(),
-            metadataType: Type<&AnyResource{FungibleToken.Balance, MetadataViews.Resolver}>(),
+            receiverType: Type<&{FungibleToken.Receiver}>(),
+            metadataType: Type<&{FungibleToken.Balance, MetadataViews.Resolver}>(),
             // @deprecated in Cadence 1.0
-            providerType: Type<&AnyResource{FungibleToken.Provider}>()
+            providerType: Type<&{FungibleToken.Provider}>()
         )
         // init FT Display
         ftviewRef.setFTDisplay(
