@@ -1301,7 +1301,7 @@ access(all) contract TokenList {
         }
 
         access(self)
-        view fun borrowAddressContractsRef(_ addr: Address): auth(Insert | Mutate) &[String]? {
+        view fun borrowAddressContractsRef(_ addr: Address): auth(Mutate) &[String]? {
             return &self.addressMapping[addr]
         }
     }
