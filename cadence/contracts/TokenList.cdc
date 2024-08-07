@@ -35,6 +35,12 @@ access(all) contract TokenList {
         _ contractName: String,
         _ type: Type,
     )
+    /// Event emitted when a new Fungible Token is removed
+    access(all) event FungiubleTokenRemoved(
+        _ address: Address,
+        _ contractName: String,
+        _ type: Type,
+    )
     /// Event emitted when Reviewer Metadata is updated
     access(all) event FungibleTokenReviewerMetadataUpdated(
         _ reviewer: Address,
@@ -1157,6 +1163,13 @@ access(all) contract TokenList {
             )
         }
 
+        /// Remove a Fungible Token Entry from the registry
+        ///
+        access(all)
+        fun removeFungibleToken(_ type: Type): Bool {
+            return self._removeFungibleToken(type)
+        }
+
         /// Register a new standard Fungible Token Entry to the registry
         ///
         access(contract)
@@ -1220,6 +1233,34 @@ access(all) contract TokenList {
                     newRank!.rawValue
                 )
             }
+        }
+
+        /// Remove a Fungible Token Entry from the registry
+        ///
+        access(self)
+        fun _removeFungibleToken(_ type: Type): Bool {
+            if self.entries[type] == nil {
+                return false
+            }
+            let entry <- self.entries.remove(key: type)
+                ?? panic("Could not remove the Fungible Token Entry")
+            self.entriesIdMapping.remove(key: entry.uuid)
+
+            let identity = entry.getIdentity()
+            if let addrRef = self.borrowAddressContractsRef(identity.address) {
+                if let idx = addrRef.firstIndex(of: identity.contractName) {
+                    addrRef.remove(at: idx)
+                }
+            }
+            destroy entry
+
+            // emit the event
+            emit FungiubleTokenRemoved(
+                identity.address,
+                identity.contractName,
+                type
+            )
+            return true
         }
 
         /// Add a new Fungible Token Entry to the registry
