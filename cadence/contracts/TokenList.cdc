@@ -1165,7 +1165,7 @@ access(all) contract TokenList {
 
         /// Remove a Fungible Token Entry from the registry
         ///
-        access(all)
+        access(SuperAdmin)
         fun removeFungibleToken(_ type: Type): Bool {
             return self._removeFungibleToken(type)
         }
