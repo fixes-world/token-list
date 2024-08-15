@@ -4,7 +4,6 @@ This repo contains all contract and frontend code.
 
 ## 🌐 Websites
 
-- **Previewnet:** <https://previewnet-token-list.fixes.world/>
 - **Testnet:** <https://testnet-token-list.fixes.world/>  
 - **Mainnet:** <https://token-list.fixes.world/>
 

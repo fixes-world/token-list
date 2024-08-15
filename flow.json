@@ -5,8 +5,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788",
-				"previewnet": "7d29f084fc7b2b84"
+				"testnet": "31ad40c07a2a9788"
 			}
 		},
 		"BlackHole": {
@@ -22,8 +21,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"ExampleToken": {
@@ -45,8 +43,7 @@
 			"aliases": {
 				"emulator": "0ae53cb6e3f42a79",
 				"mainnet": "1654653399040a61",
-				"testnet": "7e60df042a9c0868",
-				"previewnet": "4445e7ad11568276"
+				"testnet": "7e60df042a9c0868"
 			}
 		},
 		"FungibleToken": {
@@ -54,8 +51,7 @@
 			"aliases": {
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "a0225e7000ac82a9"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"FungibleTokenMetadataViews": {
@@ -63,8 +59,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "a0225e7000ac82a9"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"MetadataViews": {
@@ -72,8 +67,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"NonFungibleToken": {
@@ -81,8 +75,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"StringUtils": {
@@ -90,8 +83,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788",
-				"previewnet": "7d29f084fc7b2b84"
+				"testnet": "31ad40c07a2a9788"
 			}
 		},
 		"SwapConfig": {
@@ -123,8 +115,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"ViewResolvers": {
@@ -143,8 +134,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788",
-				"previewnet": "7d29f084fc7b2b84"
+				"testnet": "31ad40c07a2a9788"
 			}
 		},
 		"Burner": {
@@ -153,8 +143,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"Clock": {
@@ -228,8 +217,7 @@
 			"aliases": {
 				"emulator": "0ae53cb6e3f42a79",
 				"mainnet": "1654653399040a61",
-				"testnet": "7e60df042a9c0868",
-				"previewnet": "4445e7ad11568276"
+				"testnet": "7e60df042a9c0868"
 			}
 		},
 		"FungibleToken": {
@@ -238,8 +226,7 @@
 			"aliases": {
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "a0225e7000ac82a9"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"FungibleTokenMetadataViews": {
@@ -248,8 +235,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7",
-				"previewnet": "a0225e7000ac82a9"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"MetadataViews": {
@@ -258,8 +244,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"NonFungibleToken": {
@@ -268,8 +253,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"OnChainMultiSig": {
@@ -306,8 +290,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788",
-				"previewnet": "7d29f084fc7b2b84"
+				"testnet": "31ad40c07a2a9788"
 			}
 		},
 		"SwapConfig": {
@@ -334,15 +317,13 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20",
-				"previewnet": "b6763b4399a888c8"
+				"testnet": "631e88ae7f1d7c20"
 			}
 		}
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
-		"previewnet": "access.previewnet.nodes.onflow.org:9000",
 		"testing": "127.0.0.1:3569",
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
@@ -381,13 +362,6 @@
 				"type": "file",
 				"location": "testnet-blackhole.pkey"
 			}
-		},
-		"previewnet-admin": {
-			"address": "8dd0a0cc07a1e596",
-			"key": {
-				"type": "file",
-				"location": "testnet-admin.pkey"
-			}
 		}
 	},
 	"deployments": {
@@ -425,13 +399,6 @@
 			],
 			"testnet-blackhole": [
 				"BlackHole"
-			]
-		},
-		"previewnet": {
-			"previewnet-admin": [
-				"FTViewUtils",
-				"ViewResolvers",
-				"TokenList"
 			]
 		}
 	}

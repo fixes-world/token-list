@@ -4,7 +4,7 @@ import * as uuid from "uuid";
 import type { Account, TransactionStatus } from "@onflow/typedefs";
 import appInfo from "@shared/config/info";
 
-export type NetworkType = "mainnet" | "testnet" | "previewnet" | "emulator";
+export type NetworkType = "mainnet" | "testnet" | "emulator";
 
 let isGloballyInited = false;
 let isGloballyWalletConnectInit = false;
@@ -74,14 +74,6 @@ export class FlowService {
         await cfg.put(
           "discovery.authn.endpoint",
           "https://fcl-discovery.onflow.org/api/testnet/authn",
-        );
-        break;
-      case "previewnet":
-        await cfg.put("accessNode.api", "https://rest-previewnet.onflow.org");
-        await cfg.put("discovery.wallet.method", "EXT/RPC");
-        await cfg.put(
-          "discovery.wallet",
-          "chrome-extension://hpclkefagolihohboafpheddmmgdffjm/popup.html",
         );
         break;
       case "emulator":
