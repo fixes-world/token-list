@@ -360,8 +360,8 @@ access(all) contract FTViewUtils {
                 storagePath: self.getStoragePath(),
                 receiverPath: self.getReceiverPath()!,
                 metadataPath: self.getMetadataPath()!,
-                receiverLinkedType: self.getCapabilityType(FTCapPath.receiver)!,
-                metadataLinkedType: self.getCapabilityType(FTCapPath.metadata)!,
+                receiverLinkedType: Type<&{FungibleToken.Receiver}>(),
+                metadataLinkedType: Type<&{FungibleToken.Vault}>(),
                 createEmptyVaultFunction: (fun (): @{FungibleToken.Vault} {
                     return <- ftRef.createEmptyVault(vaultType: ftType)
                 })
