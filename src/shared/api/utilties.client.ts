@@ -3,6 +3,8 @@ import {
   FailedToLoadTokenListJsonError,
   FailedToParseTokenListJsonError,
 } from "@shared/exception.client";
+import { sendGetRequest } from "./utilities.shared";
+import Exception from "@shared/exception";
 
 /**
  * Send a request to the OpenAPI server
@@ -39,4 +41,30 @@ export async function queryTokenListByAPI(
   } else {
     throw new FailedToLoadTokenListJsonError();
   }
+}
+
+/**
+ * Load or generate an upload token for Qiniu
+ */
+export async function loadOrGenerateUploadToken(): Promise<string> {
+  let localToken = localStorage.getItem("qiniu-upload-token");
+  let localExpireAt = parseInt(
+    localStorage.getItem("qiniu-upload-token-expire-at") ?? "0",
+  );
+  if (localExpireAt > Date.now() && !!localToken) {
+    return localToken;
+  }
+  const data = await sendGetRequest(undefined, "/api/get-upload-token");
+  if (typeof data.token !== "string") {
+    throw new Exception(500, `Invalid response from get-upload-token`);
+  }
+  if (typeof data.expireAt !== "number") {
+    throw new Exception(500, `Invalid response from get-upload-token`);
+  }
+  localStorage.setItem("qiniu-upload-token", data.token);
+  localStorage.setItem(
+    "qiniu-upload-token-expire-at",
+    data.expireAt.toString(),
+  );
+  return data.token;
 }

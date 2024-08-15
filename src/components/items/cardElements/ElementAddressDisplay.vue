@@ -5,7 +5,7 @@ import { useSharedAddressNamingCache } from '@components/shared';
 import { resolveAddressName } from '@shared/flow/action/scripts';
 
 const props = withDefaults(defineProps<{
-  address: string,
+  address?: string,
   short?: boolean,
   notResolve?: boolean,
 }>(), {
@@ -19,7 +19,7 @@ const addressDisplay = computed(() => {
   if (props.address === appInfo.contractAddr) {
     return "Official Team"
   }
-  const displayName = resolvedName.value || props.address
+  const displayName = (resolvedName.value || props.address) ?? ""
   const sliceMax = props.short ? 10 : 20
   return displayName.length <= sliceMax ? displayName : displayName.slice(0, sliceMax) + '..'
 });
@@ -41,7 +41,9 @@ async function resolveAddress(address: string) {
 }
 
 watch(() => props.address, async (address) => {
-  await resolveAddress(address)
+  if (address) {
+    await resolveAddress(address)
+  }
 }, { immediate: true })
 </script>
 

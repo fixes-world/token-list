@@ -7,14 +7,7 @@ const contractAddr =
       ? "0x15a918087ab12d86"
       : "";
 
-const chainId =
-  network === "previewnet"
-    ? 646
-    : network === "mainnet"
-      ? 747
-      : network === "testnet"
-        ? 545
-        : 0;
+const chainId = network === "mainnet" ? 747 : network === "testnet" ? 545 : 0;
 
 export default {
   title: "TokenList",
@@ -24,15 +17,16 @@ export default {
   author: "FIXeS World",
   version: "0.1.0",
   url: import.meta.env.SITE ?? "http://localhost:4321",
+  staticHost: "https://static.fixes.world",
   icon:
     import.meta.env.PUBLIC_ICON ?? "https://fixes.world/apple-touch-icon.png",
   banner: import.meta.env.PUBLIC_BANNER ?? "https://i.imgur.com/Wdy3GG7.jpg",
   linktree: import.meta.env.PUBLIC_LINKTREE ?? "https://linktr.ee/fixes.world",
   twitter: import.meta.env.PUBLIC_TWITTER ?? "https://x.com/fixesWorld",
-  github: import.meta.env.PUBLIC_GITHUB ?? "https://github.com/fixes-world",
-  discord: import.meta.env.PUBLIC_DISCORD ?? "https://discord.gg/flow",
-  // API Keys
-  nftStorageKey: import.meta.env.PUBLIC_NFTSTORAGE_KEY ?? undefined,
+  github:
+    import.meta.env.PUBLIC_GITHUB ??
+    "https://github.com/fixes-world/token-list",
+  documentation: "https://docs.fixes.world/concepts/token-list",
   // Blockchain info
   network: network,
   chainId: chainId,

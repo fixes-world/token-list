@@ -4,8 +4,8 @@ transaction(
     reviewer: Address,
     verified: Bool,
 ) {
-    prepare(acct: AuthAccount) {
-        let registry = acct.borrow<&TokenList.Registry>(from: TokenList.registryStoragePath)
+    prepare(acct: auth(Storage) &Account) {
+        let registry = acct.storage.borrow<auth(TokenList.SuperAdmin) &TokenList.Registry>(from: TokenList.registryStoragePath)
             ?? panic("Missing or mis-typed TokenList")
         registry.updateReviewerVerified(reviewer, verified)
     }

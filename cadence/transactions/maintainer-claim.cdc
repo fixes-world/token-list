@@ -4,19 +4,19 @@ import "TokenList"
 transaction(
     reviewer: Address
 ) {
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(Storage, Inbox) &Account) {
         let registry = TokenList.borrowRegistry()
         let registryAddr = registry.owner?.address ?? panic("Failed to get registry address")
 
-        if acct.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
+        if acct.storage.check<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath) {
             // remove old Maintainer
-            let old <- acct.load<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
+            let old <- acct.storage.load<@TokenList.ReviewMaintainer>(from: TokenList.maintainerStoragePath)
             destroy old
         }
 
         let maintainerId = TokenList.generateReviewMaintainerCapabilityId(acct.address)
         let reviewerCap = acct.inbox
-            .claim<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewMaintainer, TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
+            .claim<auth(TokenList.Maintainer) &TokenList.FungibleTokenReviewer>(
                 maintainerId,
                 provider: reviewer
             ) ?? panic("Failed to claim reviewer capability")
@@ -26,6 +26,6 @@ transaction(
         )
 
         let maintainer <- TokenList.createFungibleTokenReviewMaintainer(reviewerCap)
-        acct.save(<- maintainer, to: TokenList.maintainerStoragePath)
+        acct.storage.save(<- maintainer, to: TokenList.maintainerStoragePath)
     }
 }

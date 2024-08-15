@@ -11,7 +11,7 @@ fun main(
     contractName: String,
     vaultAddr: Address?
 ): FTStatus? {
-    let acct = getAuthAccount(addr)
+    let acct = getAuthAccount<auth(Storage, Capabilities) &Account>(addr)
     let contractNames = acct.contracts.names
     if contractNames.length == 0 {
         return nil
@@ -28,9 +28,9 @@ fun main(
         return nil
     }
 
-    var ftViewResolver: &ViewResolver? = nil
+    var ftViewResolver: &{ViewResolver}? = nil
     var isValid = false
-    if let contract = acct.contracts.borrow<&FungibleToken>(name: contractName) {
+    if let ref = acct.contracts.borrow<&{FungibleToken}>(name: contractName) {
         isValid = true
         // Borrow the view resolver for the contract
         if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
@@ -44,11 +44,11 @@ fun main(
     }
 
     let vaultAcct = vaultAddr != nil
-        ? getAuthAccount(vaultAddr!)
+        ? getAuthAccount<auth(Storage, Capabilities) &Account>(vaultAddr!)
         : acct
 
     var ftVaultPath: String? = nil
-    vaultAcct.forEachStored(fun (path: StoragePath, type: Type): Bool {
+    vaultAcct.storage.forEachStored(fun (path: StoragePath, type: Type): Bool {
         if type.isSubtype(of: ftType!) {
             ftVaultPath = path.toString()
             return false
@@ -57,17 +57,22 @@ fun main(
     })
 
     let ftPublicPaths: {String: String} = {}
-    vaultAcct.forEachPublic(fun (path: PublicPath, type: Type): Bool {
-        if let storagePath = vaultAcct.getLinkTarget(path) {
-            if storagePath.toString() == ftVaultPath {
-                ftPublicPaths[type.identifier] = path.toString()
+    vaultAcct.storage.forEachPublic(fun (path: PublicPath, type: Type): Bool {
+        let capExists = vaultAcct.capabilities.exists(path)
+        if capExists {
+            let cap = vaultAcct.capabilities.get<&AnyResource>(path)
+            if let controler = vaultAcct.capabilities.storage.getController(byCapabilityID: cap.id) {
+                let storagePath = controler.target()
+                if storagePath.toString() == ftVaultPath {
+                    ftPublicPaths[type.identifier] = path.toString()
+                }
             }
         }
         return true
     })
 
-    let supportedViews = ftViewResolver?.getViews() ?? []
-    var ret: FTStatus? = FTStatus(
+    let supportedViews = ftViewResolver?.getContractViews(resourceType: nil) ?? []
+    var ret = FTStatus(
         address: addr,
         contractName: contractName,
         isRegistered: TokenList.isFungibleTokenRegistered(addr, contractName),
