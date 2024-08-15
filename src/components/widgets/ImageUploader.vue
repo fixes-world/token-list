@@ -1,43 +1,35 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import {
   useMessage,
   NUpload, NUploadDragger,
   type UploadFileInfo, type UploadCustomRequestOptions
 } from 'naive-ui';
-import { NFTStorage } from "nft.storage";
-import appInfo from '@shared/config/info'
+import * as qiniu from 'qiniu-js';
+import { encode } from 'js-base64';
+
+import appInfo from '@shared/config/info';
+import { loadOrGenerateUploadToken } from '@shared/api/utilties.client';
 
 const props = withDefaults(defineProps<{
   image?: string
   type?: string
+  disabled?: boolean
 }>(), {
   image: undefined,
-  type: 'image/*'
+  type: 'image/*',
+  disabled: false,
 })
 
 const emit = defineEmits<{
-  (e: 'update:image', cid: string): void
+  (e: 'update:image', url: string): void
+  (e: 'update:type', val: string): void
 }>()
 
 const message = useMessage();
-const client = new NFTStorage({ token: appInfo.nftStorageKey });
 
-// ipfs uploading related
-const uploading = ref(false);
-const fileRef = computed<UploadFileInfo | null>(() => {
-  if (props.image) {
-    const name = props.image.split('/').pop();
-    return {
-      id: '1',
-      name: name ?? "unknown",
-      status: 'finished',
-      url: getIPFSUrl(props.image),
-      type: props.type ?? 'image/*',
-    }
-  }
-  return null
-});
+const uploading = ref(false)
+const lastUploaded = ref('')
 const fileList = ref<UploadFileInfo[]>([])
 
 // Funcations
@@ -51,56 +43,85 @@ async function beforeUpload(data: {
     message.error('File size is 0.')
     return false
   }
-  // File 的 size 最多 256KB
-  if (size > 256 * 1024) {
-    message.error('File size exceeds 256KB.')
+  // File 的 size 最多 2M
+  if (size > 2 * 1024 * 1024) {
+    message.error('File size exceeds 2MB.')
     return false
   }
   return true
 }
 
-async function uploadToIPFS(options: UploadCustomRequestOptions) {
+
+async function uploadImage(options: UploadCustomRequestOptions) {
   if (!options.file.file) {
     message.error('No file selected.')
     return
   }
+  const token = await loadOrGenerateUploadToken()
   uploading.value = true
-  try {
-    options.onProgress({ percent: 10 })
-    const cid = await client.storeBlob(options.file.file);
-    emit('update:image', getIPFSUrl(cid));
-    options.onProgress({ percent: 100 })
-    options.onFinish()
-    message.success('Image uploaded to IPFS successfully! \n CID: ' + cid)
-  } catch (e: any) {
-    console.error(e)
-    message.error('Failed to upload image to IPFS.')
-    options.onError()
-  }
-  uploading.value = false
+  const fname = options.file.file.name
+  const encodedFname = encode(fname)
+  const key = encodedFname.length + encodedFname.slice(0, Math.min(10, encodedFname.length)) + Date.now().toFixed(0)
+  const observable = qiniu.upload(options.file.file, key, token, { fname }, { useCdnDomain: true })
+  observable.subscribe({
+    next: (res) => {
+      options.onProgress({ percent: res.total.percent })
+    },
+    error: (err) => {
+      uploading.value = false
+      console.error(err)
+      message.error('Failed to upload image to Qiniu.')
+      options.onError()
+    },
+    complete: (res) => {
+      uploading.value = false
+      const imageUrl = `${appInfo.staticHost}/${res.key}`
+      // update last file
+      lastUploaded.value = imageUrl
+      emit('update:image', imageUrl)
+      emit('update:type', res.mimeType ?? options.file.file?.type)
+      options.onFinish()
+      console.log('Image uploaded successfully:', imageUrl)
+      message.success('Image uploaded successfully!')
+    }
+  })
 }
 
-/**
- * get a ipfs gateway url from ipfs hash
- * @param ipfsHash
- */
-function getIPFSUrl(ipfsHash: string) {
-  if (ipfsHash.startsWith("http")) {
-    return ipfsHash;
-  } else {
-    return `https://nftstorage.link/ipfs/${ipfsHash}`;
+function handleUploadChange(data: { fileList: UploadFileInfo[] }) {
+  fileList.value = data.fileList
+  if (data.fileList.length === 0) {
+    emit('update:image', '')
+    emit('update:type', '')
+    resetDefaultList()
   }
 }
 
 function resetDefaultList() {
-  fileList.value = fileRef.value ? [fileRef.value] : []
+  if (props.image) {
+    const name = props.image.split('/').pop();
+    const isQiniu = props.image.startsWith(appInfo.staticHost)
+    const fileRef: UploadFileInfo = {
+      id: '1',
+      name: name ?? "unknown",
+      status: 'finished',
+      url: props.image,
+      type: props.type ?? 'image/*',
+      thumbnailUrl: isQiniu ? `${props.image}-thumbnail.png` : undefined,
+    }
+    fileList.value = [fileRef]
+  } else {
+    fileList.value = []
+  }
+  lastUploaded.value = ''
 }
 
-function handleUploadChange (data: { fileList: UploadFileInfo[] }) {
-  fileList.value = data.fileList
-}
-
-watch(() => props.image, () => {
+watch(() => props.image, (newVal) => {
+  if (newVal) {
+    const currFile = fileList.value[0]
+    if (currFile && (currFile.url === newVal || lastUploaded.value === newVal)) {
+      return
+    }
+  }
   resetDefaultList()
 }, { immediate: true })
 
@@ -110,19 +131,20 @@ watch(() => props.image, () => {
   <NUpload
     accept="image/png, image/jpeg, image/gif, image/svg+xml"
     list-type="image-card"
-    trigger-class=""
+    :custom-request="uploadImage"
+    name="image"
+    response-type="json"
     v-model:file-list="fileList"
     :max="1"
     :multiple="false"
-    :disabled="uploading"
-    :custom-request="uploadToIPFS"
+    :disabled="disabled"
     @before-upload="beforeUpload"
     @change="handleUploadChange"
   >
     <NUploadDragger>
       <div class="w-hull flex flex-col items-center justify-center text-gray-400/60">
         <span class="mx-a i-carbon:image w-8 h-8"/>
-        <span class="text-xs"> < 256KB</span>
+        <span class="text-xs"> <= 2MB</span>
       </div>
     </NUploadDragger>
   </NUpload>

@@ -17,6 +17,7 @@ export default {
   author: "FIXeS World",
   version: "0.1.0",
   url: import.meta.env.SITE ?? "http://localhost:4321",
+  staticHost: "https://static.fixes.world",
   icon:
     import.meta.env.PUBLIC_ICON ?? "https://fixes.world/apple-touch-icon.png",
   banner: import.meta.env.PUBLIC_BANNER ?? "https://i.imgur.com/Wdy3GG7.jpg",
@@ -26,8 +27,6 @@ export default {
     import.meta.env.PUBLIC_GITHUB ??
     "https://github.com/fixes-world/token-list",
   documentation: "https://docs.fixes.world/concepts/token-list",
-  // API Keys
-  nftStorageKey: import.meta.env.PUBLIC_NFTSTORAGE_KEY ?? undefined,
   // Blockchain info
   network: network,
   chainId: chainId,

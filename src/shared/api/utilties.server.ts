@@ -8,8 +8,25 @@ import type {
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 import { exportTokenInfo, isValidFlowAddress } from "@shared/flow/utilitites";
-import appInfo from "@shared/config/info";
 import { executeOrLoadFromRedis } from "@shared/redis";
+import qiniu from "qiniu";
+import appInfo from "@shared/config/info";
+import runtime from "@shared/config/runtime";
+
+export function generateQiniuUploadToken(): string {
+  const accessKey = runtime.secrets.qiniu.accessKey;
+  const secretKey = runtime.secrets.qiniu.secretKey;
+  if (!accessKey || !secretKey) {
+    throw new Exception(500, "QINIU_ACCESS_KEY or QINIU_SECRET_KEY is not set");
+  }
+  const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+  const putPolicy = new qiniu.rs.PutPolicy({
+    scope: runtime.secrets.qiniu.bucket ?? "fixes-world",
+    returnBody:
+      '{"key": $(key), "hash": $(etag), "bucket": $(bucket), "mimeType": $(mimeType), "fsize": $(fsize)}',
+  });
+  return putPolicy.uploadToken(mac);
+}
 
 export async function queryReviewersUsingCache(): Promise<ReviewerInfo[]> {
   const reviewersRequestKey = "reviewers/";

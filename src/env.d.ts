@@ -2,7 +2,11 @@
 
 interface ImportMetaEnv {
   readonly PUBLIC_FLOW_NETWORK: string;
-  readonly PUBLIC_NFTSTORAGE_KEY: string;
+
+  // -> Qiniu
+  readonly QINIU_ACCESS_KEY: string;
+  readonly QINIU_SECRET_KEY: string;
+  readonly QINIU_BUCKET: string;
 
   // Redis
   readonly KV_URL: string;
