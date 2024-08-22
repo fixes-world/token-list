@@ -11,6 +11,8 @@
 
 */
 import "FungibleToken"
+import "NonFungibleToken"
+import "ViewResolver"
 import "StringUtils"
 // IncrementFi Swap
 import "SwapConfig"
@@ -40,6 +42,14 @@ access(all) contract BlackHole {
         amount: UFix64,
     )
 
+    /// Event emitted when a new NonFungible Token is registered
+    access(all) event NonFungibleTokenVanished(
+        blackHoleAddr: Address,
+        blackHoleId: UInt64,
+        nftIdentifier: Type,
+        nftID: UInt64,
+    )
+
     /* --- Variable, Enums and Structs --- */
 
     /// BlackHole Resource
@@ -53,11 +63,29 @@ access(all) contract BlackHole {
     ///
     access(all) resource interface BlackHolePublic {
         /// Check if the BlackHole Resource is valid
+        /// Valid means that the owner's account should have all keys revoked
+        ///
         access(all)
-        view fun isValid(): Bool
-        /// Get the balance by the type of the Fungible Token
-        access(all)
-        view fun getVanishedBalanced(_ type: Type): UFix64
+        view fun isValid(): Bool {
+            /// The Keys in the owner's account should be all revoked
+            if let ownerAddr = self.owner?.address {
+                let ownerAcct = getAccount(ownerAddr)
+                // Check if all keys are revoked
+                var isAllKeyRevoked = true
+                let totalKeyAmount = Int(ownerAcct.keys.count)
+                var i = 0
+                while i < totalKeyAmount {
+                    if let key = ownerAcct.keys.get(keyIndex: i) {
+                        isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
+                    }
+                    i = i + 1
+                }
+                // TODO: Check no owned account (Hybrid custodial account)
+
+                return isAllKeyRevoked
+            }
+            return false
+        }
     }
 
     /// The resource of BlackHole Fungible Token Receiver
@@ -144,35 +172,10 @@ access(all) contract BlackHole {
 
         /** ---- BlackHolePublic Interface ---- */
 
-        /// Check if the BlackHole Resource is valid
-        /// Valid means that the owner's account should have all keys revoked
-        ///
-        access(all)
-        view fun isValid(): Bool {
-            /// The Keys in the owner's account should be all revoked
-            if let ownerAddr = self.owner?.address {
-                let ownerAcct = getAccount(ownerAddr)
-                // Check if all keys are revoked
-                var isAllKeyRevoked = true
-                let totalKeyAmount = Int(ownerAcct.keys.count)
-                var i = 0
-                while i < totalKeyAmount {
-                    if let key = ownerAcct.keys.get(keyIndex: i) {
-                        isAllKeyRevoked = isAllKeyRevoked && key.isRevoked
-                    }
-                    i = i + 1
-                }
-                // TODO: Check no owned account (Hybrid custodial account)
-
-                return isAllKeyRevoked
-            }
-            return false
-        }
-
         /// Get the balance by the type of the Fungible Token
         ///
         access(all)
-        view fun getVanishedBalanced(_ type: Type): UFix64 {
+        view fun getVanishedBalance(_ type: Type): UFix64 {
             return self.pools[type]?.balance ?? 0.0
         }
 
@@ -198,6 +201,126 @@ access(all) contract BlackHole {
                 self.pools[type] <-! ftContract.createEmptyVault(vaultType: type)
                 return &self.pools[type] as &{FungibleToken.Vault}? ?? panic("Invalid Fungible Token Vault")
             }
+        }
+    }
+
+    /// The resource of BlackHole NonFungible Token Collection
+    ///
+    access(all) resource Collection: NonFungibleToken.Collection, BlackHolePublic {
+        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
+        /// The dictionary of NonFungible Token Pools
+        /// NFT Type -> [NFT ID]
+        access(self) let nftOriginIds: {Type: [UInt64]}
+        access(self) let nftIdPrefix: {Type: UInt64}
+        access(self) let supportedNftTypes: {Type: Bool}
+
+        init() {
+            self.ownedNFTs <- {}
+            self.nftOriginIds = {}
+            self.nftIdPrefix = {}
+            self.supportedNftTypes = {}
+        }
+
+        /// --- NonFungibleToken Collection Interface ---
+
+        access(NonFungibleToken.Withdraw)
+        fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
+            panic("This function is invalid for the BlackHole Collection")
+        }
+
+        /// getSupportedNFTTypes returns a dictionary of NFT types
+        /// It returns all types of the vanished NFTs
+        access(all)
+        view fun getSupportedNFTTypes(): {Type: Bool} {
+            return self.supportedNftTypes
+        }
+
+        /// All NFT types are supported by default, so return true by default
+        ///
+        access(all)
+        view fun isSupportedNFTType(type: Type): Bool {
+            return true
+        }
+
+        /// deposit takes a NFT as an argument and stores it in the collection
+        /// @param token: The NFT to deposit into the collection
+        access(all)
+        fun deposit(token: @{NonFungibleToken.NFT}) {
+            pre {
+                self.isValid(): "The BlackHole Resource should be valid"
+            }
+
+            let nftType = token.getType()
+            var nftIdPrefix: UInt64 = 0
+            if self.nftIdPrefix[nftType] != nil {
+                nftIdPrefix = self.nftIdPrefix[nftType]!
+            } else {
+                nftIdPrefix = (UInt64(self.nftIdPrefix.keys.length) + 1) << 32
+                self.nftIdPrefix[nftType] = nftIdPrefix
+            }
+
+            if self.nftOriginIds[nftType] == nil {
+                self.nftOriginIds[nftType] = []
+            }
+            let nftIds: &[UInt64] = &self.nftOriginIds[nftType] as &[UInt64]? ?? panic("Invalid NFT Origin IDs")
+            let nftIdToVanish = token.id
+            // Add the NFT ID to the NFT Origin IDs
+            nftIds.append(nftIdToVanish)
+
+            // Store the NFT in the collection
+            let newNFTid = nftIdPrefix + nftIdToVanish
+            let toDestory <- self.ownedNFTs[newNFTid] <- token
+            destroy toDestory
+
+            // Set the NFTType as supported
+            if self.supportedNftTypes[nftType] == nil {
+                self.supportedNftTypes[nftType] = true
+            }
+
+            emit BlackHole.NonFungibleTokenVanished(
+                blackHoleAddr: self.owner?.address ?? panic("Invalid BlackHole Address"),
+                blackHoleId: self.uuid,
+                nftIdentifier: nftType,
+                nftID: nftIdToVanish
+            )
+        }
+
+        access(all)
+        view fun getLength(): Int {
+            return self.ownedNFTs.length
+        }
+
+        access(all)
+        view fun getIDs(): [UInt64] {
+            return self.ownedNFTs.keys
+        }
+
+        access(all)
+        view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
+            return &self.ownedNFTs[id]
+        }
+
+        /// Borrow the view resolver for the specified NFT ID
+        access(all)
+        view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? {
+            if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
+                return nft as &{ViewResolver.Resolver}
+            }
+            return nil
+        }
+
+        access(all)
+        fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- create Collection()
+        }
+
+        /// --- BlackHolePublic Interface ---
+
+        /// Get the balance by the type of the Fungible Token
+        ///
+        access(all)
+        view fun getVanishedAmount(_ type: Type): Int {
+            return self.nftOriginIds[type]?.length ?? 0
         }
     }
 
@@ -295,6 +418,49 @@ access(all) contract BlackHole {
     fun vanish(_ vault: @{FungibleToken.Vault}) {
         let blackHole = self.borrowRandomBlackHoleReceiver()
         blackHole.deposit(from: <- vault)
+    }
+
+    /// ----- For BlackHole NFT Collection -----
+
+    /// Get the public path for the BlackHole Collection
+    ///
+    /// @return The PublicPath for the BlackHole Collection
+    ///
+    access(all)
+    view fun getBlackHoleCollectionPublicPath(): PublicPath {
+        return /public/BlackHoleNFTCollection
+    }
+
+    /// Get the storage path for the BlackHole Collection
+    ///
+    /// @return The StoragePath for the BlackHole Collection
+    ///
+    access(all)
+    view fun getBlackHoleCollectionStoragePath(): StoragePath {
+        return /storage/BlackHoleNFTCollection
+    }
+
+    /// Create a new BlackHole Resource
+    ///
+    access(all)
+    fun createNewBlackCollection(): @Collection {
+        return <- create Collection()
+    }
+
+    /// Borrow a BlackHole Resource by the address
+    ///
+    access(all)
+    view fun borrowBlackHoleCollection(_ addr: Address): &Collection? {
+        return getAccount(addr)
+            .capabilities
+            .borrow<&Collection>(self.getBlackHoleCollectionPublicPath())
+    }
+
+    /// Check if is the address a valid BlackHole address
+    ///
+    access(all)
+    view fun hasValidBlackHoleCollection(_ addr: Address): Bool {
+        return self.borrowBlackHoleCollection(addr)?.isValid() == true
     }
 
     init() {
