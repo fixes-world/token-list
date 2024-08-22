@@ -68,7 +68,7 @@ access(all) contract NFTViewUtils {
         /// Borrow the Fungible Token Contract
         ///
         access(all)
-        fun borrowFungibleTokenContract(): &{NonFungibleToken} {
+        fun borrowNFTContract(): &{NonFungibleToken} {
             return getAccount(self.address)
                 .contracts.borrow<&{NonFungibleToken}>(name: self.contractName)
                 ?? panic("Could not borrow the FungibleToken contract reference")
@@ -165,6 +165,23 @@ access(all) contract NFTViewUtils {
         access(all)
         fun getImages(): MetadataViews.Medias
         // --- default implementation ---
+        // Get the default square image
+        access(all)
+        view fun getDefaultSquareImage(): MetadataViews.Media {
+            return MetadataViews.Media(
+                file: MetadataViews.HTTPFile(url: "https://i.imgur.com/hs3U5CY.png"),
+                mediaType: "image/png"
+            )
+        }
+        // Get the default banner image
+        //
+        access(all)
+        view fun getDefaultBannerImage(): MetadataViews.Media {
+            return MetadataViews.Media(
+                file: MetadataViews.HTTPFile(url: "https://i.imgur.com/4DOuqFf.jpeg"),
+                mediaType: "image/jpeg"
+            )
+        }
         /// Get the FT Display
         ///
         access(all)
@@ -174,19 +191,9 @@ access(all) contract NFTViewUtils {
                 description: self.getDescription() ?? "No Description",
                 externalURL: self.getExternalURL() ?? MetadataViews.ExternalURL("https://fixes.world"),
                 // Square-sized image to represent this collection.
-                squareImage: self.getSquareImage() ?? MetadataViews.Media(
-                    file: MetadataViews.HTTPFile(
-                        url: "https://i.imgur.com/hs3U5CY.png"
-                    ),
-                    mediaType: "image/png"
-                ),
+                squareImage: self.getSquareImage() ?? self.getDefaultSquareImage(),
                 // Banner-sized image for this collection, recommended to have a size near 1200x630.
-                bannerImage: self.getBannerImage() ?? MetadataViews.Media(
-                    file: MetadataViews.HTTPFile(
-                        url: "https://i.imgur.com/4DOuqFf.jpeg"
-                    ),
-                    mediaType: "image/jpeg"
-                ),
+                bannerImage: self.getBannerImage() ?? self.getDefaultBannerImage(),
                 socials: self.getSocials()
             )
         }
@@ -209,7 +216,7 @@ access(all) contract NFTViewUtils {
 
     /// The Resource for the FT Display
     ///
-    access(all) resource EditableNFTCollectionDisplay: NFTCollectionDisplayEditor {
+    access(all) resource EditableNFTCollectionDisplay: NFTCollectionDisplayEditor, EditableNFTCollectionDisplayInterface {
         access(all)
         let identity: NFTIdentity
         access(contract)
@@ -222,7 +229,7 @@ access(all) contract NFTViewUtils {
             self.identity = NFTIdentity(address, contractName)
             self.metadata = {}
             // ensure identity is valid
-            self.identity.borrowFungibleTokenContract()
+            self.identity.borrowNFTContract()
         }
 
         /// Set the FT Display
