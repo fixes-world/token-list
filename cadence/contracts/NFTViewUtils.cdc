@@ -150,6 +150,9 @@ access(all) contract NFTViewUtils {
         // Banner-sized image for this collection, recommended to have a size near 1200x630.
         access(all)
         view fun getBannerImage(): MetadataViews.Media?
+        // Get all the images
+        access(all)
+        fun getImages(): MetadataViews.Medias
         // --- default implementation ---
         /// Get the FT Display
         ///
@@ -330,9 +333,29 @@ access(all) contract NFTViewUtils {
             return self.getImage("square", "svg") ?? self.getImage("square", "png") ?? self.getImage("square", "jpg") ?? self.getImage("square", nil)
         }
 
+        /// Get all the images
+        ///
         access(all)
-        fun getLogos(): MetadataViews.Medias {
+        fun getImages(): MetadataViews.Medias {
             let medias: [MetadataViews.Media] = []
+            if let bannerSvg = self.getImage("banner", "svg") {
+                medias.append(bannerSvg)
+            }
+            if let bannerPng = self.getImage("banner", "png") {
+                medias.append(bannerPng)
+            }
+            if let bannerJpg = self.getImage("banner", "jpg") {
+                medias.append(bannerJpg)
+            }
+            if let squareSvg = self.getImage("square", "svg") {
+                medias.append(squareSvg)
+            }
+            if let squarePng = self.getImage("square", "png") {
+                medias.append(squarePng)
+            }
+            if let squareJpg = self.getImage("square", "jpg") {
+                medias.append(squareJpg)
+            }
             return MetadataViews.Medias(medias)
         }
 
@@ -355,7 +378,8 @@ access(all) contract NFTViewUtils {
         access(all)
         view fun getViews(): [Type] {
             return [
-                Type<MetadataViews.NFTCollectionDisplay>()
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.Medias>()
             ]
         }
 
@@ -364,6 +388,8 @@ access(all) contract NFTViewUtils {
             switch view {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     return self.getCollectionDisplay()
+                case Type<MetadataViews.Medias>():
+                    return self.getImages()
             }
             return nil
         }
