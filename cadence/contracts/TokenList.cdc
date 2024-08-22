@@ -36,7 +36,7 @@ access(all) contract TokenList {
         _ type: Type,
     )
     /// Event emitted when a new Fungible Token is removed
-    access(all) event FungiubleTokenRemoved(
+    access(all) event FungibleTokenRemoved(
         _ address: Address,
         _ contractName: String,
         _ type: Type,
@@ -213,20 +213,19 @@ access(all) contract TokenList {
             // If viewResolver is not provided, then create one using the ViewResolvers
             if ViewResolvers.borrowContractViewResolver(ftAddress, ftContractName) != nil {
                 self.viewResolver <- ViewResolvers.createContractViewResolver(address: ftAddress, contractName: ftContractName)
-                // ensure ftView exists
-                self.getDisplay(nil)
-                self.getVaultData(nil)
             } else {
-                // Upgrade in Cadence 1.0 to use the FungibleToken(v2) contract
-                // let emptyVault <- ftContractRef.createEmptyVault()
-                // if emptyVault.isInstance(Type<@{ViewResolver.Resolver}>()) {
-                //     self.viewResolver <- emptyVault as @{ViewResolver.Resolver}
-                // } else {
-                //     self.viewResolver <- nil
-                //     destroy emptyVault
-                // }
-                self.viewResolver <- nil
+                let vaultType = FTViewUtils.buildFTVaultType(ftAddress, ftContractName) ?? panic("Could not build the FT Type")
+                let emptyVault <- ftContractRef.createEmptyVault(vaultType: vaultType)
+                if emptyVault.isInstance(Type<@{ViewResolver.Resolver}>()) {
+                    self.viewResolver <- emptyVault as @{ViewResolver.Resolver}
+                } else {
+                    self.viewResolver <- nil
+                    destroy emptyVault
+                }
             }
+            // ensure ftView exists
+            self.getDisplay(nil)
+            self.getVaultData(nil)
         }
 
         // ----- Implementing the FTMetadataInterface -----
@@ -1255,7 +1254,7 @@ access(all) contract TokenList {
             destroy entry
 
             // emit the event
-            emit FungiubleTokenRemoved(
+            emit FungibleTokenRemoved(
                 identity.address,
                 identity.contractName,
                 type

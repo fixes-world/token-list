@@ -50,7 +50,18 @@ access(all) contract NFTViewUtils {
 
         access(all)
         view fun buildType(): Type {
-            return FTViewUtils.buildFTVaultType(self.address, self.contractName)
+            return self.buildCollectionType()
+        }
+
+        access(all)
+        view fun buildCollectionType(): Type {
+            return NFTViewUtils.buildCollectionType(self.address, self.contractName)
+                ?? panic("Could not build the FT Type")
+        }
+
+        access(all)
+        view fun buildNFTType(): Type {
+            return NFTViewUtils.buildNFTType(self.address, self.contractName)
                 ?? panic("Could not build the FT Type")
         }
 
