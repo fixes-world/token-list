@@ -265,8 +265,9 @@ access(all) contract NFTList {
         /// Get the vault data of the FT
         ///
         access(all)
-        fun getCollectionData(): MetadataViews.NFTCollectionData? {
+        fun getCollectionData(): MetadataViews.NFTCollectionData {
             return MetadataViews.getNFTCollectionData(self.borrowViewResolver())
+                ?? panic("Failed to load the NFT Collection Data")
         }
 
         /// Get the FT Type
