@@ -1,4 +1,3 @@
-import "MetadataViews"
 import "TokenList"
 
 transaction() {

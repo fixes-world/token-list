@@ -1,4 +1,3 @@
-import "MetadataViews"
 import "FungibleToken"
 import "FTViewUtils"
 import "TokenList"
