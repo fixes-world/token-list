@@ -3,18 +3,28 @@ import "BlackHole"
 
 transaction() {
     prepare(acct: auth(Storage, Capabilities) &Account) {
-        let storagePath = BlackHole.getBlackHoleReceiverStoragePath()
-        if acct.storage.borrow<&AnyResource>(from: storagePath) != nil {
-            // If the account already has a BlackHole receiver, do nothing
-            return
+        let ftStoragePath = BlackHole.getBlackHoleReceiverStoragePath()
+        if acct.storage.borrow<&AnyResource>(from: ftStoragePath) == nil {
+            // create a new BlackHole receiver and save it to the new account's storage
+            let blackHole <- BlackHole.createNewBlackHole()
+            acct.storage.save(<- blackHole, to: ftStoragePath)
+
+            // Link the public capability to the new account so it can be used
+            let cap = acct.capabilities
+                .storage.issue<&BlackHole.Receiver>(ftStoragePath)
+            acct.capabilities.publish(cap, at: BlackHole.getBlackHoleReceiverPublicPath())
         }
 
-        // create a new BlackHole receiver and save it to the new account's storage
-        let blackHole <- BlackHole.createNewBlackHole()
-        acct.storage.save(<- blackHole, to: storagePath)
+        let nftStoragePath = BlackHole.getBlackHoleCollectionStoragePath()
+        if acct.storage.borrow<&AnyResource>(from: nftStoragePath) == nil {
+            // create a new BlackHole collection and save it to the new account's storage
+            let blackHoleCollection <- BlackHole.createNewBlackHoleCollection()
+            acct.storage.save(<- blackHoleCollection, to: nftStoragePath)
 
-        // Link the public capability to the new account so it can be used
-        let cap = acct.capabilities.storage.issue<&BlackHole.Receiver>(storagePath)
-        acct.capabilities.publish(cap, at: BlackHole.getBlackHoleReceiverPublicPath())
+            // Link the public capability to the new account so it can be used
+            let cap = acct.capabilities
+                .storage.issue<&BlackHole.Collection>(nftStoragePath)
+            acct.capabilities.publish(cap, at: BlackHole.getBlackHoleCollectionPublicPath())
+        }
     }
 }

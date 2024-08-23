@@ -443,7 +443,7 @@ access(all) contract BlackHole {
     /// Create a new BlackHole Resource
     ///
     access(all)
-    fun createNewBlackCollection(): @Collection {
+    fun createNewBlackHoleCollection(): @Collection {
         return <- create Collection()
     }
 
