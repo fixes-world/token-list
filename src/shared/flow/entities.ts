@@ -126,3 +126,33 @@ export interface TokenList {
     patch: number;
   };
 }
+
+interface NFTPaths {
+  storagePath: string;
+  publicPath: string;
+}
+
+export interface NFTStatus extends TokenStatusBasic, NFTPaths {}
+
+export interface NFTCollectionDisplay {
+  name: string;
+  description?: string;
+  externalURL?: string;
+  squareImage: Media;
+  bannerImage: Media;
+  social: Record<string, string>;
+}
+
+export interface NFTCollectionDisplayWithSource {
+  source: string;
+  display: NFTCollectionDisplay;
+}
+
+export interface StandardNFTCollectionView {
+  identity: TokenStatusBasic;
+  tags: string[];
+  paths: NFTPaths;
+  display?: NFTCollectionDisplayWithSource;
+}
+
+export type NFTListQueryResult = QueryResult<StandardNFTCollectionView>;
