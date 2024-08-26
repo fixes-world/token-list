@@ -403,7 +403,9 @@
 			"mainnet-admin": [
 				"FTViewUtils",
 				"ViewResolvers",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			],
 			"mainnet-blackhole": [
 				"BlackHole"
