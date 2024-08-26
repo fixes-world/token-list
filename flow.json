@@ -394,7 +394,9 @@
 				"ExampleToken",
 				"ViewResolvers",
 				"FTViewUtils",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			]
 		},
 		"mainnet": {
@@ -411,7 +413,9 @@
 			"testnet-admin": [
 				"FTViewUtils",
 				"ViewResolvers",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			],
 			"testnet-blackhole": [
 				"BlackHole"
