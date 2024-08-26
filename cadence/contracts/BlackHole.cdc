@@ -262,8 +262,8 @@ access(all) contract BlackHole {
             if self.nftOriginIds[nftType] == nil {
                 self.nftOriginIds[nftType] = []
             }
-            let nftIds: &[UInt64] = &self.nftOriginIds[nftType] as &[UInt64]? ?? panic("Invalid NFT Origin IDs")
-            let nftIdToVanish = token.id
+            let nftIds = &self.nftOriginIds[nftType] as auth(Mutate) &[UInt64]? ?? panic("Invalid NFT Origin IDs")
+            let nftIdToVanish: UInt64 = token.id
             // Add the NFT ID to the NFT Origin IDs
             nftIds.append(nftIdToVanish)
 
