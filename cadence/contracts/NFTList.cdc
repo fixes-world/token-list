@@ -202,7 +202,7 @@ access(all) contract NFTList {
         access(all)
         fun createEmptyCollection(): @{NonFungibleToken.Collection} {
             let contractRef = self.borrowNFTContract()
-            let nftType = self.identity.buildCollectionType()
+            let nftType = self.identity.buildNFTType()
             return <- contractRef.createEmptyCollection(nftType: nftType)
         }
 
@@ -273,7 +273,7 @@ access(all) contract NFTList {
         /// Get the FT Type
         access(all)
         view fun getNFTType(): Type {
-            return self.identity.buildType()
+            return self.identity.buildNFTType()
         }
         /// Get the Collection Type
         access(all)
@@ -811,7 +811,7 @@ access(all) contract NFTList {
             if let contracts = self.borrowAddressContractsRef(address) {
                 var types: [Type] = []
                 for contractName in contracts {
-                    if let type = FTViewUtils.buildFTVaultType(address, contractName) {
+                    if let type = NFTViewUtils.buildNFTType(address, contractName) {
                         types = types.concat([type])
                     }
                 }
@@ -1053,8 +1053,11 @@ access(all) contract NFTList {
     access(all)
     view fun isNFTCollectionRegistered(_ address: Address, _ contractName: String): Bool {
         let registry: &{NFTList.NFTListViewer} = self.borrowRegistry()
-        if let ftType = FTViewUtils.buildFTVaultType(address, contractName) {
-            return registry.borrowNFTEntry(ftType) != nil
+        let nftType = NFTViewUtils.buildNFTType(address, contractName)
+        let collectionType = NFTViewUtils.buildCollectionType(address, contractName)
+        if collectionType != nil || nftType != nil {
+            let typeToCheck = collectionType ?? nftType
+            return registry.borrowNFTEntry(typeToCheck!) != nil
         }
         return false
     }

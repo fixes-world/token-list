@@ -33,6 +33,7 @@ const options = computed<SelectOption[]>(() => {
     return {
       label: identifier,
       value: identifier,
+      disabled: contract.isRegistered,
     }
   }) || [];
 })
