@@ -134,13 +134,22 @@ interface NFTPaths {
 
 export interface NFTStatus extends TokenStatusBasic, NFTPaths {}
 
-export interface NFTCollectionDisplay {
+export interface NFTCollectionDisplayBasic {
   name: string;
   description?: string;
   externalURL?: string;
+}
+
+export interface NFTCollectionDisplay extends NFTCollectionDisplayBasic {
   squareImage: Media;
   bannerImage: Media;
   social: Record<string, string>;
+}
+
+export interface NFTCollectionDisplayDto extends NFTCollectionDisplayBasic {
+  squareImage: string;
+  bannerImage: string;
+  social: SocialKeyPair[];
 }
 
 export interface NFTCollectionDisplayWithSource {
