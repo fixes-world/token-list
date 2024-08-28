@@ -30,13 +30,13 @@ access(all) contract NFTList {
     /// Event emitted when the contract is initialized
     access(all) event ContractInitialized()
 
-    /// Event emitted when a new Fungible Token is registered
+    /// Event emitted when a new Non-Fungible Token is registered
     access(all) event NFTCollectionRegistered(
         _ address: Address,
         _ contractName: String,
         _ type: Type,
     )
-    /// Event emitted when a new Fungible Token is removed
+    /// Event emitted when a new Non-Fungible Token is removed
     access(all) event NFTCollectionRemoved(
         _ address: Address,
         _ contractName: String,
@@ -64,20 +64,20 @@ access(all) contract NFTList {
         _ contractName: String,
         reviewer: Address
     )
-    /// Event emitted when a new Fungible Token is reviewed
+    /// Event emitted when a new Non-Fungible Token is reviewed
     access(all) event NFTCollectionViewResolverUpdated(
         _ address: Address,
         _ contractName: String,
         _ newResolverIdentifier: String
     )
-    /// Event emitted when a Fungible Token is evaluated
+    /// Event emitted when a Non-Fungible Token is evaluated
     access(all) event NFTCollectionReviewEvaluated(
         _ address: Address,
         _ contractName: String,
         _ rank: UInt8,
         _ by: Address
     )
-    /// Event emitted when a Fungible Token is tagged
+    /// Event emitted when a Non-Fungible Token is tagged
     access(all) event NFTCollectionTagsAdded(
         _ address: Address,
         _ contractName: String,
@@ -110,17 +110,17 @@ access(all) contract NFTList {
         /// Get the Collection Type
         access(all)
         view fun getCollectionType(): Type
-        /// Check if the Fungible Token is reviewed by some one
+        /// Check if the Non-Fungible Token is reviewed by some one
         access(all)
         view fun isReviewedBy(_ reviewer: Address): Bool
-        /// Get the Fungible Token Review
+        /// Get the Non-Fungible Token Review
         access(all)
         view fun getReview(_ reviewer: Address): FTViewUtils.FTReview?
         /// Get the display metadata of the FT, fallback to the highest rank reviewer
         access(all)
         fun getDisplay(_ reviewer: Address?): NFTViewUtils.NFTCollectionViewWithSource?
         // ----- Quick Access For FTViews -----
-        /// Get the evaluation rank of the Fungible Token, no fallback
+        /// Get the evaluation rank of the Non-Fungible Token, no fallback
         access(all)
         view fun getEvaluatedRank(_ reviewer: Address?): FTViewUtils.Evaluation? {
             if let reviewerAddr = reviewer {
@@ -156,11 +156,10 @@ access(all) contract NFTList {
         /// Try to get a reviewer address
         access(contract)
         view fun tryGetReviewer(_ reviewer: Address?): Address? {
-            let tokenType = self.getNFTType()
             var reviewerAddr = reviewer
             if reviewerAddr == nil {
                 let registry = NFTList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+                reviewerAddr = registry.getHighestRankVerifiedCustomizedReviewer(self.getNFTType())
             }
             return reviewerAddr
         }
@@ -171,7 +170,7 @@ access(all) contract NFTList {
         fun addReview(_ reviewer: Address, _ review: FTViewUtils.FTReview)
     }
 
-    /// Resource for the Fungible Token Entry
+    /// Resource for the Non-Fungible Token Entry
     ///
     access(all) resource NFTCollectionEntry: NFTEntryInterface {
         access(all)
@@ -206,21 +205,21 @@ access(all) contract NFTList {
             return <- contractRef.createEmptyCollection(nftType: nftType)
         }
 
-        /// Get the Fungible Token Identity
+        /// Get the Non-Fungible Token Identity
         ///
         access(all)
         view fun getIdentity(): NFTViewUtils.NFTIdentity {
             return self.identity
         }
 
-        /// Check if the Fungible Token is reviewed by some one
+        /// Check if the Non-Fungible Token is reviewed by some one
         ///
         access(all)
         view fun isReviewedBy(_ reviewer: Address): Bool {
             return self.reviewers[reviewer] != nil
         }
 
-        /// Get the Fungible Token Review
+        /// Get the Non-Fungible Token Review
         ///
         access(all)
         view fun getReview(_ reviewer: Address): FTViewUtils.FTReview? {
@@ -239,7 +238,7 @@ access(all) contract NFTList {
             var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 if let reviewerRef = NFTList.borrowReviewerPublic(addr) {
-                    if let displayRef = reviewerRef.borrowNFTCollectionDisplayReader(self.getNFTType()) {
+                    if let displayRef = reviewerRef.borrowNFTCollectionDisplayReader(self.identity.address, self.identity.contractName) {
                         let socials = retNFTDisplay?.socials ?? {}
                         let extraSocials = displayRef.getSocials()
                         for key in extraSocials.keys {
@@ -308,7 +307,7 @@ access(all) contract NFTList {
             return &self.viewResolver
         }
 
-        /// Borrow the Fungible Token Contract
+        /// Borrow the Non-Fungible Token Contract
         ///
         access(contract)
         fun borrowNFTContract(): &{NonFungibleToken} {
@@ -316,7 +315,7 @@ access(all) contract NFTList {
         }
     }
 
-    /// Interface for the Fungible Token Reviewer
+    /// Interface for the Non-Fungible Token Reviewer
     ///
     access(all) resource interface NFTListReviewerInterface {
         access(all)
@@ -346,30 +345,46 @@ access(all) contract NFTList {
         access(all)
         view fun getVerifiedNFTTypes(): [Type]
         access(all)
-        view fun borrowNFTCollectionDisplayReader(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay?
+        view fun borrowNFTCollectionDisplayReaderByNftType(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay?
+        access(all)
+        view fun borrowNFTCollectionDisplayReader(
+            _ address: Address,
+            _ contractName: String,
+        ): &NFTViewUtils.EditableNFTCollectionDisplay?
     }
 
-    /// Maintainer interface for the Fungible Token Reviewer
+    /// Maintainer interface for the Non-Fungible Token Reviewer
     ///
     access(all) resource interface NFTListReviewMaintainer {
         /// Update Reviewer Metadata
         access(Maintainer)
         fun updateMetadata(name: String?, url: String?)
-        /// Review the Fungible Token with Evaluation
+        /// Review the Non-Fungible Token with Evaluation
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation)
-        /// Review the Fungible Token, add tags
+        fun reviewNFTEvalute(
+            _ address: Address,
+            _ contractName: String,
+            rank: FTViewUtils.Evaluation
+        )
+        /// Review the Non-Fungible Token, add tags
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String])
-        /// Register the Fungible Token Display Patch
+        fun reviewNFTAddTags(
+            _ address: Address,
+            _ contractName: String,
+            tags: [String]
+        )
+        /// Register the Non-Fungible Token Display Patch
         access(Maintainer)
         fun registerNFTCollectionDisplayPatch(
             _ address: Address,
-            _ contractName: String
+            _ contractName: String,
         )
         /// Borrow or create the FTDisplay editor
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay?
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay?
     }
 
     /// The resource for the FT Reviewer
@@ -410,13 +425,17 @@ access(all) contract NFTList {
             )
         }
 
-        /// Review the Fungible Token with Evaluation
+        /// Review the Non-Fungible Token with Evaluation
         ///
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
+        fun reviewNFTEvalute(
+            _ address: Address,
+            _ contractName: String,
+            rank: FTViewUtils.Evaluation
+        ) {
             let registery = NFTList.borrowRegistry()
-            let entryRef = registery.borrowNFTEntry(type)
-                ?? panic("Failed to load the Fungible Token Entry")
+            let entryRef = registery.borrowNFTEntryByContract(address, contractName)
+                ?? panic("Failed to load the Non-Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
             var isUpdated = false
@@ -435,10 +454,11 @@ access(all) contract NFTList {
                 return
             }
 
+            let identity = entryRef.getIdentity()
+            let type = identity.buildNFTType()
+
             // update reviewed status locally
             self.reviewed[type] = rank
-
-            let identity = entryRef.getIdentity()
 
             // emit the event
             emit NFTCollectionReviewEvaluated(
@@ -449,25 +469,29 @@ access(all) contract NFTList {
             )
         }
 
-        /// Review the Fungible Token, add tags
+        /// Review the Non-Fungible Token, add tags
         ///
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String]) {
+        fun reviewNFTAddTags(
+            _ address: Address,
+            _ contractName: String,
+            tags: [String]
+        ) {
             pre {
                 tags.length > 0: "Tags should not be empty"
             }
 
             let registery = NFTList.borrowRegistry()
-            let entryRef = registery.borrowNFTEntry(type)
-                ?? panic("Failed to load the Fungible Token Entry")
+            let entryRef = registery.borrowNFTEntryByContract(address, contractName)
+                ?? panic("Failed to load the Non-Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
             if entryRef.borrowReviewRef(reviewerAddr) == nil {
                 // add the review with UNVERIFIED evaluation
-                self.reviewNFTEvalute(type, rank: FTViewUtils.Evaluation.UNVERIFIED)
+                self.reviewNFTEvalute(address, contractName, rank: FTViewUtils.Evaluation.UNVERIFIED)
             }
             let ref = entryRef.borrowReviewRef(reviewerAddr)
-                ?? panic("Failed to load the Fungible Token Review")
+                ?? panic("Failed to load the Non-Fungible Token Review")
             var isUpdated = false
             for tag in tags {
                 // ingore the eval tags
@@ -494,7 +518,7 @@ access(all) contract NFTList {
             )
         }
 
-        /// Register the Fungible Token Display Patch
+        /// Register the Non-Fungible Token Display Patch
         ///
         access(Maintainer)
         fun registerNFTCollectionDisplayPatch(
@@ -530,7 +554,12 @@ access(all) contract NFTList {
         /// Borrow or create the editor
         ///
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+            let nftType = NFTViewUtils.buildNFTType(address, contractName)
+                ?? panic("Failed to build the NFT Type")
             return &self.storedDisplayPatches[nftType]
         }
 
@@ -541,28 +570,28 @@ access(all) contract NFTList {
             return self.metadata
         }
 
-        /// Return the amount of Fungible Token which reviewed by the reviewer
+        /// Return the amount of Non-Fungible Token which reviewed by the reviewer
         ///
         access(all)
         view fun getReviewedNFTAmount(): Int {
             return self.reviewed.keys.length
         }
 
-        /// Return the amount of Fungible Token which display customized by the reviewer
+        /// Return the amount of Non-Fungible Token which display customized by the reviewer
         ///
         access(all)
         view fun getCustomizedNFTAmount(): Int {
             return self.storedDisplayPatches.keys.length
         }
 
-        /// Return all Fungible Token Types reviewed by the reviewer
+        /// Return all Non-Fungible Token Types reviewed by the reviewer
         ///
         access(all)
         view fun getReviewedNFTTypes(): [Type] {
             return self.reviewed.keys
         }
 
-        /// Return all Fungible Token Types with FEATURED evaluation
+        /// Return all Non-Fungible Token Types with FEATURED evaluation
         ///
         access(all)
         view fun getFeaturedNFTTypes(): [Type] {
@@ -572,7 +601,7 @@ access(all) contract NFTList {
             })
         }
 
-        /// Return all Fungible Token Types with VERIFIED or FEATURED evaluation
+        /// Return all Non-Fungible Token Types with VERIFIED or FEATURED evaluation
         ///
         access(all)
         view fun getVerifiedNFTTypes(): [Type] {
@@ -586,14 +615,24 @@ access(all) contract NFTList {
         /// Borrow the FTDisplay editor
         ///
         access(all)
-        view fun borrowNFTCollectionDisplayReader(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay? {
-            return self.borrowNFTCollectionDisplayEditor(nftType)
+        view fun borrowNFTCollectionDisplayReader(
+            _ address: Address,
+            _ contractName: String,
+        ): &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return self.borrowNFTCollectionDisplayEditor(address, contractName)
+        }
+
+        /// Borrow the FTDisplay editor
+        ///
+        access(all)
+        view fun borrowNFTCollectionDisplayReaderByNftType(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return &self.storedDisplayPatches[nftType]
         }
 
         // --- Internal Methods ---
     }
 
-    /// The Maintainer for the Fungible Token Reviewer
+    /// The Maintainer for the Non-Fungible Token Reviewer
     ///
     access(all) resource ReviewMaintainer: NFTListReviewMaintainer {
         access(self)
@@ -622,21 +661,21 @@ access(all) contract NFTList {
             self._borrowReviewer().updateMetadata(name: name, url: url)
         }
 
-        /// Review the Fungible Token with Evaluation
+        /// Review the Non-Fungible Token with Evaluation
         ///
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
-            self._borrowReviewer().reviewNFTEvalute(type, rank: rank)
+        fun reviewNFTEvalute(_ address: Address, _ contractName: String, rank: FTViewUtils.Evaluation) {
+            self._borrowReviewer().reviewNFTEvalute(address, contractName, rank: rank)
         }
 
-        /// Review the Fungible Token, add tags
+        /// Review the Non-Fungible Token, add tags
         ///
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String]) {
-            self._borrowReviewer().reviewNFTAddTags(type, tags: tags)
+        fun reviewNFTAddTags(_ address: Address, _ contractName: String, tags: [String]) {
+            self._borrowReviewer().reviewNFTAddTags(address, contractName, tags: tags)
         }
 
-        /// Register the Fungible Token Display Patch
+        /// Register the Non-Fungible Token Display Patch
         access(Maintainer)
         fun registerNFTCollectionDisplayPatch(
             _ address: Address,
@@ -647,8 +686,11 @@ access(all) contract NFTList {
 
         /// Borrow or create the FTDisplay editor
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
-            return self._borrowReviewer().borrowNFTCollectionDisplayEditor(nftType)
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return self._borrowReviewer().borrowNFTCollectionDisplayEditor(address, contractName)
         }
 
         /* ---- Internal Methods ---- */
@@ -675,21 +717,21 @@ access(all) contract NFTList {
         /// Return if the reviewer is verified
         access(all)
         view fun isReviewerVerified(_ reviewer: Address): Bool
-        /// Get the amount of Fungible Token Entries
+        /// Get the amount of Non-Fungible Token Entries
         access(all)
         view fun getNFTEntriesAmount(): Int
-        /// Get all the Fungible Token Entries
+        /// Get all the Non-Fungible Token Entries
         access(all)
         view fun getAllNFTEntries(): [Type]
-        /// Get the Fungible Token Entry by the page and size
+        /// Get the Non-Fungible Token Entry by the page and size
         access(all)
         view fun getNFTEntries(_ page: Int, _ size: Int): [Type]
-        /// Get the Fungible Token Entry by the address
+        /// Get the Non-Fungible Token Entry by the address
         access(all)
         view fun getNFTEntriesByAddress(_ address: Address): [Type]
         /// Get the customized reviewers
         access(all)
-        view fun getHighestRankCustomizedReviewer(_ nftType: Type): Address?
+        view fun getHighestRankVerifiedCustomizedReviewer(_ nftType: Type): Address?
         /// Borrow the NFT Entry by the type
         access(all)
         view fun borrowNFTEntry(_ nftType: Type): &NFTCollectionEntry?
@@ -697,10 +739,10 @@ access(all) contract NFTList {
         access(all)
         view fun borrowNFTEntryByContract(_ address: Address, _ contractName: String): &NFTCollectionEntry?
         // --- Write Methods ---
-        /// Register a new standard Fungible Token Entry to the registry
+        /// Register a new standard Non-Fungible Token Entry to the registry
         access(contract)
         fun registerStandardNonFungibleToken(_ address: Address, _ contractName: String)
-        /// Invoked when a new Fungible Token is customized by the reviewer
+        /// Invoked when a new Non-Fungible Token is customized by the reviewer
         access(contract)
         fun onReviewerNFTCollectionCustomized(_ reviewer: Address, _ nftType: Type)
     }
@@ -771,20 +813,20 @@ access(all) contract NFTList {
             return self.verifiedReviewers[reviewer] ?? false
         }
 
-        /// Get the amount of Fungible Token Entries
+        /// Get the amount of Non-Fungible Token Entries
         access(all)
         view fun getNFTEntriesAmount(): Int {
             return self.entries.keys.length
         }
 
-        /// Get all the Fungible Token Entries
+        /// Get all the Non-Fungible Token Entries
         ///
         access(all)
         view fun getAllNFTEntries(): [Type] {
             return self.entries.keys
         }
 
-        /// Get the Fungible Token Entry by the page and size
+        /// Get the Non-Fungible Token Entry by the page and size
         ///
         access(all)
         view fun getNFTEntries(_ page: Int, _ size: Int): [Type] {
@@ -804,7 +846,7 @@ access(all) contract NFTList {
             return self.entries.keys.slice(from: start, upTo: end)
         }
 
-        /// Get the Fungible Token Entry by the address
+        /// Get the Non-Fungible Token Entry by the address
         ///
         access(all)
         view fun getNFTEntriesByAddress(_ address: Address): [Type] {
@@ -823,13 +865,16 @@ access(all) contract NFTList {
         /// Get the highest rank customized reviewers
         ///
         access(all)
-        view fun getHighestRankCustomizedReviewer(_ nftType: Type): Address? {
+        view fun getHighestRankVerifiedCustomizedReviewer(_ nftType: Type): Address? {
             if let reviewers = self.customizedNFTViews[nftType] {
                 var highestRank: ReviewerRank? = nil
                 var highestReviewer: Address? = nil
                 for reviewer in reviewers {
+                    if self.verifiedReviewers[reviewer] != true {
+                        continue
+                    }
                     if let rank = self.reviewerRanks[reviewer] {
-                        if highestRank == nil || rank.rawValue > highestRank!.rawValue || self.verifiedReviewers[reviewer] == true {
+                        if highestRank == nil || rank.rawValue > highestRank!.rawValue {
                             highestRank = rank
                             highestReviewer = reviewer
                             // break if the reviewer is verified
@@ -883,14 +928,14 @@ access(all) contract NFTList {
             )
         }
 
-        /// Remove a Fungible Token Entry from the registry
+        /// Remove a Non-Fungible Token Entry from the registry
         ///
         access(SuperAdmin)
         fun removeNFTCollection(_ type: Type): Bool {
             return self._removeNFTCollection(type)
         }
 
-        /// Register a new standard Fungible Token Entry to the registry
+        /// Register a new standard Non-Fungible Token Entry to the registry
         ///
         access(contract)
         fun registerStandardNonFungibleToken(_ address: Address, _ contractName: String) {
@@ -900,7 +945,7 @@ access(all) contract NFTList {
             self._register(<- create NFTCollectionEntry(address, contractName))
         }
 
-        /// Invoked when a new Fungible Token is customized by the reviewer
+        /// Invoked when a new Non-Fungible Token is customized by the reviewer
         ///
         access(contract)
         fun onReviewerNFTCollectionCustomized(_ reviewer: Address, _ nftType: Type) {
@@ -954,7 +999,7 @@ access(all) contract NFTList {
             }
         }
 
-        /// Remove a Fungible Token Entry from the registry
+        /// Remove a Non-Fungible Token Entry from the registry
         ///
         access(self)
         fun _removeNFTCollection(_ nftType: Type): Bool {
@@ -962,7 +1007,7 @@ access(all) contract NFTList {
                 return false
             }
             let entry <- self.entries.remove(key: nftType)
-                ?? panic("Could not remove the Fungible Token Entry")
+                ?? panic("Could not remove the Non-Fungible Token Entry")
             self.entriesIdMapping.remove(key: entry.uuid)
 
             let identity = entry.getIdentity()
@@ -982,7 +1027,7 @@ access(all) contract NFTList {
             return true
         }
 
-        /// Add a new Fungible Token Entry to the registry
+        /// Add a new Non-Fungible Token Entry to the registry
         ///
         access(self)
         fun _register(_ entry: @NFTCollectionEntry) {
@@ -1029,7 +1074,7 @@ access(all) contract NFTList {
         return <- create NFTListReviewer()
     }
 
-    /// Create a new Fungible Token Review Maintainer
+    /// Create a new Non-Fungible Token Review Maintainer
     ///
     access(all)
     fun createNFTListReviewMaintainer(
@@ -1038,7 +1083,7 @@ access(all) contract NFTList {
         return <- create ReviewMaintainer(cap)
     }
 
-    /// Get the Fungible Token Reviewer capability
+    /// Get the Non-Fungible Token Reviewer capability
     ///
     access(all)
     view fun getReviewerCapability(_ addr: Address): Capability<&NFTListReviewer> {
@@ -1046,7 +1091,7 @@ access(all) contract NFTList {
             .get<&NFTListReviewer>(self.reviewerPublicPath)
     }
 
-    /// Borrow the public capability of the Fungible Token Reviewer
+    /// Borrow the public capability of the Non-Fungible Token Reviewer
     ///
     access(all)
     view fun borrowReviewerPublic(_ addr: Address): &NFTListReviewer? {

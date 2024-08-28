@@ -4,18 +4,19 @@ import {
   NSkeleton, NEmpty, NDivider,
 } from 'naive-ui';
 
-import { getAddressReviewerStatus } from '@shared/flow/action/scripts';
-import type { StandardTokenView, AddressStatus } from '@shared/flow/entities';
+import { getAddressReviewerStatus, getNFTListAddressReviewerStatus } from '@shared/flow/action/scripts';
+import type { StandardTokenView, AddressStatus, StandardNFTCollectionView } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
+import LoadingFrame from '@components/partials/LoadingFrame.vue';
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
-import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
+import PanelNFTEditor from '@components/reviewer/panel/PanelNFTEditor.vue';
 import PanelTokenReview from '@components/reviewer/panel/PanelTokenReview.vue';
 
 const acctName = useGlobalAccount();
@@ -28,7 +29,7 @@ const addrStatus = ref<AddressStatus | null>(null);
 
 const isFirstLoading = ref(false)
 
-const currentToken = ref<StandardTokenView | undefined>(undefined)
+const currentNFT = ref<StandardNFTCollectionView | undefined>(undefined)
 
 const isEditorAvailable = computed(() => {
   return addrStatus.value && (addrStatus.value.isReviewer || addrStatus.value.isReviewMaintainer)
@@ -44,7 +45,7 @@ const isPlaceCenter = computed(() => {
 
 async function loadAddrStatus() {
   if (!acctName.value) return
-  addrStatus.value = await getAddressReviewerStatus(acctName.value)
+  addrStatus.value = await getNFTListAddressReviewerStatus(acctName.value)
 }
 
 async function reloadAddrStatus() {
@@ -59,7 +60,7 @@ async function refreshTokenList() {
   if (tokenListRef.value) {
     await tokenListRef.value?.reload()
   }
-  currentToken.value = undefined
+  currentNFT.value = undefined
 }
 
 // Watchers and Lifecycle Hooks
@@ -69,7 +70,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
 </script>
 
 <template>
-  <VueWrapper id="MaintainerEditor">
+  <VueWrapper id="NFTListEditor">
     <div :class="['min-h-[calc(100vh-36rem)] flex flex-col', isPlaceCenter ? 'items-center justify-center' : '']">
       <EnsureConnected type="primary">
         <template #not-connected>
@@ -87,30 +88,35 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             <PanelTokenList
               ref="tokenListRef"
               class="flex-none"
-              v-model:ft="currentToken"
+              :is-nft="true"
+              v-model:nft="currentNFT"
               :reviewer="addrStatus.reviewerAddr"
             />
             <div class="flex-auto flex flex-col">
-              <PanelReviewer :reviewer="addrStatus.reviewerAddr" />
+              <PanelReviewer
+                :is-nft="true"
+                :reviewer="addrStatus.reviewerAddr"
+              />
               <p
-                v-if="!currentToken"
+                v-if="!currentNFT"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
               >
-                Select a fungible token to edit
+                Select a non-fungible token to edit
               </p>
               <template v-else>
-                <NDivider class="!mt-4 !mb-6">
-                  <span class="text-sm italic font-bold text-gray-400/60">Token Metadata Editor</span>
-                </NDivider>
-                <PanelTokenEditor
-                  :ft="currentToken"
-                  @refresh="refreshTokenList"
-                />
                 <NDivider>
-                  <span class="text-sm italic font-bold text-gray-400/60">Token Review</span>
+                  <span class="text-sm italic font-bold text-gray-400/60">NFT Collection Review</span>
                 </NDivider>
                 <PanelTokenReview
-                  :item="currentToken"
+                  :is-nft="true"
+                  :item="currentNFT"
+                  @refresh="refreshTokenList"
+                />
+                <NDivider class="!mt-4 !mb-6">
+                  <span class="text-sm italic font-bold text-gray-400/60">NFT Collection Metadata Editor</span>
+                </NDivider>
+                <PanelNFTEditor
+                  :nft="currentNFT"
                   @refresh="refreshTokenList"
                 />
               </template>
@@ -135,10 +141,14 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             </h2>
             <FormSubmitClaimMaintainer
               :reviewer="addrStatus.reviewerAddr"
+              :is-nft="true"
               @success="reloadAddrStatus"
             />
             <h2 class="text-lg"> or </h2>
-            <FormSubmitInitReviewer @success="reloadAddrStatus" />
+            <FormSubmitInitReviewer
+              :is-nft="true"
+              @success="reloadAddrStatus"
+            />
           </div>
         </LoadingFrame>
       </EnsureConnected>

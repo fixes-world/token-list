@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, watch } from 'vue';
-import { NInput } from 'naive-ui'
 
 import type { QueryResult, StandardTokenView, StandardNFTCollectionView } from '@shared/flow/entities';
 import { queryTokenList, queryNFTList } from '@shared/flow/action/scripts';
@@ -9,6 +8,7 @@ import { FilterType } from '@shared/flow/enums';
 import ListWrapper from '@components/widgets/ListWrapper.vue';
 import ItemTokenInfo from '@components/items/ItemTokenInfo.vue';
 import ItemNFTCollectionInfo from '@components/items/ItemNFTCollectionInfo.vue';
+import SearchFilter from '@components/landing/items/SearchFilter.vue';
 
 const props = withDefaults(defineProps<{
   isNft?: boolean,
@@ -81,19 +81,7 @@ defineExpose({
       }"
     >
       <template #header>
-        <NInput
-          size="small"
-          round
-          v-model:value="filterName"
-          placeholder="Search"
-          :input-props="{
-            autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false', inputmode: 'search', enterKeyHint: 'search'
-          }"
-        >
-          <template #suffix>
-            <div class="i-carbon:search w-4 h-4 text-gray-400/50" />
-          </template>
-        </NInput>
+        <SearchFilter v-model:search="filterName" />
       </template>
       <template #="{ items }">
         <component

@@ -7,11 +7,13 @@ const props = withDefaults(defineProps<{
   alt?: string,
   objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down',
   width?: number | string
+  previewDisabled?: boolean
 }>(), {
   media: undefined,
   alt: 'Image Alt',
   objectFit: 'cover',
-  width: 48
+  width: 48,
+  previewDisabled: true
 })
 
 </script>
@@ -23,6 +25,7 @@ const props = withDefaults(defineProps<{
     :width="width"
     :src="props.media.uri"
     :object-fit="objectFit"
+    :preview-disabled="previewDisabled"
   >
     <template #placeholder>
       <span class="mx-a i-carbon:image w-6 h-6 text-gray-400/50"/>

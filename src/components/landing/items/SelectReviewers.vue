@@ -4,15 +4,18 @@ import {
   NSkeleton, NEmpty, NTag,
   NSelect, type SelectOption,
 } from 'naive-ui';
-import { getReviewers } from '@shared/flow/action/scripts'
+import { getNFTListReviewers, getReviewers } from '@shared/flow/action/scripts'
 import type { ReviewerInfo } from '@shared/flow/entities';
 
+import LoadingFrame from '@components/partials/LoadingFrame.vue';
 import ItemReviewerInfo from './ItemReviewerInfo.vue';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean;
   disabled?: boolean;
   current?: ReviewerInfo;
 }>(), {
+  isNft: false,
   disabled: false,
 });
 
@@ -63,7 +66,11 @@ async function reload() {
 
 async function loadReviewers() {
   isLoadingData.value = true;
-  reviewers.value = await getReviewers();
+  if (props.isNft) {
+    reviewers.value = await getNFTListReviewers();
+  } else {
+    reviewers.value = await getReviewers();
+  }
   isLoadingData.value = false;
 }
 
@@ -83,30 +90,30 @@ defineExpose({
 
 <template>
   <div class="w-full">
-    <NSkeleton
-      v-if="isFirstLoading"
-      animated
-      width="100%"
-      :height="3"
-      round
-    />
-    <template v-else-if="reviewers.length === 0">
-      <NEmpty
-        description="No Reviwer Found"
-        class="my-3"
+    <LoadingFrame
+      :loading="isFirstLoading"
+      :is-empty="reviewers.length === 0"
+      empty-text="No Reviwer Found"
+    >
+      <template #loading>
+        <NSkeleton
+          animated
+          width="100%"
+          :height="3"
+          round
+        />
+      </template>
+      <NSelect
+        size="large"
+        v-model:value="currentSelect"
+        :options="options"
+        :loading="isLoadingData"
+        :disabled="isDisabled"
+        placeholder="Select a reviewer to see more details"
+        :input-props="{ autocomplete: 'off' }"
+        filterable
+        clearable
       />
-    </template>
-    <NSelect
-      v-else
-      size="large"
-      v-model:value="currentSelect"
-      :options="options"
-      :loading="isLoadingData"
-      :disabled="isDisabled"
-      placeholder="Select a reviewer to see more details"
-      :input-props="{ autocomplete: 'off' }"
-      filterable
-      clearable
-    />
+    </LoadingFrame>
   </div>
 </template>

@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import { ref, reactive, computed, inject, watch } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import {
   NCollapseTransition, NSwitch,
   NDivider,
 } from 'naive-ui';
-import { getReviewerInfo } from '@shared/flow/action/scripts';
-import { FlowSrvKey } from '@shared/flow/utilitites';
+import { getReviewerInfo, getNFTListReviewerInfo } from '@shared/flow/action/scripts';
 import type { ReviewerInfo } from '@shared/flow/entities';
-import { useGlobalAccount, useSendingTransaction } from '@components/shared';
+import { useGlobalAccount } from '@components/shared';
 
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import FormReviewerMetadata from '@components/reviewer/form/FormReviewerMetadata.vue';
 import FormAddMaintainer from '@components/reviewer/form/FormAddMaintainer.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
+  isNft?: boolean
   reviewer?: string
-}>();
+}>(), {
+  isNft: false,
+});
 
 const acctName = useGlobalAccount();
-const isSending = useSendingTransaction()
 
 // const breakpoints = useBreakpoints(breakpointsTailwind)
 // const isNotMobile = breakpoints.greaterOrEqual('md')
@@ -36,8 +36,11 @@ const reviewerInfo = ref<ReviewerInfo | null>(null)
 
 async function loadReviewerMetadata() {
   if (!props.reviewer) return
-
-  reviewerInfo.value = await getReviewerInfo(props.reviewer)
+  if (props.isNft) {
+    reviewerInfo.value = await getNFTListReviewerInfo(props.reviewer)
+  } else {
+    reviewerInfo.value = await getReviewerInfo(props.reviewer)
+  }
 }
 
 async function refresh() {
@@ -109,6 +112,7 @@ watch(acctName, refresh, { immediate: true })
         <span class="text-xs italic text-gray-500">Edit Reviewer Metadata</span>
       </NDivider>
       <FormReviewerMetadata
+        :is-nft="props.isNft"
         :reviewer-info="reviewerInfo"
         @refresh="refresh"
       />
@@ -121,6 +125,7 @@ watch(acctName, refresh, { immediate: true })
       </NDivider>
       <FormAddMaintainer
         v-if="reviewerInfo?.address == acctName"
+        :is-nft="props.isNft"
         :reviewer-info="reviewerInfo"
         @refresh="refresh"
       />

@@ -48,10 +48,13 @@ export interface TokenDisplayWithSource {
   display: TokenDisplay;
 }
 
-export interface StandardTokenView {
+export interface TagableItem {
   identity: TokenStatusBasic;
-  decimals: number;
   tags: string[];
+}
+
+export interface StandardTokenView extends TagableItem {
+  decimals: number;
   dataSource?: string;
   path?: TokenPaths;
   display?: TokenDisplayWithSource;
@@ -157,9 +160,7 @@ export interface NFTCollectionDisplayWithSource {
   display: NFTCollectionDisplay;
 }
 
-export interface StandardNFTCollectionView {
-  identity: TokenStatusBasic;
-  tags: string[];
+export interface StandardNFTCollectionView extends TagableItem {
   paths: NFTPaths;
   display?: NFTCollectionDisplayWithSource;
 }

@@ -7,6 +7,7 @@ import type { ReviewerInfo } from '@shared/flow/entities';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import ItemTabName from '@components/items/ItemTabName.vue';
+import SelectReviewers from '../items/SelectReviewers.vue';
 import PanelTokensListView from '../panels/PanelTokensListView.vue';
 import PanelTokensJsonView from '../panels/PanelTokensJsonView.vue';
 
@@ -53,6 +54,10 @@ onMounted(() => {
           target="_self"
         >How to use</a> below.
       </p>
+      <SelectReviewers
+        :is-nft="true"
+        v-model:current="currentReviewer"
+      />
       <NTabs
         type="line"
         display-directive="show:lazy"
