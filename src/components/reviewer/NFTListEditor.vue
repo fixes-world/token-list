@@ -103,28 +103,29 @@ watch(acctName, reloadAddrStatus, { immediate: true })
                 :is-nft="true"
                 :reviewer="addrStatus.reviewerAddr"
               />
-              <!-- <p
-                v-if="!currentToken"
+              <p
+                v-if="!currentNFT"
                 class="mx-a my-10 italic text-gray-400/60 text-xl font-semibold text-center"
               >
-                Select a fungible token to edit
+                Select a non-fungible token to edit
               </p>
               <template v-else>
-                <NDivider class="!mt-4 !mb-6">
-                  <span class="text-sm italic font-bold text-gray-400/60">Token Metadata Editor</span>
-                </NDivider>
-                <PanelTokenEditor
-                  :ft="currentToken"
-                  @refresh="refreshTokenList"
-                />
                 <NDivider>
-                  <span class="text-sm italic font-bold text-gray-400/60">Token Review</span>
+                  <span class="text-sm italic font-bold text-gray-400/60">NFT Collection Review</span>
                 </NDivider>
                 <PanelTokenReview
-                  :ft="currentToken"
+                  :is-nft="true"
+                  :item="currentNFT"
                   @refresh="refreshTokenList"
                 />
-              </template> -->
+                <NDivider class="!mt-4 !mb-6">
+                  <span class="text-sm italic font-bold text-gray-400/60">NFT Collection Metadata Editor</span>
+                </NDivider>
+                <!-- <PanelTokenEditor
+                  :ft="currentToken"
+                  @refresh="refreshTokenList"
+                /> -->
+              </template>
             </div>
           </div>
           <div

@@ -6,19 +6,21 @@ import {
   NGrid, NFormItemGi, NForm, type FormInst, type FormRules,
   NSelect, type SelectOption, NDynamicTags,
 } from 'naive-ui';
-import type { StandardTokenView } from '@shared/flow/entities';
+import type { TagableItem } from '@shared/flow/entities';
 import { EvaluationType } from '@shared/flow/enums';
 import { parseReviewData } from '@shared/flow/utilitites';
 import { useSendingTransaction } from '@components/shared';
 
 import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
-import FormSubmitReviewFT from '@components/reviewer/form/FormSubmitReviewFT.vue';
+import FormSubmitReviewToken from '@components/reviewer/form/FormSubmitReviewToken.vue';
 
 const props = withDefaults(defineProps<{
-  ft?: StandardTokenView,
+  isNft?: boolean,
+  item?: TagableItem,
 }>(), {
-  ft: undefined,
+  isNft: false,
+  item: undefined,
 })
 
 const emits = defineEmits<{
@@ -79,10 +81,10 @@ const rankOptions: SelectOption[] = [
 
 // Watchers and Lifecycle Hooks
 
-watch(() => props.ft, async (ft, oldFt) => {
-  if (ft && (ft?.identity.address !== oldFt?.identity.address
-    || ft?.identity.contractName !== oldFt?.identity.contractName)) {
-    const data = parseReviewData(ft)
+watch(() => props.item, async (newVal, oldVal) => {
+  if (newVal && (newVal?.identity.address !== oldVal?.identity.address
+    || newVal?.identity.contractName !== oldVal?.identity.contractName)) {
+    const data = parseReviewData(newVal)
     formData.rank = data.rank
     formData.tags = data.tags
   }
@@ -99,8 +101,8 @@ watch(() => props.ft, async (ft, oldFt) => {
       <h2 class="py-1 italic highlight font-semibold">Evaluate and Review</h2>
     </template>
     <NEmpty
-      v-if="!ft"
-      description="Failed to load fungible token."
+      v-if="!item"
+      description="Failed to load data."
       class="my-6"
     />
     <NForm
@@ -151,11 +153,12 @@ watch(() => props.ft, async (ft, oldFt) => {
       </NGrid>
     </NForm>
     <template
-      v-if="!!ft"
+      v-if="!!item"
       #action
     >
-      <FormSubmitReviewFT
-        :ft="ft"
+      <FormSubmitReviewToken
+        :is-nft="props.isNft"
+        :item="item"
         :rank="formData.rank"
         :tags="formData.tags"
         @success="emits('refresh')"

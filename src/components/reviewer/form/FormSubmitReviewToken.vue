@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, reactive, computed, inject, watch, h, type VNodeChild, type VNode } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import type { TagableItem } from '@shared/flow/entities';
 import { EvaluationType } from '@shared/flow/enums';
 import { parseReviewData } from '@shared/flow/utilitites'
@@ -88,6 +87,6 @@ async function onCancel() {
     <template #icon>
       <span class="i-carbon:edit w-5 h-5" />
     </template>
-    <span>Update Token Reviews</span>
+    <span>Update {{ isNft ? 'NFT Collection' : "Fungible Token" }} Reviews</span>
   </FlowSubmitTrxWidget>
 </template>

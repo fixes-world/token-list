@@ -117,7 +117,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
                   <span class="text-sm italic font-bold text-gray-400/60">Token Review</span>
                 </NDivider>
                 <PanelTokenReview
-                  :ft="currentToken"
+                  :item="currentToken"
                   @refresh="refreshTokenList"
                 />
               </template>
