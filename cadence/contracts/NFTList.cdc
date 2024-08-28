@@ -239,7 +239,7 @@ access(all) contract NFTList {
             var reviewerAddr = self.tryGetReviewer(reviewer)
             if let addr = reviewerAddr {
                 if let reviewerRef = NFTList.borrowReviewerPublic(addr) {
-                    if let displayRef = reviewerRef.borrowNFTCollectionDisplayReader(self.getNFTType()) {
+                    if let displayRef = reviewerRef.borrowNFTCollectionDisplayReader(self.identity.address, self.identity.contractName) {
                         let socials = retNFTDisplay?.socials ?? {}
                         let extraSocials = displayRef.getSocials()
                         for key in extraSocials.keys {
@@ -346,7 +346,12 @@ access(all) contract NFTList {
         access(all)
         view fun getVerifiedNFTTypes(): [Type]
         access(all)
-        view fun borrowNFTCollectionDisplayReader(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay?
+        view fun borrowNFTCollectionDisplayReaderByNftType(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay?
+        access(all)
+        view fun borrowNFTCollectionDisplayReader(
+            _ address: Address,
+            _ contractName: String,
+        ): &NFTViewUtils.EditableNFTCollectionDisplay?
     }
 
     /// Maintainer interface for the Non-Fungible Token Reviewer
@@ -357,19 +362,30 @@ access(all) contract NFTList {
         fun updateMetadata(name: String?, url: String?)
         /// Review the Non-Fungible Token with Evaluation
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation)
+        fun reviewNFTEvalute(
+            _ address: Address,
+            _ contractName: String,
+            rank: FTViewUtils.Evaluation
+        )
         /// Review the Non-Fungible Token, add tags
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String])
+        fun reviewNFTAddTags(
+            _ address: Address,
+            _ contractName: String,
+            tags: [String]
+        )
         /// Register the Non-Fungible Token Display Patch
         access(Maintainer)
         fun registerNFTCollectionDisplayPatch(
             _ address: Address,
-            _ contractName: String
+            _ contractName: String,
         )
         /// Borrow or create the FTDisplay editor
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay?
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay?
     }
 
     /// The resource for the FT Reviewer
@@ -413,9 +429,13 @@ access(all) contract NFTList {
         /// Review the Non-Fungible Token with Evaluation
         ///
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
+        fun reviewNFTEvalute(
+            _ address: Address,
+            _ contractName: String,
+            rank: FTViewUtils.Evaluation
+        ) {
             let registery = NFTList.borrowRegistry()
-            let entryRef = registery.borrowNFTEntry(type)
+            let entryRef = registery.borrowNFTEntryByContract(address, contractName)
                 ?? panic("Failed to load the Non-Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
@@ -435,10 +455,11 @@ access(all) contract NFTList {
                 return
             }
 
+            let identity = entryRef.getIdentity()
+            let type = identity.buildNFTType()
+
             // update reviewed status locally
             self.reviewed[type] = rank
-
-            let identity = entryRef.getIdentity()
 
             // emit the event
             emit NFTCollectionReviewEvaluated(
@@ -452,19 +473,23 @@ access(all) contract NFTList {
         /// Review the Non-Fungible Token, add tags
         ///
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String]) {
+        fun reviewNFTAddTags(
+            _ address: Address,
+            _ contractName: String,
+            tags: [String]
+        ) {
             pre {
                 tags.length > 0: "Tags should not be empty"
             }
 
             let registery = NFTList.borrowRegistry()
-            let entryRef = registery.borrowNFTEntry(type)
+            let entryRef = registery.borrowNFTEntryByContract(address, contractName)
                 ?? panic("Failed to load the Non-Fungible Token Entry")
 
             let reviewerAddr = self.getAddress()
             if entryRef.borrowReviewRef(reviewerAddr) == nil {
                 // add the review with UNVERIFIED evaluation
-                self.reviewNFTEvalute(type, rank: FTViewUtils.Evaluation.UNVERIFIED)
+                self.reviewNFTEvalute(address, contractName, rank: FTViewUtils.Evaluation.UNVERIFIED)
             }
             let ref = entryRef.borrowReviewRef(reviewerAddr)
                 ?? panic("Failed to load the Non-Fungible Token Review")
@@ -530,7 +555,12 @@ access(all) contract NFTList {
         /// Borrow or create the editor
         ///
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+            let nftType = NFTViewUtils.buildNFTType(address, contractName)
+                ?? panic("Failed to build the NFT Type")
             return &self.storedDisplayPatches[nftType]
         }
 
@@ -586,8 +616,18 @@ access(all) contract NFTList {
         /// Borrow the FTDisplay editor
         ///
         access(all)
-        view fun borrowNFTCollectionDisplayReader(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay? {
-            return self.borrowNFTCollectionDisplayEditor(nftType)
+        view fun borrowNFTCollectionDisplayReader(
+            _ address: Address,
+            _ contractName: String,
+        ): &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return self.borrowNFTCollectionDisplayEditor(address, contractName)
+        }
+
+        /// Borrow the FTDisplay editor
+        ///
+        access(all)
+        view fun borrowNFTCollectionDisplayReaderByNftType(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return &self.storedDisplayPatches[nftType]
         }
 
         // --- Internal Methods ---
@@ -625,15 +665,15 @@ access(all) contract NFTList {
         /// Review the Non-Fungible Token with Evaluation
         ///
         access(Maintainer)
-        fun reviewNFTEvalute(_ type: Type, rank: FTViewUtils.Evaluation) {
-            self._borrowReviewer().reviewNFTEvalute(type, rank: rank)
+        fun reviewNFTEvalute(_ address: Address, _ contractName: String, rank: FTViewUtils.Evaluation) {
+            self._borrowReviewer().reviewNFTEvalute(address, contractName, rank: rank)
         }
 
         /// Review the Non-Fungible Token, add tags
         ///
         access(Maintainer)
-        fun reviewNFTAddTags(_ type: Type, tags: [String]) {
-            self._borrowReviewer().reviewNFTAddTags(type, tags: tags)
+        fun reviewNFTAddTags(_ address: Address, _ contractName: String, tags: [String]) {
+            self._borrowReviewer().reviewNFTAddTags(address, contractName, tags: tags)
         }
 
         /// Register the Non-Fungible Token Display Patch
@@ -647,8 +687,11 @@ access(all) contract NFTList {
 
         /// Borrow or create the FTDisplay editor
         access(Maintainer)
-        view fun borrowNFTCollectionDisplayEditor(_ nftType: Type): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
-            return self._borrowReviewer().borrowNFTCollectionDisplayEditor(nftType)
+        view fun borrowNFTCollectionDisplayEditor(
+            _ address: Address,
+            _ contractName: String,
+        ): auth(NFTViewUtils.Editable) &NFTViewUtils.EditableNFTCollectionDisplay? {
+            return self._borrowReviewer().borrowNFTCollectionDisplayEditor(address, contractName)
         }
 
         /* ---- Internal Methods ---- */

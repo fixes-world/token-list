@@ -32,13 +32,10 @@ transaction(
     }
 
     execute {
-        let nftType = NFTViewUtils.buildNFTType(address, contractName)
-            ?? panic("Failed to build ft type")
-
-        var editorRef = self.maintainer.borrowNFTCollectionDisplayEditor(nftType)
+        var editorRef = self.maintainer.borrowNFTCollectionDisplayEditor(address, contractName)
         if editorRef == nil {
             self.maintainer.registerNFTCollectionDisplayPatch(address, contractName)
-            editorRef = self.maintainer.borrowNFTCollectionDisplayEditor(nftType)
+            editorRef = self.maintainer.borrowNFTCollectionDisplayEditor(address, contractName)
         }
 
         if editorRef == nil {

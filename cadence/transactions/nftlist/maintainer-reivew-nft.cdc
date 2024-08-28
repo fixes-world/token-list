@@ -28,18 +28,15 @@ transaction(
     }
 
     execute {
-        let nftType = NFTViewUtils.buildNFTType(address, contractName)
-            ?? panic("Failed to build ft type")
-
         // update rank
         if rank != nil {
             if let evalRank = FTViewUtils.Evaluation(rawValue: rank!) {
-                self.maintainer.reviewNFTEvalute(nftType, rank: evalRank)
+                self.maintainer.reviewNFTEvalute(address, contractName, rank: evalRank)
             }
         }
         // add tags
         if tags.length > 0 {
-            self.maintainer.reviewNFTAddTags(nftType, tags: tags)
+            self.maintainer.reviewNFTAddTags(address, contractName, tags: tags)
         }
     }
 }
