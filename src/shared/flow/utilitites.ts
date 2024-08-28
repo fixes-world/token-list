@@ -5,6 +5,7 @@ import type {
   ExportedTokenInfo,
   StandardNFTCollectionView,
   StandardTokenView,
+  TagableItem,
 } from "./entities";
 import { EvaluationType } from "./enums";
 import appInfo from "@shared/config/info";
@@ -25,7 +26,7 @@ export function isValidFlowAddress(addr: string) {
 /**
  * Parse the review data from the token view
  */
-export function parseReviewData(ft: StandardTokenView): {
+export function parseReviewData(item: TagableItem): {
   rank: EvaluationType;
   tags: string[];
 } {
@@ -33,7 +34,7 @@ export function parseReviewData(ft: StandardTokenView): {
     rank: EvaluationType.UNVERIFIED,
     tags: [] as string[],
   };
-  const tags = new Set(ft?.tags ?? []);
+  const tags = new Set(item?.tags ?? []);
   if (tags.has("Featured")) {
     data.rank = EvaluationType.FEATURED;
     tags.delete("Featured");

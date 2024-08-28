@@ -23,6 +23,7 @@ const props = withDefaults(defineProps<{
     :width="width"
     :src="props.media.uri"
     :object-fit="objectFit"
+    :preview-disabled="true"
   >
     <template #placeholder>
       <span class="mx-a i-carbon:image w-6 h-6 text-gray-400/50"/>

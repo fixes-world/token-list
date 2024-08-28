@@ -3,7 +3,7 @@ import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
 import { FlowSrvKey } from '@shared/flow/utilitites';
-import { maintainerUpdateReviwerMetadata } from '@shared/flow/action/transactions';
+import { maintainerUpdateReviwerMetadata, nftListMaintainerUpdateReviewerMetadata } from '@shared/flow/action/transactions';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
@@ -11,10 +11,12 @@ import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 import type { ReviewerInfo } from '@shared/flow/entities';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean
   reviewerInfo: ReviewerInfo | null,
   name?: string,
   url?: string,
 }>(), {
+  isNft: false,
   reviewerInfo: null,
 });
 
@@ -62,7 +64,11 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await maintainerUpdateReviwerMetadata(props.name!, props.url!)
+  if (props.isNft) {
+    return await nftListMaintainerUpdateReviewerMetadata(props.name!, props.url!)
+  } else {
+    return await maintainerUpdateReviwerMetadata(props.name!, props.url!)
+  }
 }
 
 async function onSuccess() {

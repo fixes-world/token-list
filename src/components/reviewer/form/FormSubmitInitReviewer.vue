@@ -2,19 +2,17 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { FlowSrvKey } from '@shared/flow/utilitites';
-import { reviewerInit } from '@shared/flow/action/transactions';
-import type { TokenStatus } from '@shared/flow/entities';
+import { reviewerInit, nftListReviewerInit } from '@shared/flow/action/transactions';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
-// const props = withDefaults(defineProps<{
-//   wFull?: boolean
-// }>(), {
-//   wFull: false
-// });
+const props = withDefaults(defineProps<{
+  isNft?: boolean
+}>(), {
+  isNft: false
+});
 
 const emits = defineEmits<{
   (e: 'success'): void,
@@ -47,7 +45,11 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await reviewerInit()
+  if (props.isNft) {
+    return await nftListReviewerInit()
+  } else {
+    return await reviewerInit()
+  }
 }
 
 async function onSuccess() {
@@ -79,7 +81,7 @@ async function onCancel() {
       <template #icon>
         <span class="i-carbon:add-filled w-5 h-5" />
       </template>
-      <span>Initialize your own <strong>Reviewer</strong> resource</span>
+      <span>Initialize your own {{ props.isNft ? "NFTList" : "TokenList" }} <strong>Reviewer</strong> resource</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

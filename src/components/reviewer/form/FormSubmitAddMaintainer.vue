@@ -4,16 +4,18 @@ import {
 } from 'vue';
 import { FlowSrvKey, isValidFlowAddress } from '@shared/flow/utilitites';
 import { useGlobalAccount } from '@components/shared';
-import { reviewerPublishMaintainer } from '@shared/flow/action/transactions';
+import { nftListReviewerPublishMaintainer, reviewerPublishMaintainer } from '@shared/flow/action/transactions';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 import type { ReviewerInfo } from '@shared/flow/entities';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean
   reviewerInfo: ReviewerInfo | null,
   address?: string,
 }>(), {
+  isNft: false,
   reviewerInfo: null,
 });
 
@@ -63,7 +65,11 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return await reviewerPublishMaintainer(props.address!)
+  if (props.isNft) {
+    return await nftListReviewerPublishMaintainer(props.address!)
+  } else {
+    return await reviewerPublishMaintainer(props.address!)
+  }
 }
 
 async function onSuccess() {

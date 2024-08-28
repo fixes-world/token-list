@@ -11,8 +11,10 @@ import { useGlobalAccount, useSendingTransaction } from '@components/shared';
 import FormSubmitUpdateReviewMetadata from '@components/reviewer/form/FormSubmitUpdateReviewMetadata.vue';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean
   reviewerInfo: ReviewerInfo | null,
 }>(), {
+  isNft: false,
   reviewerInfo: null,
 });
 
@@ -110,6 +112,7 @@ watch(() => props.reviewerInfo, (newVal) => {
         :show-feedback="false"
       >
         <FormSubmitUpdateReviewMetadata
+          :is-nft="props.isNft"
           :reviewer-info="reviewerInfo"
           :name="formEditMetadata.name"
           :url="formEditMetadata.url"
