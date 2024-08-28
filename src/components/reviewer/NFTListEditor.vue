@@ -9,13 +9,14 @@ import type { StandardTokenView, AddressStatus, StandardNFTCollectionView } from
 import { useGlobalAccount } from '@components/shared';
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
+import LoadingFrame from '@components/partials/LoadingFrame.vue';
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import FormSubmitClaimMaintainer from '@components/reviewer/form/FormSubmitClaimMaintainer.vue';
 import FormSubmitInitReviewer from '@components/reviewer/form/FormSubmitInitReviewer.vue';
 import PanelTokenList from '@components/reviewer/panel/PanelTokenList.vue';
 import PanelReviewer from '@components/reviewer/panel/PanelReviewer.vue';
-import PanelTokenEditor from '@components/reviewer/panel/PanelTokenEditor.vue';
+import PanelNFTEditor from '@components/reviewer/panel/PanelNFTEditor.vue';
 import PanelTokenReview from '@components/reviewer/panel/PanelTokenReview.vue';
 
 const acctName = useGlobalAccount();
@@ -75,20 +76,13 @@ watch(acctName, reloadAddrStatus, { immediate: true })
         <template #not-connected>
           <span class="text-lg">Connect wallet to access Maintainer Editor</span>
         </template>
-        <NSkeleton
-          v-if="isFirstLoading"
-          animate
-          text
-          :repeat="6"
-        />
-        <NEmpty
-          v-else-if="!addrStatus"
-          description="Failed to load address status"
-          class="my-6"
-        />
-        <template v-else>
+        <LoadingFrame
+          :loading="isFirstLoading"
+          :is-empty="!addrStatus"
+          empty-text="Failed to load address status"
+        >
           <div
-            v-if="isEditorAvailable"
+            v-if="isEditorAvailable && addrStatus"
             class="w-full flex items-start justify-between gap-4"
           >
             <PanelTokenList
@@ -121,15 +115,15 @@ watch(acctName, reloadAddrStatus, { immediate: true })
                 <NDivider class="!mt-4 !mb-6">
                   <span class="text-sm italic font-bold text-gray-400/60">NFT Collection Metadata Editor</span>
                 </NDivider>
-                <!-- <PanelTokenEditor
-                  :ft="currentToken"
+                <PanelNFTEditor
+                  :nft="currentNFT"
                   @refresh="refreshTokenList"
-                /> -->
+                />
               </template>
             </div>
           </div>
           <div
-            v-else
+            v-else-if="addrStatus"
             class="flex flex-col gap-6 items-center justify-start"
           >
             <h2 class="text-lg">
@@ -156,7 +150,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
               @success="reloadAddrStatus"
             />
           </div>
-        </template>
+        </LoadingFrame>
       </EnsureConnected>
     </div>
   </VueWrapper>
