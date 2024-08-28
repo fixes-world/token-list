@@ -31,6 +31,9 @@ You just need one line of code to execute the action:
 execute {
   // For Fungible Token
   BlackHole.vanish(<- tokenVault)
+  // For Non-Fungbile Token, you need to deposit it to BlackHole Collection
+  let blackHoleCol = BlackHole.borrowBlackHoleCollection(address)
+  blackHoleCol.deposit(<- anyNFT)
 }
 ```
 
