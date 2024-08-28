@@ -71,7 +71,9 @@ function onClick() {
       v-if="withDisplay && token.display?.display"
       class="z-10 flex-none flex items-center items-end gap-2 md:gap-4"
     >
-      <span class="title-base highlight text-xl truncate">{{ token.display?.display?.name }}</span>
+      <span class="title-base highlight text-xl truncate px-1">
+        {{ token.display?.display?.name }}
+      </span>
       <ItemMedia
         :alt="`Square Image for ${token.display?.display?.name}`"
         :media="token.display.display.squareImage"
