@@ -57,7 +57,7 @@ export async function updateViewResolver(ft: TokenIdentity): Promise<string> {
  */
 export async function reviewerInit() {
   const flowSrv = await getFlowInstance();
-  return await flowSrv.sendTransaction(txReviewerInit, (arg, t) => []);
+  return await flowSrv.sendTransaction(txReviewerInit, (_arg, _t) => []);
 }
 
 /**
@@ -174,7 +174,7 @@ export async function registerStandardNFT(
 
 export async function nftListReviewerInit(): Promise<string> {
   const flowSrv = await getFlowInstance();
-  return await flowSrv.sendTransaction(txNFTListReviewerInit, (arg, t) => []);
+  return await flowSrv.sendTransaction(txNFTListReviewerInit, (_arg, _t) => []);
 }
 
 export async function nftListReviewerPublishMaintainer(

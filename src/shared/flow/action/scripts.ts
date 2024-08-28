@@ -14,7 +14,7 @@ import type {
   TokenQueryResult,
   TokenStatus,
 } from "@shared/flow/entities";
-import { FilterType, EvaluationType } from "@shared/flow/enums";
+import { FilterType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
 import { getFlowInstance } from "../flow.service.factory";
 // Scripts - Utils
@@ -170,7 +170,11 @@ const parseReviewer = (obj: any): ReviewerInfo => {
 
 export async function getReviewers() {
   const flowServ = await getFlowInstance();
-  const ret = await flowServ.executeScript(scGetReviewers, (arg, t) => [], []);
+  const ret = await flowServ.executeScript(
+    scGetReviewers,
+    (_arg, _t) => [],
+    [],
+  );
   return ret.map(parseReviewer).sort((a, b) => {
     // Prioritize verified, desc by customziedTokenAmt
     if (a.verified && !b.verified) return -1;
@@ -183,7 +187,7 @@ export async function getVerifiedReviewers() {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetVeifiedReviewers,
-    (arg, t) => [],
+    (_arg, _t) => [],
     [],
   );
   return ret.map(parseReviewer).sort((a, b) => {
@@ -396,7 +400,7 @@ export async function getNFTListReviewers() {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetNFTListReviewers,
-    (arg, t) => [],
+    (_arg, _t) => [],
     [],
   );
   return ret.map(parseReviewer).sort((a, b) => {
@@ -411,7 +415,7 @@ export async function getVerifiedNFTListReviewers() {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetNFTListVeifiedReviewers,
-    (arg, t) => [],
+    (_arg, _t) => [],
     [],
   );
   return ret.map(parseReviewer).sort((a, b) => {

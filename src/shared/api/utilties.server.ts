@@ -6,6 +6,7 @@ import {
   queryNFTList,
 } from "@shared/flow/action/scripts";
 import type {
+  ExportedNFTCollectionInfo,
   ExportedTokenInfo,
   NFTList,
   QueryResult,
@@ -128,7 +129,7 @@ export async function queryTokenListUsingCache(
     name: "Flow Token List",
     network: appInfo.network,
     chainId: appInfo.chainId,
-    tokens: tokens.filter((x) => x !== undefined),
+    tokens: tokens.filter((x) => x !== undefined) as ExportedTokenInfo[],
     totalAmount: tokens.length,
     filterType: FilterType[filter],
     timestamp: new Date(),
@@ -162,7 +163,9 @@ export async function queryNFTListUsingCache(
     name: "Flow NFT List",
     network: appInfo.network,
     chainId: appInfo.chainId,
-    tokens: tokens.filter((x) => x !== undefined),
+    tokens: tokens.filter(
+      (x) => x !== undefined,
+    ) as ExportedNFTCollectionInfo[],
     totalAmount: tokens.length,
     filterType: FilterType[filter],
     timestamp: new Date(),

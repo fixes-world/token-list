@@ -1,4 +1,3 @@
-import Exception from "@shared/exception";
 import {
   FailedToParseJsonError,
   FailedToRequestError,
