@@ -8,6 +8,7 @@ import type { ReviewerInfo } from '@shared/flow/entities';
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import ItemTabName from '@components/items/ItemTabName.vue';
 import PanelTokensListView from '../panels/PanelTokensListView.vue';
+import PanelTokensJsonView from '../panels/PanelTokensJsonView.vue';
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isOnPCBrowser = breakpoints.greaterOrEqual('lg')
@@ -21,6 +22,7 @@ const currentReviewer = ref<ReviewerInfo | undefined>(undefined)
 const tabs = computed(() => {
   return [
     { key: 'listView', label: 'List View', icon: 'i-carbon:list', component: PanelTokensListView },
+    { key: 'jsonView', label: 'JSON View', icon: 'i-carbon:json', component: PanelTokensJsonView },
   ]
 })
 

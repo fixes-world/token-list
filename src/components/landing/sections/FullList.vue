@@ -16,14 +16,14 @@ const isOnPCBrowser = breakpoints.greaterOrEqual('lg')
 
 // tabs
 type TabType = 'jsonView' | 'listView'
-const currentTab = ref<TabType>('jsonView')
+const currentTab = ref<TabType>('listView')
 
 const currentReviewer = ref<ReviewerInfo | undefined>(undefined)
 
 const tabs = computed(() => {
   return [
-    { key: 'jsonView', label: 'JSON View', icon: 'i-carbon:json', component: PanelTokensJsonView },
     { key: 'listView', label: 'List View', icon: 'i-carbon:list', component: PanelTokensListView },
+    { key: 'jsonView', label: 'JSON View', icon: 'i-carbon:json', component: PanelTokensJsonView },
   ]
 })
 

@@ -127,9 +127,9 @@ export interface TokenList {
   };
 }
 
-interface NFTPaths {
-  storagePath: string;
-  publicPath: string;
+export interface NFTPaths {
+  storage: string;
+  public: string;
 }
 
 export interface NFTStatus extends TokenStatusBasic, NFTPaths {}
@@ -165,3 +165,31 @@ export interface StandardNFTCollectionView {
 }
 
 export type NFTListQueryResult = QueryResult<StandardNFTCollectionView>;
+
+export interface ExportedNFTCollectionInfo extends TokenIdentity {
+  chainId: number;
+  path: NFTPaths;
+  evmAddress?: string;
+  name: string;
+  description: string;
+  logoURI: string;
+  bannerURI: string;
+  tags: string[];
+  extensions: Record<string, string>;
+}
+
+export interface NFTList {
+  name: string;
+  network: string;
+  chainId?: number;
+  tags: Record<string, TokenTag>;
+  timestamp: Date;
+  tokens: ExportedNFTCollectionInfo[];
+  totalAmount: number;
+  filterType: string;
+  version: {
+    major: number;
+    minor: number;
+    patch: number;
+  };
+}

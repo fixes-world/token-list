@@ -87,7 +87,7 @@ onMounted(() => {
       <div class="w-full flex flex-col gap-2 text-xs">
 
         <ElementWrapper
-          title="Usage for"
+          title="For"
           direction="auto"
           position="left"
         >

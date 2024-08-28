@@ -3,6 +3,7 @@ import type {
   Media,
   NFTCollectionDisplay,
   NFTListQueryResult,
+  NFTPaths,
   NFTStatus,
   ReviewerInfo,
   StandardNFTCollectionView,
@@ -348,8 +349,8 @@ function parseNFTContractStatus(obj: any): NFTStatus {
     isRegistered: obj.isRegistered,
     isWithDisplay: obj.isWithDisplay,
     isWithVaultData: true,
-    storagePath: obj.storagePath,
-    publicPath: obj.publicPath,
+    storage: obj.storagePath,
+    public: obj.publicPath,
   };
 }
 
@@ -449,6 +450,17 @@ const parseNFTCollectionDisplay = (obj: any): NFTCollectionDisplay => {
   };
 };
 
+const parseNFTCollectionPaths = (paths: any): NFTPaths => {
+  return {
+    storage: paths.storagePath
+      ? `/${paths.storagePath.domain}/${paths.storagePath.identifier}`
+      : "",
+    public: paths.publicPath
+      ? `/${paths.publicPath.domain}/${paths.publicPath.identifier}`
+      : "",
+  };
+};
+
 function parseNFTCollectionView(obj: any): StandardNFTCollectionView {
   return {
     identity: {
@@ -458,10 +470,7 @@ function parseNFTCollectionView(obj: any): StandardNFTCollectionView {
       isWithVaultData: true,
     },
     tags: obj.tags,
-    paths: {
-      storagePath: obj.paths.storagePath,
-      publicPath: obj.paths.publicPath,
-    },
+    paths: parseNFTCollectionPaths(obj.paths),
     display: obj.display
       ? {
           source: obj.display.source,

@@ -2,22 +2,23 @@
 import { ref, computed, inject, onMounted, watch } from 'vue';
 import { NSkeleton, NEmpty, NCode } from 'naive-ui'
 
-import type { TokenList } from '@shared/flow/entities';
 import { FilterType } from '@shared/flow/enums';
-import { queryTokenListByAPI } from '@shared/api/utilties.client';
+import { queryNFTListByAPI, queryTokenListByAPI } from '@shared/api/utilties.client';
 
 import CodeBlock from '@components/widgets/CodeBlock.vue';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean,
   reviewer?: string,
   filterType?: FilterType,
 }>(), {
+  isNft: false,
   reviewer: undefined,
   filterType: FilterType.ALL,
 })
 
 const isFirstLoading = ref(false)
-const tokenList = ref<TokenList | null>(null)
+const tokenList = ref<any>(null)
 
 const tokenListJson = computed(() => {
   if (!tokenList.value) return null
@@ -27,7 +28,9 @@ const tokenListJson = computed(() => {
 async function loadJsonView() {
   isFirstLoading.value = true
   try {
-    tokenList.value = await queryTokenListByAPI(props.reviewer, props.filterType)
+    tokenList.value = props.isNft
+      ? await queryNFTListByAPI(props.reviewer, props.filterType)
+      : await queryTokenListByAPI(props.reviewer, props.filterType)
   } catch (e) {
     console.error(e)
     tokenList.value = null
@@ -35,8 +38,8 @@ async function loadJsonView() {
   isFirstLoading.value = false
 }
 
-watch(() => props.reviewer, async (newVal, oldVal) => {
-  if (newVal !== oldVal) {
+watch(() => props, async (newVal, oldVal) => {
+  if (newVal.reviewer !== oldVal.reviewer || newVal.filterType !== oldVal.filterType || newVal.isNft !== oldVal.isNft) {
     await loadJsonView()
   }
 })

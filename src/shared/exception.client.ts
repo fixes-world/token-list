@@ -1,5 +1,7 @@
-export class ClientNotificationError extends Error {}
+import Exception from "./exception";
+
+export class ClientNotificationError extends Exception {}
 
 export class UnsupportedNetworkError extends ClientNotificationError {}
-export class FailedToLoadTokenListJsonError extends ClientNotificationError {}
-export class FailedToParseTokenListJsonError extends ClientNotificationError {}
+export class FailedToParseJsonError extends ClientNotificationError {}
+export class FailedToRequestError extends ClientNotificationError {}
