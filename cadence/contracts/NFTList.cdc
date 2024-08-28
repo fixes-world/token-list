@@ -156,11 +156,10 @@ access(all) contract NFTList {
         /// Try to get a reviewer address
         access(contract)
         view fun tryGetReviewer(_ reviewer: Address?): Address? {
-            let tokenType = self.getNFTType()
             var reviewerAddr = reviewer
             if reviewerAddr == nil {
                 let registry = NFTList.borrowRegistry()
-                reviewerAddr = registry.getHighestRankCustomizedReviewer(tokenType)
+                reviewerAddr = registry.getHighestRankVerifiedCustomizedReviewer(self.getNFTType())
             }
             return reviewerAddr
         }
@@ -732,7 +731,7 @@ access(all) contract NFTList {
         view fun getNFTEntriesByAddress(_ address: Address): [Type]
         /// Get the customized reviewers
         access(all)
-        view fun getHighestRankCustomizedReviewer(_ nftType: Type): Address?
+        view fun getHighestRankVerifiedCustomizedReviewer(_ nftType: Type): Address?
         /// Borrow the NFT Entry by the type
         access(all)
         view fun borrowNFTEntry(_ nftType: Type): &NFTCollectionEntry?
@@ -866,13 +865,16 @@ access(all) contract NFTList {
         /// Get the highest rank customized reviewers
         ///
         access(all)
-        view fun getHighestRankCustomizedReviewer(_ nftType: Type): Address? {
+        view fun getHighestRankVerifiedCustomizedReviewer(_ nftType: Type): Address? {
             if let reviewers = self.customizedNFTViews[nftType] {
                 var highestRank: ReviewerRank? = nil
                 var highestReviewer: Address? = nil
                 for reviewer in reviewers {
+                    if self.verifiedReviewers[reviewer] != true {
+                        continue
+                    }
                     if let rank = self.reviewerRanks[reviewer] {
-                        if highestRank == nil || rank.rawValue > highestRank!.rawValue || self.verifiedReviewers[reviewer] == true {
+                        if highestRank == nil || rank.rawValue > highestRank!.rawValue {
                             highestRank = rank
                             highestReviewer = reviewer
                             // break if the reviewer is verified
