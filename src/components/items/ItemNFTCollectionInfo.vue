@@ -43,7 +43,7 @@ function onClick() {
   >
     <div class="z-0 absolute left-0 top-0 w-full h-full">
       <ItemMedia
-        class="w-full h-full opacity-20"
+        class="w-full h-full rounded-lg opacity-10"
         :media="token.display?.display?.bannerImage"
         :alt="`Banner Image for ${token.display?.display?.name}`"
         width="100%"

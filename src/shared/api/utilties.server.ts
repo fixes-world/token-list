@@ -1,5 +1,9 @@
 import Exception from "@shared/exception";
-import { queryTokenList, getReviewers } from "@shared/flow/action/scripts";
+import {
+  queryTokenList,
+  getReviewers,
+  getNFTListReviewers,
+} from "@shared/flow/action/scripts";
 import type {
   ExportedTokenInfo,
   ReviewerInfo,
@@ -34,6 +38,19 @@ export async function queryReviewersUsingCache(): Promise<ReviewerInfo[]> {
   const ret = await executeOrLoadFromRedis(
     reviewersRequestKey,
     getReviewers,
+    cacheTime,
+  );
+  return ret;
+}
+
+export async function queryReviewersForNFTListUsingCache(): Promise<
+  ReviewerInfo[]
+> {
+  const reviewersRequestKey = "reviewers-for-nftlist/";
+  const cacheTime = 60 * 60; // 1 hours
+  const ret = await executeOrLoadFromRedis(
+    reviewersRequestKey,
+    getNFTListReviewers,
     cacheTime,
   );
   return ret;
