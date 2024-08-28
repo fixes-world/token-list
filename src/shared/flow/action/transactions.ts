@@ -1,11 +1,12 @@
 import type {
   CustomizedTokenDto,
+  NFTCollectionDisplayDto,
   TokenIdentity,
   TokenPaths,
 } from "@shared/flow/entities";
 import { getFlowInstance } from "../flow.service.factory";
 import type { EvaluationType } from "../enums";
-// Transactions
+// Transactions - FTs
 import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
 import txUpdateViewResolver from "@cadence/transactions/update-ft-view-resolver.cdc?raw";
 import txReviewerInit from "@cadence/transactions/reviewer-init.cdc?raw";
@@ -15,8 +16,16 @@ import txMaintainerRegisterCustomizedFT from "@cadence/transactions/maintainer-r
 import txMaintainerUpdateCustomizedFT from "@cadence/transactions/maintainer-update-customized-ft-display.cdc?raw";
 import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer-update-reviewer-metadata.cdc?raw";
 import txMaintainerReviewFT from "@cadence/transactions/maintainer-reivew-ft.cdc?raw";
+// Transactions - NFTs
+import txRegisterStandardNFT from "@cadence/transactions/nftlist/register-standard-nft.cdc?raw";
+import txNFTListReviewerInit from "@cadence/transactions/nftlist/reviewer-init.cdc?raw";
+import txNFTListReviewerPublishMaintainer from "@cadence/transactions/nftlist/reviewer-publish-maintainer.cdc?raw";
+import txNFTListMaintainerClaim from "@cadence/transactions/nftlist/maintainer-claim.cdc?raw";
+import txNFTListMaintainerUpdateReviewerMetadata from "@cadence/transactions/nftlist/maintainer-update-reviewer-metadata.cdc?raw";
+import txNFTListMaintainerUpdateCustomizedDisplay from "@cadence/transactions/nftlist/maintainer-update-customized-display.cdc?raw";
+import txNFTListMaintainerReviewNFT from "@cadence/transactions/nftlist/maintainer-reivew-nft.cdc?raw";
 
-/** ---- Transactions ---- */
+/** ---- FTs Transactions ---- */
 
 /**
  * Register a standard FT
@@ -48,7 +57,7 @@ export async function updateViewResolver(ft: TokenIdentity): Promise<string> {
  */
 export async function reviewerInit() {
   const flowSrv = await getFlowInstance();
-  return await flowSrv.sendTransaction(txReviewerInit, (arg, t) => []);
+  return await flowSrv.sendTransaction(txReviewerInit, (_arg, _t) => []);
 }
 
 /**
@@ -149,4 +158,91 @@ export async function maintainerReviewFT(
     arg(rank ? rank.toFixed(0) : null, t.Optional(t.UInt8)),
     arg(tags, t.Array(t.String)),
   ]);
+}
+
+/** ---- NFTs Transactions ---- */
+
+export async function registerStandardNFT(
+  token: TokenIdentity,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txRegisterStandardNFT, (arg, t) => [
+    arg(token.address, t.Address),
+    arg(token.contractName, t.String),
+  ]);
+}
+
+export async function nftListReviewerInit(): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txNFTListReviewerInit, (_arg, _t) => []);
+}
+
+export async function nftListReviewerPublishMaintainer(
+  maintainer: string,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(
+    txNFTListReviewerPublishMaintainer,
+    (arg, t) => [arg(maintainer, t.Address)],
+  );
+}
+
+export async function nftListMaintainerClaim(
+  reviewer: string,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(txNFTListMaintainerClaim, (arg, t) => [
+    arg(reviewer, t.Address),
+  ]);
+}
+
+export async function nftListMaintainerUpdateReviewerMetadata(
+  name?: string,
+  url?: string,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(
+    txNFTListMaintainerUpdateReviewerMetadata,
+    (arg, t) => [
+      arg(name ?? null, t.Optional(t.String)),
+      arg(url ?? null, t.Optional(t.String)),
+    ],
+  );
+}
+
+export async function nftListMaintainerUpdateCustomizedDisplay(
+  token: TokenIdentity,
+  display: NFTCollectionDisplayDto,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(
+    txNFTListMaintainerUpdateCustomizedDisplay,
+    (arg, t) => [
+      arg(token.address, t.Address),
+      arg(token.contractName, t.String),
+      arg(display.name, t.String),
+      arg(display.description ?? null, t.Optional(t.String)),
+      arg(display.externalURL ?? null, t.Optional(t.String)),
+      arg(display.squareImage ?? null, t.Optional(t.String)),
+      arg(display.bannerImage ?? null, t.Optional(t.String)),
+      arg(display.social, t.Dictionary({ key: t.String, value: t.String })),
+    ],
+  );
+}
+
+export async function nftListMaintainerReviewNFT(
+  token: TokenIdentity,
+  tags: string[],
+  rank?: EvaluationType,
+): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  return await flowSrv.sendTransaction(
+    txNFTListMaintainerReviewNFT,
+    (arg, t) => [
+      arg(token.address, t.Address),
+      arg(token.contractName, t.String),
+      arg(rank ? rank.toFixed(0) : null, t.Optional(t.UInt8)),
+      arg(tags, t.Array(t.String)),
+    ],
+  );
 }

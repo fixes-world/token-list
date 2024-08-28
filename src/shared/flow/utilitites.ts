@@ -1,6 +1,11 @@
 import type { FlowService } from "@shared/flow/flow.service";
 import type { InjectionKey } from "vue";
-import type { ExportedTokenInfo, StandardTokenView } from "./entities";
+import type {
+  ExportedNFTCollectionInfo,
+  ExportedTokenInfo,
+  StandardNFTCollectionView,
+  StandardTokenView,
+} from "./entities";
 import { EvaluationType } from "./enums";
 import appInfo from "@shared/config/info";
 
@@ -79,6 +84,37 @@ export function exportTokenInfo(
     decimals: ft.decimals,
     logoURI: ft.display.display.logos[0].uri,
     tags: ft.tags ?? [],
+    extensions,
+  };
+}
+
+export function exportNFTCollectionInfo(
+  nft: StandardNFTCollectionView,
+): ExportedNFTCollectionInfo | undefined {
+  if (nft.paths === undefined) {
+    return undefined;
+  }
+  if (nft.display === undefined) {
+    return undefined;
+  }
+  const extensions: Record<string, string> = nft.display?.display?.social ?? {};
+  if (typeof nft.display.display.externalURL === "string") {
+    extensions["website"] = nft.display.display.externalURL;
+  }
+  if (typeof nft.display.source === "string") {
+    extensions["displaySource"] = nft.display.source;
+  }
+  return {
+    chainId: appInfo.chainId,
+    address: nft.identity.address,
+    contractName: nft.identity.contractName,
+    path: nft.paths,
+    evmAddress: undefined, // TODO: add EVM address from View
+    name: nft.display.display.name,
+    description: nft.display?.display?.description ?? "",
+    logoURI: nft.display.display.squareImage.uri,
+    bannerURI: nft.display.display.bannerImage.uri,
+    tags: nft.tags ?? [],
     extensions,
   };
 }

@@ -1,5 +1,11 @@
 import { computed, reactive, ref, type Ref } from "vue";
-import { createGlobalState, createSharedComposable, useDark, useLocalStorage, useSessionStorage, type EventBusKey } from "@vueuse/core";
+import {
+  createGlobalState,
+  createSharedComposable,
+  useDark,
+  useSessionStorage,
+  type EventBusKey,
+} from "@vueuse/core";
 import type { UserSnapshot } from "@onflow/fcl";
 
 // ---------------- Global State ----------------

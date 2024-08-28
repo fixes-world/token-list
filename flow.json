@@ -110,6 +110,22 @@
 				"testnet": "b86f928a1fa7798e"
 			}
 		},
+		"NFTList": {
+			"source": "./cadence/contracts/NFTList.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "15a918087ab12d86",
+				"testnet": "b86f928a1fa7798e"
+			}
+		},
+		"NFTViewUtils": {
+			"source": "./cadence/contracts/NFTViewUtils.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "15a918087ab12d86",
+				"testnet": "b86f928a1fa7798e"
+			}
+		},
 		"ViewResolver": {
 			"source": "./imports-c1/1d7e57aa55817448/ViewResolver.cdc",
 			"aliases": {
@@ -378,14 +394,18 @@
 				"ExampleToken",
 				"ViewResolvers",
 				"FTViewUtils",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			]
 		},
 		"mainnet": {
 			"mainnet-admin": [
 				"FTViewUtils",
 				"ViewResolvers",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			],
 			"mainnet-blackhole": [
 				"BlackHole"
@@ -395,7 +415,9 @@
 			"testnet-admin": [
 				"FTViewUtils",
 				"ViewResolvers",
-				"TokenList"
+				"TokenList",
+				"NFTViewUtils",
+				"NFTList"
 			],
 			"testnet-blackhole": [
 				"BlackHole"

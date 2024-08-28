@@ -18,12 +18,12 @@
 .theme-dark, .dark {
   --base-color: #f4f6f6;
   --primary-color: #3df5f5;
-  --primary-hover-color: #8ce1f2;
+  /* --primary-hover-color: #8ce1f2; */
+  --primary-hover-color: hsl(189, 28%, 37%);
   --success-color: #63E2B7;
   --error-color: #E88080;
   --warn-color: #F2C97D;
   --warn-color-light: hsl(39, 40%, 95%);
-  --primary-hover-color: hsl(189, 28%, 37%);
   --bg-color-active: hsl(191, 20%, 22%);
   --bg-color-dark: #1c282d;
   --bg-color: #212d36;

@@ -1,4 +1,7 @@
-import Exception from "@shared/exception";
+import {
+  FailedToParseJsonError,
+  FailedToRequestError,
+} from "@shared/exception.client";
 
 /**
  * Send a POST request to the given URL
@@ -87,7 +90,7 @@ export async function sendRequest(
   try {
     result = await res?.json();
   } catch (e: any) {
-    throw new Exception(
+    throw new FailedToParseJsonError(
       500,
       `Failed to parse response from ${path}: ${e.message}`,
     );
@@ -95,12 +98,12 @@ export async function sendRequest(
   if (resStatus >= 200 && resStatus < 300) {
     // check if the response is an error
     if (!result?.success && typeof result?.error === "object") {
-      throw new Exception(result.error.code, result.error.message);
+      throw new FailedToRequestError(result.error.code, result.error.message);
     }
     return result;
   } else {
     errorMessages = errorMessages ?? JSON.stringify(result ?? "unknown error");
-    throw new Exception(
+    throw new FailedToRequestError(
       resStatus,
       `Failed to send request to ${path}. Error: ${errorMessages}`,
     );

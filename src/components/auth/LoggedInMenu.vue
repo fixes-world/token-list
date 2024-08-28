@@ -35,7 +35,7 @@ const menuOptions = computed(() => {
   ]
   if (acctName.value) {
     menu.unshift({
-      label: "Maintain Token Views",
+      label: "Maintain Fungible Token List",
       key: 'maintain',
       icon: () => h("div", {
         class: "i-carbon:face-pending-filled w-5 h-5"

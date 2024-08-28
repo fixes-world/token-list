@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import { NTabs, NTabPane, NDivider } from 'naive-ui'
+import { NTabs, NTabPane, NDivider, NSwitch } from 'naive-ui'
 
 import VueWrapper from '@components/partials/VueWrapper.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
@@ -16,9 +16,18 @@ const currentTab = ref<TabType>('js')
 
 // Reactive Data
 
+const isNFT = ref(false)
+
+const apiName = computed(() => {
+  return isNFT.value ? 'nft-list' : 'token-list'
+})
+const scriptPath = computed(() => {
+  return isNFT.value ? 'nftlist/query-token-list' : 'query-token-list'
+})
+
 const endpoint = computed(() => {
   const baseUrl = window.location.origin
-  return `${baseUrl}/api/token-list`
+  return `${baseUrl}/api/${apiName.value}`
 })
 
 const endpointFull = computed(() => {
@@ -26,7 +35,7 @@ const endpointFull = computed(() => {
 })
 
 const queryScriptGithubLink = computed(() => {
-  return 'https://github.com/fixes-world/token-list/blob/main/cadence/scripts/query-token-list.cdc'
+  return `https://github.com/fixes-world/token-list/blob/main/cadence/scripts/${scriptPath.value}.cdc`
 })
 
 const javaScriptCode = computed(() => {
@@ -77,6 +86,23 @@ onMounted(() => {
     ]">
       <div class="w-full flex flex-col gap-2 text-xs">
 
+        <ElementWrapper
+          title="For"
+          direction="auto"
+          position="left"
+        >
+          <NSwitch
+            size="small"
+            v-model:value="isNFT"
+          >
+            <template #checked>
+              <span class="text-xs">Non-Fungible Token</span>
+            </template>
+            <template #unchecked>
+              <span class="text-xs">Fungible Token</span>
+            </template>
+          </NSwitch>
+        </ElementWrapper>
         <ElementWrapper
           title="Cadence"
           direction="auto"

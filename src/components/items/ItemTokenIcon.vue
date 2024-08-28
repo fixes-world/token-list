@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, inject } from 'vue';
 import type { StandardTokenView } from '@shared/flow/entities';
-import { NImage } from 'naive-ui';
+
+import ItemMedia from '@components/items/ItemMedia.vue';
 
 const props = withDefaults(defineProps<{
   token: StandardTokenView,
@@ -10,20 +11,16 @@ const props = withDefaults(defineProps<{
   width: 48
 })
 
-const firstIconUrl = computed(() => {
-  return props.token.display?.display?.logos?.[0]?.uri
+const firstIcon = computed(() => {
+  return props.token.display?.display?.logos?.[0]!
 })
 
 </script>
 
 <template>
-  <NImage
+  <ItemMedia
+    :media="firstIcon"
     :alt="`Token Icon: ${token.identity.address}.${token.identity.contractName}`"
     :width="width"
-    :src="firstIconUrl"
-  >
-    <template #placeholder>
-      <span class="mx-a i-carbon:image w-6 h-6 text-gray-400/50"/>
-    </template>
-  </NImage>
+  />
 </template>

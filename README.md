@@ -1,4 +1,4 @@
-# Token List - A on-chain list of Flow Standard Fungible Tokens (FTs)
+# Token List - A on-chain list of Flow Standard Fungible Tokens (FTs) or Non-Fungible Tokens (NFTs)
 
 This repo contains all contract and frontend code.
 
@@ -12,13 +12,15 @@ This repo contains all contract and frontend code.
 | Contract Name | Testnet | Mainnet |
 | :------------ | :------ | :------ |
 | BlackHole | [0xad26718c4b6b921b](https://contractbrowser.com/A.ad26718c4b6b921b.BlackHole) | [0x4396883a58c3a2d1](https://contractbrowser.com/A.4396883a58c3a2d1.BlackHole) |
-| FTViewUtils | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.FTViewUtils) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.FTViewUtils) |
 | ViewResolvers | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.ViewResolvers) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.ViewResolvers) |
+| FTViewUtils | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.FTViewUtils) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.FTViewUtils) |
 | TokenList | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.TokenList) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.TokenList) |
+| NFTViewUtils | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.NFTViewUtils) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.NFTViewUtils) |
+| NFTList | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.NFTList) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.NFTList) |
 
 ## 📦 Special Contract: BlackHole
 
-> **BlackHole** is a special contract that can receive any fungible token and burn it.
+> **BlackHole** is a special contract that can receive any fungible/non-fungible token and burn it.
 
 the Token Vault can be permanently unusable without being destroyed.  
 It will essentially be sent to a black hole address.
@@ -27,6 +29,7 @@ You just need one line of code to execute the action:
 
 ```cadence
 execute {
+  // For Fungible Token
   BlackHole.vanish(<- tokenVault)
 }
 ```
