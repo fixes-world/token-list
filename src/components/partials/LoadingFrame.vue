@@ -14,12 +14,15 @@ const props = withDefaults(defineProps<{
 </script>
 
 <template>
-  <NSkeleton
-    v-if="loading"
-    animate
-    text
-    :repeat="6"
-  />
+  <template v-if="loading">
+    <slot name="loading">
+      <NSkeleton
+        animate
+        text
+        :repeat="6"
+      />
+    </slot>
+  </template>
   <NEmpty
     v-else-if="isEmpty"
     :description="emptyText"
