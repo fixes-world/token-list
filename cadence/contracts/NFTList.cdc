@@ -503,12 +503,9 @@ access(all) contract NFTList {
         ) {
             let registery = NFTList.borrowRegistry()
 
-            let nftType = NFTViewUtils.buildNFTType(address, contractName)
-                ?? panic("Could not build the FT Type")
-            assert(
-                registery.borrowNFTEntry(nftType) != nil,
-                message: "Fungible Token not registered"
-            )
+            let entry = registery.borrowNFTEntryByContract(address, contractName)
+                ?? panic("Token not registered")
+            let nftType = entry.getNFTType()
             assert(
                 self.storedDisplayPatches[nftType] == nil,
                 message: "Editable FTDisplay already exists"
@@ -693,9 +690,12 @@ access(all) contract NFTList {
         /// Get the customized reviewers
         access(all)
         view fun getHighestRankCustomizedReviewer(_ nftType: Type): Address?
-        /// Get the Fungible Token Entry by the type
+        /// Borrow the NFT Entry by the type
         access(all)
         view fun borrowNFTEntry(_ nftType: Type): &NFTCollectionEntry?
+        /// Borrow the NFT Entry by the contract address
+        access(all)
+        view fun borrowNFTEntryByContract(_ address: Address, _ contractName: String): &NFTCollectionEntry?
         // --- Write Methods ---
         /// Register a new standard Fungible Token Entry to the registry
         access(contract)
@@ -844,10 +844,25 @@ access(all) contract NFTList {
             return nil
         }
 
-        /// Get the Fungible Token Entry by the type
+        /// Borrow the NFT Entry by the type
         access(all)
         view fun borrowNFTEntry(_ nftType: Type): &NFTCollectionEntry? {
             return &self.entries[nftType]
+        }
+
+        /// Borrow the NFT Entry by the contract address
+        access(all)
+        view fun borrowNFTEntryByContract(_ address: Address, _ contractName: String): &NFTCollectionEntry? {
+            var entry: &NFTCollectionEntry? = nil
+            if let collectionType = NFTViewUtils.buildCollectionType(address, contractName) {
+                entry = self.borrowNFTEntry(collectionType)
+            }
+            if entry == nil {
+                if let nftType = NFTViewUtils.buildNFTType(address, contractName) {
+                    entry = self.borrowNFTEntry(nftType)
+                }
+            }
+            return entry
         }
 
         // ----- Write Methods -----
@@ -1053,13 +1068,8 @@ access(all) contract NFTList {
     access(all)
     view fun isNFTCollectionRegistered(_ address: Address, _ contractName: String): Bool {
         let registry: &{NFTList.NFTListViewer} = self.borrowRegistry()
-        let nftType = NFTViewUtils.buildNFTType(address, contractName)
-        let collectionType = NFTViewUtils.buildCollectionType(address, contractName)
-        if collectionType != nil || nftType != nil {
-            let typeToCheck = collectionType ?? nftType
-            return registry.borrowNFTEntry(typeToCheck!) != nil
-        }
-        return false
+        let entry = registry.borrowNFTEntryByContract(address, contractName)
+        return entry != nil
     }
 
     /// Try to register a new NFT, if already registered, then do nothing
