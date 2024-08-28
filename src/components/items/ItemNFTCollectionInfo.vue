@@ -36,8 +36,8 @@ function onClick() {
       'relative px-4 py-3 rounded-lg',
       props.hoverable ? 'cursor-pointer' : '',
       !props.active
-        ? 'bg-[var(--bg-color-dark)]'
-        : 'bg-[var(--bg-color-active)]'
+        ? 'border border-dashed hover:border-solid border-[var(--primary-color)] bg-[var(--bg-color-dark)]'
+        : 'border border-solid border-[var(--primary-hover-color)] bg-[var(--bg-color-active)]'
     ]"
     @click="onClick"
   >
