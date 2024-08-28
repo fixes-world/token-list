@@ -78,10 +78,6 @@ const defaultTags: Record<string, TokenTag> = {
     name: "wrapped-celer",
     description: "Asset wrapped using celer bridge",
   },
-  "lp-token": {
-    name: "lp-token",
-    description: "Asset representing liquidity provider token",
-  },
   "utility-token": {
     name: "utility-token",
     description:
