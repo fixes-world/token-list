@@ -11,10 +11,10 @@ const chainId = network === "mainnet" ? 747 : network === "testnet" ? 545 : 0;
 
 export default {
   title: "TokenList",
-  titleDesc: "FungibleToken List #onFlow",
+  titleDesc: "Listing Fungible/Non-Fungible Tokens #onFlow Permissionlessly",
   description:
-    "TokenList is a platform for registering Fungible Tokens on Flow Blockchain. It supports permissionless on-chain registration of any Flow FT with on-chain MetadataViews and provides an API endpoint to expose the Uniswap standard token list JSON file.",
-  author: "FIXeS World",
+    "TokenList is a platform for registering Fungible/Non-Fungible Tokens on Flow Blockchain. It supports permissionless on-chain registration of any Flow FT with on-chain MetadataViews and provides an API endpoint to expose the Uniswap standard token list JSON file.",
+  author: "Fixes Labs",
   version: "0.1.0",
   url: import.meta.env.SITE ?? "http://localhost:4321",
   staticHost: "https://static.fixes.world",
