@@ -32,11 +32,14 @@ const disableReason = computed(() => {
   if (props.token.isRegistered) {
     return "Token Already Registered"
   }
+  if (!props.token.isWithDisplay) {
+    return "No NFTCollectionData or NFTCollectionDisplay view"
+  }
   return undefined
 })
 
 const isDisabled = computed(() => {
-  return props.token.isRegistered
+  return props.token.isRegistered || !props.token.isWithDisplay
 })
 
 // Handlers and Functions
