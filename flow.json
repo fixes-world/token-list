@@ -70,6 +70,22 @@
 				"testnet": "631e88ae7f1d7c20"
 			}
 		},
+		"NFTList": {
+			"source": "./cadence/contracts/NFTList.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "15a918087ab12d86",
+				"testnet": "b86f928a1fa7798e"
+			}
+		},
+		"NFTViewUtils": {
+			"source": "./cadence/contracts/NFTViewUtils.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "15a918087ab12d86",
+				"testnet": "b86f928a1fa7798e"
+			}
+		},
 		"NonFungibleToken": {
 			"source": "./imports-c1/1d7e57aa55817448/NonFungibleToken.cdc",
 			"aliases": {
@@ -104,22 +120,6 @@
 		},
 		"TokenList": {
 			"source": "./cadence/contracts/TokenList.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "15a918087ab12d86",
-				"testnet": "b86f928a1fa7798e"
-			}
-		},
-		"NFTList": {
-			"source": "./cadence/contracts/NFTList.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "15a918087ab12d86",
-				"testnet": "b86f928a1fa7798e"
-			}
-		},
-		"NFTViewUtils": {
-			"source": "./cadence/contracts/NFTViewUtils.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "15a918087ab12d86",
@@ -162,12 +162,95 @@
 				"testnet": "9a0766d93b6608b7"
 			}
 		},
+		"CrossVMNFT": {
+			"source": "testnet://dfc20aee650fcbdf.CrossVMNFT",
+			"hash": "ef438c3c08b9ffce12ddebf9393be5ad3423966acf036d87bfeb3f593167f778",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"CrossVMToken": {
+			"source": "testnet://dfc20aee650fcbdf.CrossVMToken",
+			"hash": "dc1a738126da0644e14200c1539c311429a9a33cf8061a0bc6460809553dc8d5",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"EVM": {
+			"source": "testnet://8c5303eaa26202d6.EVM",
+			"hash": "4eca716fbef22799fdf57de5d4af1e2e7a79a91b3f0a92db1a10ae4fe4cb13af",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "e467b9dd11fa00df",
+				"previewnet": "b6763b4399a888c8",
+				"testnet": "8c5303eaa26202d6"
+			}
+		},
 		"FIND": {
 			"source": "testnet://35717efbbce11c74.FIND",
 			"hash": "6144210577276e0c231caacc7418262741c8c6acca11be0a77e4de0e19c2e58f",
 			"aliases": {
 				"mainnet": "097bafa4e0b48eef",
 				"testnet": "35717efbbce11c74"
+			}
+		},
+		"FlowEVMBridge": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridge",
+			"hash": "c5539b5bcf04953ecb7059c6f7e13d490818b0f54a114f3ffc1f00723f1255be",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeConfig": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeConfig",
+			"hash": "06186537a9a57b04a2dfaecfb14e3662c2c1ef8fdc7b3b346e7e7dcba98a1bae",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeHandlerInterfaces": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeHandlerInterfaces",
+			"hash": "dec0c63d94bcede2040ad42e8fcddbfb7731cfdd9a93b56fa678396148c81ac8",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeNFTEscrow": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeNFTEscrow",
+			"hash": "673da6d528c75d98f9fe875c5f1f86f3461a4db4e770cb6b2f7927c81c999b1e",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeTemplates": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeTemplates",
+			"hash": "24e28415f0b53b68d4a525fdf2106529c00ff5b60a18d20a853b01b638363880",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeTokenEscrow": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeTokenEscrow",
+			"hash": "6ebc4af11b3320314258f26e536bbc1476ab78d751fd6f9497b264ab8f54bc9d",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowEVMBridgeUtils": {
+			"source": "testnet://dfc20aee650fcbdf.FlowEVMBridgeUtils",
+			"hash": "a326596efb08b8f5fae596916fb0d6b5e77485ae6b9d7043062b33006804a1f5",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"FlowStorageFees": {
+			"source": "testnet://8c5303eaa26202d6.FlowStorageFees",
+			"hash": "a4dbe988fcaa61db479b437579b3a470d8f8ce11be08827111522f19a50fdb07",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "e467b9dd11fa00df",
+				"previewnet": "b6763b4399a888c8",
+				"testnet": "8c5303eaa26202d6"
 			}
 		},
 		"FlowToken": {
@@ -197,6 +280,48 @@
 				"testnet": "9a0766d93b6608b7"
 			}
 		},
+		"IBridgePermissions": {
+			"source": "testnet://dfc20aee650fcbdf.IBridgePermissions",
+			"hash": "7b2b7cdfbc8749def124808875e37d0f2d1b3aebdceb728dec0c59890b2d701b",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"ICrossVM": {
+			"source": "testnet://dfc20aee650fcbdf.ICrossVM",
+			"hash": "4f86af9fff6a0a7f5e727614085d72503e7ee2d6dd32f44ff3b5681a62f06635",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"IEVMBridgeNFTMinter": {
+			"source": "testnet://dfc20aee650fcbdf.IEVMBridgeNFTMinter",
+			"hash": "bf86d7d2a83fa9024bf91eee834a2f29be495b73a554b9792e60351b8380bb96",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"IEVMBridgeTokenMinter": {
+			"source": "testnet://dfc20aee650fcbdf.IEVMBridgeTokenMinter",
+			"hash": "b47748eddd6bc1828414c6e498d7c3b87a0912566a1eb4e6a92fff1f6dc30a73",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"IFlowEVMNFTBridge": {
+			"source": "testnet://dfc20aee650fcbdf.IFlowEVMNFTBridge",
+			"hash": "a1e4f88da25e7a841c99d0ab414b21794fee1ed37044ecb0791d698cf863cfc5",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"IFlowEVMTokenBridge": {
+			"source": "testnet://dfc20aee650fcbdf.IFlowEVMTokenBridge",
+			"hash": "bead17f662fcfe103f6a29dc162ec2a7957b0c9ffb2079935374f1753b13f74b",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
 		"MetadataViews": {
 			"source": "testnet://631e88ae7f1d7c20.MetadataViews",
 			"hash": "8d605dbd8135085aa9e8bb0604ff67ddb24f70c9368c0be7673efaaa17fcfc8f",
@@ -204,6 +329,14 @@
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
 				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"NFTCatalog": {
+			"source": "testnet://324c34e1c517e4db.NFTCatalog",
+			"hash": "db6293f7c3f48fbbf6dd50f138c93d1ec7712fe09637cb2ceec87442d5f77a11",
+			"aliases": {
+				"mainnet": "49a7cda3a1eecc29",
+				"testnet": "324c34e1c517e4db"
 			}
 		},
 		"NonFungibleToken": {
@@ -215,12 +348,18 @@
 				"testnet": "631e88ae7f1d7c20"
 			}
 		},
-		"NFTCatalog": {
-			"source": "testnet://324c34e1c517e4db.NFTCatalog",
-			"hash": "db6293f7c3f48fbbf6dd50f138c93d1ec7712fe09637cb2ceec87442d5f77a11",
+		"Serialize": {
+			"source": "testnet://dfc20aee650fcbdf.Serialize",
+			"hash": "71106798938f37e5271e396513d672d089ede66ff34793bb9da037d392bd26d0",
 			"aliases": {
-				"testnet": "324c34e1c517e4db",
-				"mainnet": "49a7cda3a1eecc29"
+				"testnet": "dfc20aee650fcbdf"
+			}
+		},
+		"SerializeMetadata": {
+			"source": "testnet://dfc20aee650fcbdf.SerializeMetadata",
+			"hash": "ccf45be6c2dea7a7e8a0e5e6cebf42e79a3f661086273b4df02b663579c5960f",
+			"aliases": {
+				"testnet": "dfc20aee650fcbdf"
 			}
 		},
 		"StringUtils": {
