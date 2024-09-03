@@ -1,27 +1,11 @@
 {
 	"contracts": {
-		"ArrayUtils": {
-			"source": "./imports-c1/a340dc0a4ec828ab/ArrayUtils.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788"
-			}
-		},
 		"BlackHole": {
 			"source": "./cadence/contracts/BlackHole.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "4396883a58c3a2d1",
 				"testnet": "ad26718c4b6b921b"
-			}
-		},
-		"Burner": {
-			"source": "./imports-c1/f233dcee88fe0abe/Burner.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"ExampleToken": {
@@ -36,70 +20,6 @@
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "15a918087ab12d86",
 				"testnet": "b86f928a1fa7798e"
-			}
-		},
-		"FlowToken": {
-			"source": "./imports-c1/1654653399040a61/FlowToken.cdc",
-			"aliases": {
-				"emulator": "0ae53cb6e3f42a79",
-				"mainnet": "1654653399040a61",
-				"testnet": "7e60df042a9c0868"
-			}
-		},
-		"FungibleToken": {
-			"source": "./imports-c1/f233dcee88fe0abe/FungibleToken.cdc",
-			"aliases": {
-				"emulator": "ee82856bf20e2aa6",
-				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7"
-			}
-		},
-		"FungibleTokenMetadataViews": {
-			"source": "./imports-c1/f233dcee88fe0abe/FungibleTokenMetadataViews.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "f233dcee88fe0abe",
-				"testnet": "9a0766d93b6608b7"
-			}
-		},
-		"MetadataViews": {
-			"source": "./imports-c1/1d7e57aa55817448/MetadataViews.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20"
-			}
-		},
-		"NonFungibleToken": {
-			"source": "./imports-c1/1d7e57aa55817448/NonFungibleToken.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20"
-			}
-		},
-		"StringUtils": {
-			"source": "./imports-c1/a340dc0a4ec828ab/StringUtils.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "a340dc0a4ec828ab",
-				"testnet": "31ad40c07a2a9788"
-			}
-		},
-		"SwapConfig": {
-			"source": "./imports-c1/b78ef7afa52ff906/SwapConfig.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "b78ef7afa52ff906",
-				"testnet": "ddb929038d45d4b3"
-			}
-		},
-		"SwapInterfaces": {
-			"source": "./imports-c1/b78ef7afa52ff906/SwapInterfaces.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "b78ef7afa52ff906",
-				"testnet": "ddb929038d45d4b3"
 			}
 		},
 		"TokenList": {
@@ -124,14 +44,6 @@
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "15a918087ab12d86",
 				"testnet": "b86f928a1fa7798e"
-			}
-		},
-		"ViewResolver": {
-			"source": "./imports-c1/1d7e57aa55817448/ViewResolver.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"mainnet": "1d7e57aa55817448",
-				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"ViewResolvers": {
@@ -264,7 +176,8 @@
 		"emulator": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
 		"testing": "127.0.0.1:3569",
-		"testnet": "access.devnet.nodes.onflow.org:9000"
+		"testnet": "access.devnet.nodes.onflow.org:9000",
+		"previewnet": "access.previewnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
 		"emulator-account": {
