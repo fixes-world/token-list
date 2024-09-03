@@ -1117,11 +1117,24 @@ access(all) contract NFTList {
         return entry != nil
     }
 
+    /// Check if the NFT is valid to register
+    access(all)
+    fun isValidToRegister(_ address: Address, _ contractName: String): Bool {
+        if let contractRef = ViewResolvers.borrowContractViewResolver(address, contractName) {
+            let displayView = contractRef.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionDisplay>())
+            let dataView = contractRef.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionData>())
+            if displayView != nil && dataView != nil {
+                return true
+            }
+        }
+        return false
+    }
+
     /// Try to register a new NFT, if already registered, then do nothing
     ///
     access(all)
     fun ensureNFTCollectionRegistered(_ address: Address, _ contractName: String) {
-        if !self.isNFTCollectionRegistered(address, contractName) {
+        if !self.isNFTCollectionRegistered(address, contractName) && self.isValidToRegister(address, contractName) {
             let registry = self.borrowRegistry()
             registry.registerStandardNonFungibleToken(address, contractName)
         }

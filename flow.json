@@ -215,6 +215,14 @@
 				"testnet": "631e88ae7f1d7c20"
 			}
 		},
+		"NFTCatalog": {
+			"source": "testnet://324c34e1c517e4db.NFTCatalog",
+			"hash": "db6293f7c3f48fbbf6dd50f138c93d1ec7712fe09637cb2ceec87442d5f77a11",
+			"aliases": {
+				"testnet": "324c34e1c517e4db",
+				"mainnet": "49a7cda3a1eecc29"
+			}
+		},
 		"StringUtils": {
 			"source": "testnet://31ad40c07a2a9788.StringUtils",
 			"hash": "5cb6f0c52bac8014c4b40cae267e505b52c37cddf10b761b84cbe02aed9b80f3",
