@@ -1,6 +1,8 @@
 /// <reference types="astro/client" />
 
 interface ImportMetaEnv {
+  readonly MAINTENANCE_MODE: string;
+
   readonly PUBLIC_FLOW_NETWORK: string;
 
   // -> Qiniu
