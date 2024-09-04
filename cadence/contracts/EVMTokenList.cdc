@@ -7,6 +7,7 @@ This contract is a list of all the bridged ERC20 / ERC721 tokens for Flow(EVM) o
 
 */
 import "FungibleToken"
+import "NonFungibleToken"
 import "MetadataViews"
 import "ViewResolver"
 import "FungibleTokenMetadataViews"
@@ -36,15 +37,17 @@ access(all) contract EVMTokenList {
 
     /// Event emitted when a new EVM compatible token is registered
     access(all) event EVMBridgedAssetRegistered(
-        _ evmAddress: EVM.EVMAddress,
-        _ bridgedType: Type,
+        _ evmAddress: String,
         _ isERC721: Bool,
+        _ bridgedAssetAddress: Address,
+        _ bridgedAssetContractName: String,
     )
     /// Event emitted when a EVM compatible token is removed
     access(all) event EVMBridgedAssetRemoved(
-        _ evmAddress: EVM.EVMAddress,
-        _ bridgedType: Type,
+        _ evmAddress: String,
         _ isERC721: Bool,
+        _ bridgedAssetAddress: Address,
+        _ bridgedAssetContractName: String,
     )
         /* --- Variable, Enums and Structs --- */
 
@@ -56,6 +59,7 @@ access(all) contract EVMTokenList {
     /// Interface for the Token List Viewer
     ///
     access(all) resource interface IListViewer {
+        // --- Read functions ---
         /// Get the total number of registered ERC20 tokens
         access(all)
         view fun getERC20Amount(): Int
@@ -85,6 +89,16 @@ access(all) contract EVMTokenList {
         /// Borrow the Bridged Token's TokenList Entry
         access(all)
         view fun borrowNonFungibleTokenEntry(_ evmContractAddressHex: String): &NFTList.NFTCollectionEntry?
+
+        // --- Register functions ---
+
+        /// Register and onboard a new EVM compatible token (ERC20 or ERC721) to the EVM Token List
+        access(all)
+        fun registerEVMAsset(_ evmContractAddressHex: String, feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?)
+
+        /// Register and onboard a new Cadence Asset to the EVM Token List
+        access(all)
+        fun registerCadenceAsset(_ ftOrNftType: Type, feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?)
     }
 
     /// Resource for the Token List Registry
@@ -197,7 +211,106 @@ access(all) contract EVMTokenList {
             return nil
         }
 
+        /* --- Register functions --- */
+
+        /// Register and onboard a new EVM compatible token (ERC20 or ERC721) to the EVM Token List
+        ///
+        access(all)
+        fun registerEVMAsset(_ evmContractAddressHex: String, feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?) {
+            var contractAddr: Address? = nil
+            var contractName: String? = nil
+            var isNFT: Bool = false
+
+            let address = EVM.addressFromString(evmContractAddressHex)
+            let isRequires = FlowEVMBridge.evmAddressRequiresOnboarding(address)
+            if isRequires == false {
+                // Now just need to look up the type of the token and register it to the Token List
+                let assetType = FlowEVMBridgeConfig.getTypeAssociated(with: address)
+                    ?? panic("Could not find the asset type")
+                contractAddr = FlowEVMBridgeUtils.getContractAddress(fromType: assetType)
+                contractName = FlowEVMBridgeUtils.getContractName(fromType: assetType)
+                isNFT = assetType.isSubtype(of: Type<@{NonFungibleToken.NFT}>())
+            } else if isRequires == true {
+                // Onboard the token to the bridge
+                assert(feeProvider != nil, message: "Fee provider is required for onboarding")
+                FlowEVMBridge.onboardByEVMAddress(address, feeProvider: feeProvider!)
+                // FIXME: Because the new deployed Cadence contracts can not be found in the same transaction
+                // So we just build the contract address and name here
+                contractAddr = FlowEVMBridge.account.address
+                let evmOnboardingValues = FlowEVMBridgeUtils.getEVMOnboardingValues(evmContractAddress: address)
+                contractName = evmOnboardingValues.cadenceContractName
+                isNFT = evmOnboardingValues.isERC721
+            } else {
+                // This address is not a valid EVM asset
+                panic("Invalid EVM Asset for the Address: 0x".concat(evmContractAddressHex))
+            }
+
+            // register the asset to the Token List
+            self._registerAsset(
+                evmContractAddressHex,
+                contractAddr ?? panic("Contract address is required to register"),
+                contractName ?? panic("Contract name is required to register"),
+                isNFT
+            )
+        }
+
+        /// Register and onboard a new Cadence Asset to the EVM Token List
+        access(all)
+        fun registerCadenceAsset(_ ftOrNftType: Type, feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?) {
+            let contractAddr = FlowEVMBridgeUtils.getContractAddress(fromType: ftOrNftType) ?? panic("Could not find the contract address")
+            let contractName = FlowEVMBridgeUtils.getContractName(fromType: ftOrNftType) ?? panic("Could not find the contract name")
+            let isNFT: Bool = ftOrNftType.isSubtype(of: Type<@{NonFungibleToken.NFT}>())
+            var evmAddress: EVM.EVMAddress? = nil
+
+            let isRequires = FlowEVMBridge.typeRequiresOnboarding(ftOrNftType)
+            if isRequires == false {
+                // Now just need to look up the type of the token and register it to the Token List
+                evmAddress = FlowEVMBridgeConfig.getEVMAddressAssociated(with: ftOrNftType)
+            } else if isRequires == true {
+                // Onboard the token to the bridge
+                assert(feeProvider != nil, message: "Fee provider is required for onboarding")
+                FlowEVMBridge.onboardByType(ftOrNftType, feeProvider: feeProvider!)
+                // EVM Contract deployment can be found in the same transaction
+                evmAddress = FlowEVMBridgeConfig.getEVMAddressAssociated(with: ftOrNftType)
+            } else {
+                panic("Invalid Cadence Asset Type for the Type: ".concat(ftOrNftType.identifier))
+            }
+
+            self._registerAsset(
+                evmAddress?.toString() ?? panic("EVM Address is required to register"),
+                contractAddr,
+                contractName,
+                isNFT
+            )
+        }
+
         /* --- Internal functions --- */
+
+        /// Register the EVM compatible asset to the Token List
+        ///
+        access(self)
+        fun _registerAsset(_ evmContractAddressHex: String, _ address: Address, _ contractName: String, _ isNFT: Bool) {
+            if isNFT {
+                if self.regsiteredErc721s[evmContractAddressHex] != nil {
+                    return
+                }
+                NFTList.ensureNFTCollectionRegistered(address, contractName)
+                self.regsiteredErc721s[evmContractAddressHex] = NFTViewUtils.NFTIdentity(address, contractName)
+            } else {
+                if self.regsiteredErc20s[evmContractAddressHex] != nil {
+                    return
+                }
+                TokenList.ensureFungibleTokenRegistered(address, contractName)
+                self.regsiteredErc20s[evmContractAddressHex] = FTViewUtils.FTIdentity(address, contractName)
+            }
+
+            emit EVMBridgedAssetRegistered(
+                "0x".concat(evmContractAddressHex),
+                isNFT,
+                address,
+                contractName
+            )
+        }
     }
 
     /* --- Public functions --- */
