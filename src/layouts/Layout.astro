@@ -4,11 +4,14 @@ import { ViewTransitions } from "astro:transitions";
 import appInfo from "@shared/config/info";
 import Header from "@components/partials/Header.astro";
 import Footer from "@components/partials/Footer.astro";
+import Maintenance from "@components/partials/Maintenance.astro";
 
 interface Props {
   title: string;
   description?: string;
 }
+
+const isMaintainance = import.meta.env.MAINTENANCE_MODE === "true";
 
 const title = `${Astro.props.title} - ${appInfo.titleDesc}`;
 const description = Astro.props.description ?? appInfo.description;
@@ -52,11 +55,13 @@ const url = appInfo.url;
     <ViewTransitions />
   </head>
   <body>
-    <Header />
-    <main class="min-h-[calc(100vh-13rem)]">
-      <slot />
-      <Footer />
-      <slot name="after-footer" />
-    </main>
+    {isMaintainance ? <Maintenance /> : (
+      <Header />
+      <main class="min-h-[calc(100vh-13rem)]">
+        <slot />
+        <Footer />
+        <slot name="after-footer" />
+      </main>
+    )}
   </body>
 </html>
