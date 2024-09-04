@@ -60,6 +60,10 @@ access(all) contract EVMTokenList {
     ///
     access(all) resource interface IListViewer {
         // --- Read functions ---
+        /// Check if the EVM Address is registered
+        access(all)
+        view fun isEVMAddressRegistered(_ evmContractAddressHex: String): Bool
+
         /// Get the total number of registered ERC20 tokens
         access(all)
         view fun getERC20Amount(): Int
@@ -116,6 +120,13 @@ access(all) contract EVMTokenList {
         }
 
         /* --- Implement the IListViewer interface ---  */
+
+        /// Check if the EVM Address is registered
+        access(all)
+        view fun isEVMAddressRegistered(_ evmContractAddressHex: String): Bool {
+            return self.regsiteredErc20s[evmContractAddressHex] != nil
+                || self.regsiteredErc721s[evmContractAddressHex] != nil
+        }
 
         /// Get the total number of registered ERC20 tokens
         access(all)
@@ -323,6 +334,23 @@ access(all) contract EVMTokenList {
             .capabilities.get<&Registry>(self.registryPublicPath)
             .borrow()
             ?? panic("Could not borrow the Registry reference")
+    }
+
+    /// Whether the EVM Address is valid to register
+    ///
+    access(all)
+    fun isValidToRegisterEVMAddress(_ evmContractAddressHex: String): Bool {
+        let registry = self.borrowRegistry()
+        return !registry.isEVMAddressRegistered(evmContractAddressHex)
+    }
+
+    /// Whether the Cadence Type is valid to register
+    ///
+    access(all)
+    fun isValidToRegisterCadenceType(_ ftOrNftType: Type): Bool {
+        let registry = self.borrowRegistry()
+        let evmAddress = FlowEVMBridgeConfig.getEVMAddressAssociated(with: ftOrNftType)
+        return evmAddress == nil || !registry.isEVMAddressRegistered(evmAddress!.toString())
     }
 
     /// The prefix for the paths
