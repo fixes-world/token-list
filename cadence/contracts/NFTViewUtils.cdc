@@ -111,7 +111,7 @@ access(all) contract NFTViewUtils {
 
     /// The struct for the Fungible Token List View
     ///
-    access(all) struct StandardTokenView {
+    access(all) struct StandardTokenView: FTViewUtils.ITokenView {
         access(all)
         let identity: NFTIdentity
         access(all)
@@ -135,6 +135,49 @@ access(all) contract NFTViewUtils {
             self.dataSource = dataSource
             self.paths = paths
             self.display = display
+        }
+
+        access(all)
+        view fun getIdentity(): {FTViewUtils.TokenIdentity} {
+            return self.identity
+        }
+    }
+
+    /// The struct for the Bridged Token List View
+    ///
+    access(all) struct BridgedTokenView: FTViewUtils.IBridgedTokenView, FTViewUtils.ITokenView {
+        access(all)
+        let identity: NFTIdentity
+        access(all)
+        let evmAddress: String
+        access(all)
+        let tags: [String]
+        access(all)
+        let dataSource: Address?
+        access(all)
+        let paths: StandardNFTPaths?
+        access(all)
+        let display: NFTCollectionViewWithSource?
+
+        view init(
+            identity: NFTIdentity,
+            evmAddress: String,
+            tags: [String],
+            dataSource: Address?,
+            paths: StandardNFTPaths?,
+            display: NFTCollectionViewWithSource?,
+        ) {
+            self.identity = identity
+            self.evmAddress = evmAddress
+            self.tags = tags
+            self.dataSource = dataSource
+            self.paths = paths
+            self.display = display
+        }
+
+        access(all)
+        view fun getIdentity(): {FTViewUtils.TokenIdentity} {
+            return self.identity
         }
     }
 
