@@ -75,6 +75,9 @@ access(all) contract EVMTokenList {
         /// The method will call the function for each address
         access(all)
         fun forEachERC20Address(_ f: fun (EVM.EVMAddress): Bool)
+        /// Get the ERC20 addresses(String) by for each
+        access(all)
+        fun forEachERC20AddressString(_ f: fun (String): Bool)
         /// Borrow the Bridged Token's TokenList Entry
         access(all)
         view fun borrowFungibleTokenEntry(_ evmContractAddressHex: String): &{TokenList.FTEntryInterface}?
@@ -90,6 +93,9 @@ access(all) contract EVMTokenList {
         /// The method will call the function for each address
         access(all)
         fun forEachERC721Address(_ f: fun (EVM.EVMAddress): Bool)
+        /// Get the ERC721 addresses(String) by for each
+        access(all)
+        fun forEachERC721AddressString(_ f: fun (String): Bool)
         /// Borrow the Bridged Token's TokenList Entry
         access(all)
         view fun borrowNonFungibleTokenEntry(_ evmContractAddressHex: String): &NFTList.NFTCollectionEntry?
@@ -164,6 +170,12 @@ access(all) contract EVMTokenList {
             })
         }
 
+        /// Get the ERC20 addresses(String) by for each
+        access(all)
+        fun forEachERC20AddressString(_ f: fun (String): Bool) {
+            self.regsiteredErc20s.forEachKey(f)
+        }
+
         /// Borrow the Bridged Token's TokenList Entry
         access(all)
         view fun borrowFungibleTokenEntry(_ evmContractAddressHex: String): &{TokenList.FTEntryInterface}? {
@@ -209,6 +221,12 @@ access(all) contract EVMTokenList {
             self.regsiteredErc721s.forEachKey(fun (key: String): Bool {
                 return f(EVM.addressFromString(key))
             })
+        }
+
+        /// Get the ERC721 addresses(String) by for each
+        access(all)
+        fun forEachERC721AddressString(_ f: fun (String): Bool) {
+            self.regsiteredErc721s.forEachKey(f)
         }
 
         /// Borrow the Bridged Token's TokenList Entry
