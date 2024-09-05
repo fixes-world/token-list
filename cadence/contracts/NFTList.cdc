@@ -266,7 +266,7 @@ access(all) contract NFTList {
         access(all)
         fun getCollectionData(): MetadataViews.NFTCollectionData {
             return MetadataViews.getNFTCollectionData(self.borrowViewResolver())
-                ?? panic("Failed to load the NFT Collection Data")
+                ?? panic("Failed to load the NFT Collection Data for ".concat(self.identity.toString()))
         }
 
         /// Get the FT Type
@@ -1121,9 +1121,25 @@ access(all) contract NFTList {
     access(all)
     fun isValidToRegister(_ address: Address, _ contractName: String): Bool {
         if let contractRef = ViewResolvers.borrowContractViewResolver(address, contractName) {
-            let displayView = contractRef.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionDisplay>())
-            let dataView = contractRef.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionData>())
-            if displayView != nil && dataView != nil {
+            let colDisplayType = Type<MetadataViews.NFTCollectionDisplay>()
+            let colDataType = Type<MetadataViews.NFTCollectionData>()
+            let contractViews = contractRef.getContractViews(resourceType: nil)
+            if contractViews.contains(colDataType) == false || contractViews.contains(colDisplayType) == false {
+                return false
+            }
+            var convertedDisplayView: MetadataViews.NFTCollectionDisplay? = nil
+            var convertedDataView: MetadataViews.NFTCollectionData? = nil
+            if let displayView = contractRef.resolveContractView(resourceType: nil, viewType: colDisplayType) {
+                convertedDisplayView = displayView as? MetadataViews.NFTCollectionDisplay
+            } else {
+                return false
+            }
+            if let dataView = contractRef.resolveContractView(resourceType: nil, viewType: colDataType) {
+                convertedDataView = dataView as? MetadataViews.NFTCollectionData
+            } else {
+                return false
+            }
+            if convertedDisplayView != nil && convertedDataView != nil {
                 return true
             }
         }
