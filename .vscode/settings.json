@@ -8,5 +8,5 @@
   "html.format.preserveNewLines": true,
   "html.format.maxPreserveNewLines": 1,
   "html.format.wrapAttributes": "force-expand-multiline",
-  "cadence.flowCommand": "flow-c1"
+  "cadence.flowCommand": "flow"
 }

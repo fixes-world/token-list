@@ -13,7 +13,7 @@
     "preview": "astro preview",
     "astro": "astro",
 		"deploy:emulator": "flow project deploy --update",
-		"deploy:testnet": "flow-c1 project deploy --update --network=testnet",
+		"deploy:testnet": "flow project deploy --update --network=testnet",
 		"deploy:mainnet": "flow project deploy --update --network=mainnet"
   },
   "keywords": [

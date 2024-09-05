@@ -1,5 +1,5 @@
 /**
-> Author: FIXeS World <https://fixes.world/>
+> Author: Fixes Lab <https://github.com/fixes-world/>
 
 # Token List - A on-chain list of Flow Standard Fungible Tokens (FTs).
 

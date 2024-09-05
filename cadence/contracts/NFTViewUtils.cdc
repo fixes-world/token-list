@@ -1,5 +1,5 @@
 /**
-> Author: Fixes World <https://fixes.world/>
+> Author: Fixes Lab <https://github.com/fixes-world/>
 
 # NFT List - An on-chain list of Flow Standard Non-Fungible Tokens (NFTs).
 
