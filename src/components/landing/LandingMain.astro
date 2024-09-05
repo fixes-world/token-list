@@ -5,6 +5,7 @@ import SectionWrapper from "@components/partials/SectionWrapper.astro";
 import QuickRegisterToken from "./sections/QuickRegisterToken.vue";
 import HowToUse from "./sections/HowToUse.vue";
 import FullList from "./sections/FullList.vue";
+import FullNFTList from "./sections/FullNFTList.vue";
 ---
 
 <SectionWrapper>
@@ -14,9 +15,13 @@ import FullList from "./sections/FullList.vue";
   <Loading id="QuickRegisterToken" classNames={["max-w-xl", "h-20"]} />
   <QuickRegisterToken client:only="vue" />
 </SectionWrapper>
-<SectionWrapper title="Full List of FTs">
+<SectionWrapper title="Full List - Fungible Tokens">
   <Loading id="FullListSection" classNames={["max-w-3xl", "h-24"]} />
   <FullList client:only="vue" />
+</SectionWrapper>
+<SectionWrapper title="Full List - Non-Fungible Tokens">
+  <Loading id="FullNFTListSection" classNames={["max-w-3xl", "h-24"]} />
+  <FullNFTList client:only="vue" />
 </SectionWrapper>
 <SectionWrapper title="How to use">
   <Loading id="HowToUseSection" classNames={["max-w-3xl", "h-24"]} />

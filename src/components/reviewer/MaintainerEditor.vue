@@ -75,20 +75,13 @@ watch(acctName, reloadAddrStatus, { immediate: true })
         <template #not-connected>
           <span class="text-lg">Connect wallet to access Maintainer Editor</span>
         </template>
-        <NSkeleton
-          v-if="isFirstLoading"
-          animate
-          text
-          :repeat="6"
-        />
-        <NEmpty
-          v-else-if="!addrStatus"
-          description="Failed to load address status"
-          class="my-6"
-        />
-        <template v-else>
+        <LoadingFrame
+          :loading="isFirstLoading"
+          :is-empty="!addrStatus"
+          empty-text="Failed to load address status"
+        >
           <div
-            v-if="isEditorAvailable"
+            v-if="isEditorAvailable && addrStatus"
             class="w-full flex items-start justify-between gap-4"
           >
             <PanelTokenList
@@ -117,14 +110,14 @@ watch(acctName, reloadAddrStatus, { immediate: true })
                   <span class="text-sm italic font-bold text-gray-400/60">Token Review</span>
                 </NDivider>
                 <PanelTokenReview
-                  :ft="currentToken"
+                  :item="currentToken"
                   @refresh="refreshTokenList"
                 />
               </template>
             </div>
           </div>
           <div
-            v-else
+            v-else-if="addrStatus"
             class="flex flex-col gap-6 items-center justify-start"
           >
             <h2 class="text-lg">
@@ -147,7 +140,7 @@ watch(acctName, reloadAddrStatus, { immediate: true })
             <h2 class="text-lg"> or </h2>
             <FormSubmitInitReviewer @success="reloadAddrStatus" />
           </div>
-        </template>
+        </LoadingFrame>
       </EnsureConnected>
     </div>
   </VueWrapper>

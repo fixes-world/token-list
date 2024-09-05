@@ -1,4 +1,3 @@
-import Exception from "@shared/exception";
 import type { APIRoute } from "astro";
 
 export const ALL: APIRoute = async (_req) => {

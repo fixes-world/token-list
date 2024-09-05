@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { ref, reactive, computed, inject, watch, h, type VNodeChild, type VNode } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
+import type { TagableItem } from '@shared/flow/entities';
 import { EvaluationType } from '@shared/flow/enums';
 import { parseReviewData } from '@shared/flow/utilitites'
-import { maintainerReviewFT } from '@shared/flow/action/transactions';
-import { useGlobalAccount, useSendingTransaction } from '@components/shared'
+import { maintainerReviewFT, nftListMaintainerReviewNFT } from '@shared/flow/action/transactions';
+import { useGlobalAccount } from '@components/shared'
 
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
-const props = defineProps<{
-  ft: StandardTokenView,
+const props = withDefaults(defineProps<{
+  item: TagableItem,
   rank?: EvaluationType,
   tags: string[],
-}>()
+  isNft?: boolean,
+}>(), {
+  isNft: false,
+});
 
 const emits = defineEmits<{
   (e: 'success'): void,
@@ -26,7 +28,7 @@ const acctName = useGlobalAccount()
 // Reactive Data
 
 const isChanged = computed(() => {
-  const data = parseReviewData(props.ft)
+  const data = parseReviewData(props.item)
   return data.rank !== props.rank || data.tags.sort().join(',') !== props.tags.sort().join(',')
 })
 
@@ -53,7 +55,11 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
 
-  return maintainerReviewFT(props.ft.identity, props.tags, props.rank)
+  if (props.isNft) {
+    return await nftListMaintainerReviewNFT(props.item.identity, props.tags, props.rank)
+  } else {
+    return await maintainerReviewFT(props.item.identity, props.tags, props.rank)
+  }
 }
 
 async function onSuccess() {
@@ -81,6 +87,6 @@ async function onCancel() {
     <template #icon>
       <span class="i-carbon:edit w-5 h-5" />
     </template>
-    <span>Update Token Reviews</span>
+    <span>Update {{ isNft ? 'NFT Collection' : "Fungible Token" }} Reviews</span>
   </FlowSubmitTrxWidget>
 </template>

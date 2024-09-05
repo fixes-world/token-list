@@ -48,10 +48,13 @@ export interface TokenDisplayWithSource {
   display: TokenDisplay;
 }
 
-export interface StandardTokenView {
+export interface TagableItem {
   identity: TokenStatusBasic;
-  decimals: number;
   tags: string[];
+}
+
+export interface StandardTokenView extends TagableItem {
+  decimals: number;
   dataSource?: string;
   path?: TokenPaths;
   display?: TokenDisplayWithSource;
@@ -118,6 +121,71 @@ export interface TokenList {
   tags: Record<string, TokenTag>;
   timestamp: Date;
   tokens: ExportedTokenInfo[];
+  totalAmount: number;
+  filterType: string;
+  version: {
+    major: number;
+    minor: number;
+    patch: number;
+  };
+}
+
+export interface NFTPaths {
+  storage: string;
+  public: string;
+}
+
+export interface NFTStatus extends TokenStatusBasic, NFTPaths {}
+
+export interface NFTCollectionDisplayBasic {
+  name: string;
+  description?: string;
+  externalURL?: string;
+}
+
+export interface NFTCollectionDisplay extends NFTCollectionDisplayBasic {
+  squareImage: Media;
+  bannerImage: Media;
+  social: Record<string, string>;
+}
+
+export interface NFTCollectionDisplayDto extends NFTCollectionDisplayBasic {
+  squareImage: string;
+  bannerImage: string;
+  social: SocialKeyPair[];
+}
+
+export interface NFTCollectionDisplayWithSource {
+  source: string;
+  display: NFTCollectionDisplay;
+}
+
+export interface StandardNFTCollectionView extends TagableItem {
+  paths: NFTPaths;
+  display?: NFTCollectionDisplayWithSource;
+}
+
+export type NFTListQueryResult = QueryResult<StandardNFTCollectionView>;
+
+export interface ExportedNFTCollectionInfo extends TokenIdentity {
+  chainId: number;
+  path: NFTPaths;
+  evmAddress?: string;
+  name: string;
+  description: string;
+  logoURI: string;
+  bannerURI: string;
+  tags: string[];
+  extensions: Record<string, string>;
+}
+
+export interface NFTList {
+  name: string;
+  network: string;
+  chainId?: number;
+  tags: Record<string, TokenTag>;
+  timestamp: Date;
+  tokens: ExportedNFTCollectionInfo[];
   totalAmount: number;
   filterType: string;
   version: {

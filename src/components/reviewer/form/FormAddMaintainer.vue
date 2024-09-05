@@ -11,8 +11,10 @@ import { useGlobalAccount, useSendingTransaction } from '@components/shared';
 import FormSubmitAddMaintainer from './FormSubmitAddMaintainer.vue';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean
   reviewerInfo: ReviewerInfo | null,
 }>(), {
+  isNft: false,
   reviewerInfo: null,
 });
 
@@ -100,6 +102,7 @@ watch(() => props.reviewerInfo, (newVal) => {
         :show-feedback="false"
       >
         <FormSubmitAddMaintainer
+          :is-nft="props.isNft"
           :reviewer-info="reviewerInfo"
           :address="formData.address"
           @success="onSuccess"

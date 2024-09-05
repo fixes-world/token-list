@@ -16,9 +16,16 @@ const isOnPCBrowser = breakpoints.greaterOrEqual('lg')
 
 // tabs
 type TabType = 'jsonView' | 'listView'
-const currentTab = ref<TabType>('jsonView')
+const currentTab = ref<TabType>('listView')
 
 const currentReviewer = ref<ReviewerInfo | undefined>(undefined)
+
+const tabs = computed(() => {
+  return [
+    { key: 'listView', label: 'List View', icon: 'i-carbon:list', component: PanelTokensListView },
+    { key: 'jsonView', label: 'JSON View', icon: 'i-carbon:json', component: PanelTokensJsonView },
+  ]
+})
 
 // Functions
 
@@ -39,7 +46,7 @@ onMounted(() => {
     ]">
       <p class="absolute -top-8 px-2 text-xs text-gray-400">
         <span class="i-carbon:warning w-3 h-3" />
-        You can preview the on-chain Token List here. The querying API has a cache time of 1 minute for efficiency improvement.
+        You can preview the on-chain Fungible Token List here. The querying API has a cache time of 1 minute for efficiency improvement.
         Learn about
         <a
           href="/#how-to-use"
@@ -55,36 +62,24 @@ onMounted(() => {
         :size="isOnPCBrowser ? 'large' : 'medium'"
         :justify-content="isOnPCBrowser ? undefined : 'space-evenly'"
       >
-        <NTabPane name="jsonView">
+        <NTabPane
+          v-for="item of tabs"
+          :key="item.key"
+          :name="item.key"
+        >
           <template #tab>
-            <ItemTabName label="JSON View">
+            <ItemTabName :label="item.label">
               <template #icon>
-                <span class="i-carbon:json w-5 h-5" />
+                <span :class="['w-5 h-5', item.icon]" />
               </template>
             </ItemTabName>
           </template>
           <h2
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
-          >JSON View</h2>
-          <PanelTokensJsonView
-            class="max-h-[calc(100vh-24rem)]"
-            :reviewer="currentReviewer?.address"
-          />
-        </NTabPane>
-        <NTabPane name="listView">
-          <template #tab>
-            <ItemTabName label="List View">
-              <template #icon>
-                <span class="i-carbon:list w-5 h-5" />
-              </template>
-            </ItemTabName>
-          </template>
-          <h2
-            aria-level="2"
-            class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
-          >List View</h2>
-          <PanelTokensListView
+          >{{ item.label }}</h2>
+          <component
+            :is="item.component"
             class="max-h-[calc(100vh-24rem)]"
             :reviewer="currentReviewer?.address"
           />

@@ -12,9 +12,9 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy:emulator": "flow project deploy --update",
-    "deploy:testnet": "flow project deploy --update --network testnet",
-    "deploy:mainnet": "flow project deploy --update --network mainnet"
+		"deploy:emulator": "flow project deploy --update",
+		"deploy:testnet": "flow project deploy --update --network=testnet",
+		"deploy:mainnet": "flow project deploy --update --network=mainnet"
   },
   "keywords": [
     "Astro",
@@ -33,7 +33,10 @@
     "astro": "^4.5.12",
     "dompurify": "^3.0.11",
     "highlight.js": "^11.9.0",
+		"js-base64": "^3.7.7",
     "nft.storage": "^7.1.1",
+		"qiniu": "^7.12.0",
+		"qiniu-js": "^3.4.2",
     "typescript": "^5.4.3",
     "uuid": "^9.0.1",
     "vue": "^3.4.21"

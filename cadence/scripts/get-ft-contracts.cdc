@@ -9,7 +9,7 @@ access(all)
 fun main(
     addr: Address
 ): [FTStatus] {
-    let acct = getAuthAccount(addr)
+    let acct = getAuthAccount<auth(Storage, Capabilities) &Account>(addr)
     let contractNames = acct.contracts.names
     if contractNames.length == 0 {
         return []
@@ -18,10 +18,10 @@ fun main(
     let addrNo0x = addr.toString().slice(from: 2, upTo: addr.toString().length)
 
     let ftDic: {Type: String} = {}
-    let ftViewResolverDic: {Type: &ViewResolver} = {}
+    let ftViewResolverDic: {Type: &{ViewResolver}} = {}
     for contractName in contractNames {
         log("Loading Contract: ".concat(contractName))
-        if let contract = acct.contracts.borrow<&FungibleToken>(name: contractName) {
+        if let ref = acct.contracts.borrow<&{FungibleToken}>(name: contractName) {
             if let ftType = CompositeType("A.".concat(addrNo0x)
                 .concat(".").concat(contractName)
                 .concat(".Vault")) {
@@ -36,22 +36,28 @@ fun main(
     }
     let ftVaultPathsDic: {Type: String} = {}
     let ftVaultPathToType: {String: Type} = {}
-    acct.forEachStored(fun (path: StoragePath, type: Type): Bool {
-        if type.isSubtype(of: Type<@FungibleToken.Vault>()) {
+    acct.storage.forEachStored(fun (path: StoragePath, type: Type): Bool {
+        if type.isSubtype(of: Type<@{FungibleToken.Vault}>()) {
             ftVaultPathsDic[type] = path.toString()
             ftVaultPathToType[path.toString()] = type
         }
         return true
     })
     let ftPublicPathsDic: {Type: {String: String}} = {}
-    acct.forEachPublic(fun (path: PublicPath, type: Type): Bool {
-        if let storagePath = acct.getLinkTarget(path) {
-            if let tokenType = ftVaultPathToType[storagePath.toString()] {
-                if ftPublicPathsDic[tokenType] == nil {
-                    ftPublicPathsDic[tokenType] = {}
+    acct.storage.forEachPublic(fun (path: PublicPath, type: Type): Bool {
+        let capExists = acct.capabilities.exists(path)
+        if capExists {
+            let cap = acct.capabilities.get<&AnyResource>(path)
+            if let controler = acct.capabilities.storage.getController(byCapabilityID: cap.id) {
+                let storagePath = controler.target()
+
+                if let tokenType = ftVaultPathToType[storagePath.toString()] {
+                    if ftPublicPathsDic[tokenType] == nil {
+                        ftPublicPathsDic[tokenType] = {}
+                    }
+                    let ref = (&ftPublicPathsDic[tokenType] as auth(Mutate) &{String: String}?)!
+                    ref[type.identifier] = path.toString()
                 }
-                let ref = (&ftPublicPathsDic[tokenType] as &{String: String}?)!
-                ref[type.identifier] = path.toString()
             }
         }
         return true
@@ -60,7 +66,7 @@ fun main(
     let ret: [FTStatus] = []
     for ftType in ftDic.keys {
         let contractName = ftDic[ftType]!
-        let supportedViews = ftViewResolverDic[ftType]?.getViews() ?? []
+        let supportedViews = ftViewResolverDic[ftType]?.getContractViews(resourceType: nil) ?? []
         let status = FTStatus(
             address: addr,
             contractName: contractName,

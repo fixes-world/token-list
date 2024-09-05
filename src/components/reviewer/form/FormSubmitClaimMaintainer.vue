@@ -2,18 +2,18 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { FlowSrvKey } from '@shared/flow/utilitites';
-import { maintainerClaim } from '@shared/flow/action/transactions';
-import type { TokenStatus } from '@shared/flow/entities';
+import { maintainerClaim, nftListMaintainerClaim } from '@shared/flow/action/transactions';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
+  isNft?: boolean,
   reviewer?: string
 }>(), {
-  // No default value
+  isNft: false,
+  reviewer: undefined
 });
 
 const emits = defineEmits<{
@@ -56,8 +56,11 @@ async function onSubmit(): Promise<string> {
     emits('error', errStr)
     throw new Error(errStr)
   }
-
-  return await maintainerClaim(props.reviewer!)
+  if (props.isNft) {
+    return await nftListMaintainerClaim(props.reviewer!)
+  } else {
+    return await maintainerClaim(props.reviewer!)
+  }
 }
 
 async function onSuccess() {
@@ -89,7 +92,7 @@ async function onCancel() {
       <template #icon>
         <span class="i-carbon:person w-5 h-5" />
       </template>
-      <span>Claim your <strong>Maintainer</strong> Role</span>
+      <span>Claim your {{ props.isNft ? "NFTList" : "TokenList" }} <strong>Maintainer</strong> Role</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

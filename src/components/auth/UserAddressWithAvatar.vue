@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { NAvatar, NTag, useThemeVars } from 'naive-ui'
+import { NAvatar, NTag } from 'naive-ui'
 import { useCurrentSignerAddress, useGlobalAccount, useIsConnected } from '@components/shared';
 
 import FlowLogo from '@assets/flow.svg?component';
@@ -14,21 +14,13 @@ withDefaults(defineProps<{
   isAside: false,
 })
 
-const themeVars = useThemeVars();
 const isConnected = useIsConnected();
 const currentUserAddr = useCurrentSignerAddress();
 
 const avatarUrl = computed(() => {
   if (typeof currentUserAddr.value === 'string') {
-    const addr = currentUserAddr.value
-    const colors = [
-      themeVars.value.primaryColor,
-      themeVars.value.primaryColorHover,
-      themeVars.value.successColor,
-      themeVars.value.warningColor,
-      themeVars.value.errorColor,
-    ]
-    return `https://source.boringavatars.com/beam/40/${addr}?colors=${colors.map(o => o.replace("#", "")).join(',')}`
+    const addr = currentUserAddr.value ?? '0x0';
+    return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${addr}&size=40`;
   } else {
     return undefined
   }

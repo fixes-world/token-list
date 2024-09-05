@@ -3,7 +3,7 @@ import "BlackHole"
 transaction(
     addr: Address
 ) {
-    prepare(acct: AuthAccount) {
+    prepare(acct: &Account) {
         // register the new account as a black hole receiver
         BlackHole.registerAsBlackHole(addr)
     }

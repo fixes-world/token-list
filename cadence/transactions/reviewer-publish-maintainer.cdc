@@ -4,41 +4,30 @@ import "TokenList"
 transaction(
     target: Address
 ) {
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(Storage, Capabilities, Inbox) &Account) {
         /// ---------- Reviewer Initialization: Start ----------
-        if !acct.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
+        if !acct.storage.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
             log("Creating a new reviewer")
             let reviewer <- TokenList.createFungibleTokenReviewer()
-            acct.save(<- reviewer, to: TokenList.reviewerStoragePath)
+            acct.storage.save(<- reviewer, to: TokenList.reviewerStoragePath)
 
             // public the public capability
-            acct.link<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
-                TokenList.reviewerPublicPath,
-                target: TokenList.reviewerStoragePath
-            )
+            let cap = acct.capabilities.storage.issue<&TokenList.FungibleTokenReviewer>(TokenList.reviewerStoragePath)
+            acct.capabilities.publish(cap, at: TokenList.reviewerPublicPath)
         } else {
             log("Reviewer already exists")
         }
         /// ---------- Reviewer Initialization: End ----------
 
         assert(
-            acct.borrow<&TokenList.FungibleTokenReviewer>(
-                from: TokenList.reviewerStoragePath
-            ) != nil,
+            acct.storage.check<&TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath),
             message: "Missing the reviewer capability"
         )
 
         let maintainerId = TokenList.generateReviewMaintainerCapabilityId(target)
-        // link the private cap
-        let privatePath = PrivatePath(identifier: maintainerId)!
-        acct.unlink(privatePath)
-        acct.link<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewMaintainer, TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
-            privatePath,
-            target: TokenList.reviewerStoragePath
-        )
-        let cap = acct.getCapability<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewMaintainer, TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
-            privatePath
-        )
+        // issue private cap
+        let cap = acct.capabilities.storage
+            .issue<auth(TokenList.Maintainer) &TokenList.FungibleTokenReviewer>(TokenList.reviewerStoragePath)
         assert(cap.check(), message: "Failed to link the capability")
 
         acct.inbox.publish(cap, name: maintainerId, recipient: target)

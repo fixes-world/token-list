@@ -4,7 +4,7 @@ transaction(
     ftAddress: Address,
     ftContractName: String,
 ) {
-    prepare(acct: AuthAccount) {
+    prepare(acct: &Account) {
         TokenList.ensureFungibleTokenRegistered(ftAddress, ftContractName)
     }
 }

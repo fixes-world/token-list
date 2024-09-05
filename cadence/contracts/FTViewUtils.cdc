@@ -1,5 +1,5 @@
 /**
-> Author: FIXeS World <https://fixes.world/>
+> Author: Fixes Lab <https://github.com/fixes-world/>
 
 # Token List - A on-chain list of Flow Standard Fungible Tokens (FTs).
 
@@ -7,10 +7,16 @@ This is the Fungible Token view utilties contract of the Token List.
 
 */
 import "MetadataViews"
+import "ViewResolver"
 import "FungibleToken"
 import "FungibleTokenMetadataViews"
 
 access(all) contract FTViewUtils {
+
+    // ----- Entitlement -----
+
+    // An entitlement for allowing edit the FT View Data
+    access(all) entitlement Editable
 
     /*  ---- Events ---- */
 
@@ -26,10 +32,8 @@ access(all) contract FTViewUtils {
         storagePath: StoragePath,
         receiverPath: PublicPath,
         metadataPath: PublicPath,
-        providerPath: PrivatePath,
         receiverType: Type,
-        metadataType: Type,
-        providerType: Type
+        metadataType: Type
     )
 
     access(all) event FTDisplayUpdated(
@@ -47,11 +51,11 @@ access(all) contract FTViewUtils {
     ///
     access(all) struct interface TokenIdentity {
         /// Build type
-        access(all) view
-        fun buildType(): Type
+        access(all)
+        view fun buildType(): Type
         /// Get Type identifier
-        access(all) view
-        fun toString(): String {
+        access(all)
+        view fun toString(): String {
             return self.buildType().identifier
         }
     }
@@ -64,7 +68,7 @@ access(all) contract FTViewUtils {
         access(all)
         let contractName: String
 
-        init(
+        view init(
             _ address: Address,
             _ contractName: String
         ) {
@@ -72,8 +76,8 @@ access(all) contract FTViewUtils {
             self.contractName = contractName
         }
 
-        access(all) view
-        fun buildType(): Type {
+        access(all)
+        view fun buildType(): Type {
             return FTViewUtils.buildFTVaultType(self.address, self.contractName)
                 ?? panic("Could not build the FT Type")
         }
@@ -81,9 +85,9 @@ access(all) contract FTViewUtils {
         /// Borrow the Fungible Token Contract
         ///
         access(all)
-        fun borrowFungibleTokenContract(): &FungibleToken {
+        fun borrowFungibleTokenContract(): &{FungibleToken} {
             return getAccount(self.address)
-                .contracts.borrow<&FungibleToken>(name: self.contractName)
+                .contracts.borrow<&{FungibleToken}>(name: self.contractName)
                 ?? panic("Could not borrow the FungibleToken contract reference")
         }
     }
@@ -95,7 +99,8 @@ access(all) contract FTViewUtils {
         let source: Address?
         access(all)
         let vaultData: FungibleTokenMetadataViews.FTVaultData
-        init(
+
+        view init(
             _ source: Address?,
             _ vaultData: FungibleTokenMetadataViews.FTVaultData
         ) {
@@ -111,7 +116,8 @@ access(all) contract FTViewUtils {
         let source: Address?
         access(all)
         let display: FungibleTokenMetadataViews.FTDisplay
-        init(
+
+        view init(
             _ source: Address?,
             _ display: FungibleTokenMetadataViews.FTDisplay
         ) {
@@ -130,7 +136,7 @@ access(all) contract FTViewUtils {
         access(all)
         let receiverPath: PublicPath
 
-        init(
+        view init(
             vaultPath: StoragePath,
             balancePath: PublicPath,
             receiverPath: PublicPath,
@@ -157,7 +163,7 @@ access(all) contract FTViewUtils {
         access(all)
         let display: FTDisplayWithSource?
 
-        init(
+        view init(
             identity: FTIdentity,
             decimals: UInt8,
             tags: [String],
@@ -193,7 +199,7 @@ access(all) contract FTViewUtils {
         access(all)
         let at: UInt64
 
-        init(_ comment: String, _ by: Address) {
+        view init(_ comment: String, _ by: Address) {
             self.comment = comment
             self.by = by
             self.at = UInt64(getCurrentBlock().timestamp)
@@ -216,6 +222,20 @@ access(all) contract FTViewUtils {
             self.evalRank = rank
             self.tags = []
             self.comments = []
+        }
+
+        /// Get tags
+        ///
+        access(all)
+        view fun getTags(): [String] {
+            return self.tags
+        }
+
+        /// Get getEvaluationRank
+        ///
+        access(all)
+        view fun getEvaluationRank(): Evaluation {
+            return self.evalRank
         }
 
         /// Update the evaluation rank
@@ -264,7 +284,7 @@ access(all) contract FTViewUtils {
         access(all)
         let customziedTokenAmt: Int
 
-        init(
+        view init(
             address: Address,
             verified: Bool,
             name: String?,
@@ -301,25 +321,25 @@ access(all) contract FTViewUtils {
         let identity: FTIdentity
         // ----- FT Vault Data -----
         /// Get the Storage Path
-        access(all) view
-        fun getStoragePath(): StoragePath
+        access(all)
+        view fun getStoragePath(): StoragePath
         /// Get the Receiver Path
-        access(all) view
-        fun getReceiverPath(): PublicPath?
+        access(all)
+        view fun getReceiverPath(): PublicPath?
         /// Get the Metadata Path
-        access(all) view
-        fun getMetadataPath(): PublicPath?
+        access(all)
+        view fun getMetadataPath(): PublicPath?
         /// Get the Provider Path
-        access(all) view
-        fun getProviderPath(): PrivatePath?
+        access(all)
+        view fun getProviderPath(): PrivatePath?
         /// Get the Capability Path
-        access(all) view
-        fun getCapabilityType(_ capPath: FTCapPath): Type?
+        access(all)
+        view fun getCapabilityType(_ capPath: FTCapPath): Type?
         // --- default implementation ---
         /// Check if the FT View Data is initialized
         ///
-        access(all) view
-        fun isInitialized(): Bool {
+        access(all)
+        view fun isInitialized(): Bool {
             return self.getReceiverPath() != nil &&
                 self.getMetadataPath() != nil &&
                 self.getProviderPath() != nil &&
@@ -335,16 +355,15 @@ access(all) contract FTViewUtils {
                 self.isInitialized(): "FT View Data is not initialized"
             }
             let ftRef = self.identity.borrowFungibleTokenContract()
+            let ftType = self.identity.buildType()
             return FungibleTokenMetadataViews.FTVaultData(
                 storagePath: self.getStoragePath(),
                 receiverPath: self.getReceiverPath()!,
                 metadataPath: self.getMetadataPath()!,
-                providerPath: self.getProviderPath()!,
-                receiverLinkedType: self.getCapabilityType(FTCapPath.receiver)!,
-                metadataLinkedType: self.getCapabilityType(FTCapPath.metadata)!,
-                providerLinkedType: self.getCapabilityType(FTCapPath.provider)!,
-                createEmptyVaultFunction: (fun (): @FungibleToken.Vault {
-                    return <- ftRef.createEmptyVault()
+                receiverLinkedType: Type<&{FungibleToken.Receiver}>(),
+                metadataLinkedType: Type<&{FungibleToken.Vault}>(),
+                createEmptyVaultFunction: (fun (): @{FungibleToken.Vault} {
+                    return <- ftRef.createEmptyVault(vaultType: ftType)
                 })
             )
         }
@@ -352,23 +371,23 @@ access(all) contract FTViewUtils {
 
     /// The interface for the Editable FT View Display
     ///
-    access(all) resource interface EditableFTViewDisplayInterface {
+    access(all) resource interface EditableFTViewDisplayInterface: ViewResolver.Resolver {
         /// Identity of the FT
         access(all)
         let identity: FTIdentity
         // ----- FT Display -----
-        access(all) view
-        fun getSymbol(): String
-        access(all) view
-        fun getName(): String?
-        access(all) view
-        fun getDescription(): String?
-        access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL?
-        access(all) view
+        access(all)
+        view fun getSymbol(): String
+        access(all)
+        view fun getName(): String?
+        access(all)
+        view fun getDescription(): String?
+        access(all)
+        view fun getExternalURL(): MetadataViews.ExternalURL?
+        access(all)
+        view fun getSocials(): {String: MetadataViews.ExternalURL}
+        access(all)
         fun getLogos(): MetadataViews.Medias
-        access(all) view
-        fun getSocials(): {String: MetadataViews.ExternalURL}
         // --- default implementation ---
         /// Get the FT Display
         ///
@@ -387,27 +406,25 @@ access(all) contract FTViewUtils {
 
     /// The interface for the FT View Data Editor
     ///
-    access(all) resource interface FTViewDataEditor {
+    access(all) resource interface FTViewDataEditor: EditableFTViewDataInterface {
         /// Update the Storage Path
-        access(all)
+        access(Editable)
         fun updateStoragePath(_ storagePath: StoragePath)
         /// Set the FT Vault Data
-        access(all)
+        access(Editable)
         fun initializeVaultData(
             receiverPath: PublicPath,
             metadataPath: PublicPath,
-            providerPath: PrivatePath,
             receiverType: Type,
             metadataType: Type,
-            providerType: Type
         )
     }
 
     /// The interface for the FT View Display Editor
     ///
-    access(all) resource interface FTViewDisplayEditor {
+    access(all) resource interface FTViewDisplayEditor: EditableFTViewDisplayInterface {
         /// Set the FT Display
-        access(all)
+        access(Editable)
         fun setFTDisplay(
             name: String?,
             symbol: String?,
@@ -420,7 +437,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT Display
     ///
-    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface, MetadataViews.Resolver {
+    access(all) resource EditableFTDisplay: FTViewDisplayEditor, EditableFTViewDisplayInterface, ViewResolver.Resolver {
         access(all)
         let identity: FTIdentity
         access(contract)
@@ -435,9 +452,8 @@ access(all) contract FTViewUtils {
         }
 
         /// Set the FT Display
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
         ///
-        access(all)
+        access(Editable)
         fun setFTDisplay(
             name: String?,
             symbol: String?,
@@ -496,28 +512,28 @@ access(all) contract FTViewUtils {
 
         /** ---- Implement the EditableFTViewDisplayInterface ---- */
 
-        access(all) view
-        fun getSymbol(): String {
+        access(all)
+        view fun getSymbol(): String {
             return self.metadata["symbol"] ?? "NONE"
         }
 
-        access(all) view
-        fun getName(): String? {
+        access(all)
+        view fun getName(): String? {
             return self.metadata["name"]
         }
 
-        access(all) view
-        fun getDescription(): String? {
+        access(all)
+        view fun getDescription(): String? {
             return self.metadata["description"]
         }
 
-        access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL? {
+        access(all)
+        view fun getExternalURL(): MetadataViews.ExternalURL? {
             let url = self.metadata["externalURL"]
             return url != nil ? MetadataViews.ExternalURL(url!) : nil
         }
 
-        access(all) view
+        access(all)
         fun getLogos(): MetadataViews.Medias {
             let medias: [MetadataViews.Media] = []
             if self.metadata["logo:png"] != nil {
@@ -560,11 +576,11 @@ access(all) contract FTViewUtils {
                     mediaType: "image/svg+xml"
                 ))
             }
-            return MetadataViews.Medias(medias: medias)
+            return MetadataViews.Medias(medias)
         }
 
-        access(all) view
-        fun getSocials(): {String: MetadataViews.ExternalURL} {
+        access(all)
+        view fun getSocials(): {String: MetadataViews.ExternalURL} {
             let ret: {String: MetadataViews.ExternalURL} = {}
             let socialKey = "social:"
             let socialKeyLen = socialKey.length
@@ -579,14 +595,14 @@ access(all) contract FTViewUtils {
 
         /* --- Implement the MetadataViews.Resolver --- */
 
-        access(all) view
-        fun getViews(): [Type] {
+        access(all)
+        view fun getViews(): [Type] {
             return [
                 Type<FungibleTokenMetadataViews.FTDisplay>()
             ]
         }
 
-        access(all) view
+        access(all)
         fun resolveView(_ view: Type): AnyStruct? {
             switch view {
                 case Type<FungibleTokenMetadataViews.FTDisplay>():
@@ -608,7 +624,7 @@ access(all) contract FTViewUtils {
 
     /// The Resource for the FT View
     ///
-    access(all) resource EditableFTView: FTViewDataEditor, FTViewDisplayEditor, EditableFTViewDataInterface, EditableFTViewDisplayInterface, MetadataViews.Resolver {
+    access(all) resource EditableFTView: FTViewDataEditor, EditableFTViewDataInterface, FTViewDisplayEditor, EditableFTViewDisplayInterface, ViewResolver.Resolver {
         access(self)
         let display: @EditableFTDisplay
         access(all)
@@ -632,17 +648,11 @@ access(all) contract FTViewUtils {
             self.storagePath = storagePath
         }
 
-        /// @deprecated in Cadence 1.0
-        destroy() {
-            destroy self.display
-        }
-
         // ---- Writable Functions ----
 
         /// Update the Storage Path
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
         ///
-        access(all)
+        access(Editable)
         fun updateStoragePath(_ storagePath: StoragePath) {
             self.storagePath = storagePath
 
@@ -654,23 +664,18 @@ access(all) contract FTViewUtils {
         }
 
         /// Initialize the FT View Data
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
         ///
-        access(all)
+        access(Editable)
         fun initializeVaultData(
             receiverPath: PublicPath,
             metadataPath: PublicPath,
-            providerPath: PrivatePath,
             receiverType: Type,
             metadataType: Type,
-            providerType: Type
         ) {
             self.capabilityPaths[FTCapPath.receiver] = receiverPath
             self.capabilityPaths[FTCapPath.metadata] = metadataPath
-            self.capabilityPaths[FTCapPath.provider] = providerPath
             self.capabilityTypes[FTCapPath.receiver] = receiverType
             self.capabilityTypes[FTCapPath.metadata] = metadataType
-            self.capabilityTypes[FTCapPath.provider] = providerType
 
             // Emit the event
             emit FTVaultDataUpdated(
@@ -679,50 +684,47 @@ access(all) contract FTViewUtils {
                 storagePath: self.storagePath,
                 receiverPath: receiverPath,
                 metadataPath: metadataPath,
-                providerPath: providerPath,
                 receiverType: receiverType,
-                metadataType: metadataType,
-                providerType: providerType
+                metadataType: metadataType
             )
         }
 
         /** ---- Implement the EditableFTViewDataInterface ---- */
 
-        access(all) view
-        fun getStoragePath(): StoragePath {
+        access(all)
+        view fun getStoragePath(): StoragePath {
             return self.storagePath
         }
 
         /// Get the Receiver Path
-        access(all) view
-        fun getReceiverPath(): PublicPath? {
+        access(all)
+        view fun getReceiverPath(): PublicPath? {
             return self.capabilityPaths[FTCapPath.receiver] as! PublicPath?
         }
 
         /// Get the Metadata Path
-        access(all) view
-        fun getMetadataPath(): PublicPath? {
+        access(all)
+        view fun getMetadataPath(): PublicPath? {
             return self.capabilityPaths[FTCapPath.metadata] as! PublicPath?
         }
 
         /// Get the Provider Path
-        access(all) view
-        fun getProviderPath(): PrivatePath? {
+        access(all)
+        view fun getProviderPath(): PrivatePath? {
             return self.capabilityPaths[FTCapPath.provider] as! PrivatePath?
         }
 
         /// Get the Capability Path
-        access(all) view
-        fun getCapabilityType(_ capPath: FTCapPath): Type? {
+        access(all)
+        view fun getCapabilityType(_ capPath: FTCapPath): Type? {
             return self.capabilityTypes[capPath]
         }
 
         /** ---- Implement the FTViewDataEditor ---- */
 
         /// Set the FT Display
-        /// TODO: Use entitlements to restrict the access in Cadence 1.0
         ///
-        access(all)
+        access(Editable)
         fun setFTDisplay(
             name: String?,
             symbol: String?,
@@ -743,40 +745,40 @@ access(all) contract FTViewUtils {
 
         /** ---- Implement the FTViewDisplayInterface ---- */
 
-        access(all) view
-        fun getSymbol(): String {
+        access(all)
+        view fun getSymbol(): String {
             return self.display.getSymbol()
         }
 
-        access(all) view
-        fun getName(): String? {
+        access(all)
+        view fun getName(): String? {
             return self.display.getName()
         }
 
-        access(all) view
-        fun getDescription(): String? {
+        access(all)
+        view fun getDescription(): String? {
             return self.display.getDescription()
         }
 
-        access(all) view
-        fun getExternalURL(): MetadataViews.ExternalURL? {
+        access(all)
+        view fun getExternalURL(): MetadataViews.ExternalURL? {
             return self.display.getExternalURL()
         }
 
-        access(all) view
+        access(all)
         fun getLogos(): MetadataViews.Medias {
             return self.display.getLogos()
         }
 
-        access(all) view
-        fun getSocials(): {String: MetadataViews.ExternalURL} {
+        access(all)
+        view fun getSocials(): {String: MetadataViews.ExternalURL} {
             return self.display.getSocials()
         }
 
         /* --- Implement the MetadataViews.Resolver --- */
 
-        access(all) view
-        fun getViews(): [Type] {
+        access(all)
+        view fun getViews(): [Type] {
             return [
                 Type<MetadataViews.ExternalURL>(),
                 Type<FungibleTokenMetadataViews.FTView>(),
@@ -785,15 +787,15 @@ access(all) contract FTViewUtils {
             ]
         }
 
-        access(all) view
+        access(all)
         fun resolveView(_ view: Type): AnyStruct? {
             switch view {
                 case Type<MetadataViews.ExternalURL>():
                     return self.getExternalURL()
                 case Type<FungibleTokenMetadataViews.FTView>():
                     return FungibleTokenMetadataViews.FTView(
-                        display: self.getFTDisplay(),
-                        vaultData: self.getFTVaultData()
+                        ftDisplay: self.getFTDisplay(),
+                        ftVaultData: self.getFTVaultData()
                     )
                 case Type<FungibleTokenMetadataViews.FTDisplay>():
                     return self.getFTDisplay()
@@ -817,8 +819,8 @@ access(all) contract FTViewUtils {
 
     /// Build the FT Vault Type
     ///
-    access(all) view
-    fun buildFTVaultType(_ address: Address, _ contractName: String): Type? {
+    access(all)
+    view fun buildFTVaultType(_ address: Address, _ contractName: String): Type? {
         let addrStr = address.toString()
         let addrStrNo0x = addrStr.slice(from: 2, upTo: addrStr.length)
         return CompositeType("A.".concat(addrStrNo0x).concat(".").concat(contractName).concat(".Vault"))

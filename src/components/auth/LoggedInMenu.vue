@@ -35,7 +35,15 @@ const menuOptions = computed(() => {
   ]
   if (acctName.value) {
     menu.unshift({
-      label: "Maintain Token Views",
+      label: "Maintain Non-Fungible Token List",
+      key: 'maintain-nftlist',
+      icon: () => h("div", {
+        class: "i-carbon:cube w-5 h-5"
+      }),
+    })
+
+    menu.unshift({
+      label: "Maintain Fungible Token List",
       key: 'maintain',
       icon: () => h("div", {
         class: "i-carbon:face-pending-filled w-5 h-5"
@@ -49,6 +57,10 @@ async function handleUpdateValue(key: string, item: MenuOption) {
   switch (key) {
     case 'maintain':
       navigate(`/maintain`)
+      isDrawerOpened.value = false
+      break
+    case 'maintain-nftlist':
+      navigate(`/maintain-nftlist`)
       isDrawerOpened.value = false
       break
     case 'logout':

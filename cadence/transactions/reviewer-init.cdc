@@ -1,26 +1,23 @@
-import "MetadataViews"
 import "TokenList"
 
 transaction() {
-    prepare(acct: AuthAccount) {
+    prepare(acct: auth(Storage, Capabilities) &Account) {
         /// ---------- Reviewer Initialization: Start ----------
-        if !acct.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
+        if !acct.storage.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath) {
             log("Creating a new reviewer")
             let reviewer <- TokenList.createFungibleTokenReviewer()
-            acct.save(<- reviewer, to: TokenList.reviewerStoragePath)
+            acct.storage.save(<- reviewer, to: TokenList.reviewerStoragePath)
 
             // public the public capability
-            acct.link<&TokenList.FungibleTokenReviewer{TokenList.FungibleTokenReviewerInterface, MetadataViews.ResolverCollection}>(
-                TokenList.reviewerPublicPath,
-                target: TokenList.reviewerStoragePath
-            )
+            let cap = acct.capabilities.storage.issue<&TokenList.FungibleTokenReviewer>(TokenList.reviewerStoragePath)
+            acct.capabilities.publish(cap, at: TokenList.reviewerPublicPath)
         } else {
             log("Reviewer already exists")
         }
         /// ---------- Reviewer Initialization: End ----------
 
         assert(
-            acct.borrow<&TokenList.FungibleTokenReviewer>(
+            acct.storage.borrow<&TokenList.FungibleTokenReviewer>(
                 from: TokenList.reviewerStoragePath
             ) != nil,
             message: "Missing the reviewer capability"

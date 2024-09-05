@@ -9,13 +9,14 @@ fun main(
         return name.concat(".find")
     } else {
         let account = getAccount(address)
-        let collectionCap = account.getCapability<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)
-
-        if collectionCap.check() != true {
+        let exists = account.capabilities.exists(Domains.CollectionPublicPath)
+        if exists == false {
             return nil
         }
 
         var flownsName = ""
+
+        let collectionCap = account.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)
         let collection = collectionCap.borrow()!
         let ids = collection.getIDs()
 
