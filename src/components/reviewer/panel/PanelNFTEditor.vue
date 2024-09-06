@@ -153,7 +153,7 @@ watch(() => props.nft, async (newVal, oldVal) => {
       empty-text="Failed to load non-fungible token."
     >
       <ItemMedia
-        class="w-full !max-h-40 rounded-lg opacity-10"
+        class="w-full !max-h-40 rounded-lg"
         :media="bannerMedia"
         :alt="`Banner Image for ${nft?.display?.display?.name ?? 'NFT Collection'}`"
         width="100%"
