@@ -155,7 +155,10 @@ export async function maintainerReviewFT(
   return await flowSrv.sendTransaction(txMaintainerReviewFT, (arg, t) => [
     arg(ft.address, t.Address),
     arg(ft.contractName, t.String),
-    arg(rank ? rank.toFixed(0) : null, t.Optional(t.UInt8)),
+    arg(
+      typeof rank !== "undefined" ? rank.toFixed(0) : null,
+      t.Optional(t.UInt8),
+    ),
     arg(tags, t.Array(t.String)),
   ]);
 }
@@ -241,7 +244,10 @@ export async function nftListMaintainerReviewNFT(
     (arg, t) => [
       arg(token.address, t.Address),
       arg(token.contractName, t.String),
-      arg(rank ? rank.toFixed(0) : null, t.Optional(t.UInt8)),
+      arg(
+        typeof rank !== "undefined" ? rank.toFixed(0) : null,
+        t.Optional(t.UInt8),
+      ),
       arg(tags, t.Array(t.String)),
     ],
   );
