@@ -16,11 +16,13 @@ fun main(
 
         var flownsName: String? = nil
 
-        if let collection = account.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath).borrow() {
+        if let collection = account.capabilities.get<&Domains.Collection>(Domains.CollectionPublicPath).borrow() {
+            var counter = 0
             collection.forEachID(fun (id: UInt64): Bool {
                 let domain = collection.borrowDomain(id: id)!
                 flownsName = domain.getDomainName()
-                if domain.getText(key: "isDefault") == "true" {
+                counter = counter + 1
+                if domain.getText(key: "isDefault") == "true" || counter > 10 {
                     return false
                 }
                 return true
