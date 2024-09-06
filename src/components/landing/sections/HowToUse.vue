@@ -173,6 +173,27 @@ onMounted(() => {
           />
         </NTabPane>
       </NTabs>
+      <NDivider title-placement="left">
+        <span class="text-xs italic text-gray-500">Static JSON Files</span>
+      </NDivider>
+      <div class="w-full space-y-2">
+        <ElementWrapper
+          title="Github Repo:"
+          direction="auto"
+          position="left"
+        >
+          <a
+            class="font-semibold"
+            href="https://github.com/fixes-world/token-list-jsons"
+            target="_blank"
+          >
+            https://github.com/fixes-world/token-list-jsons
+          </a>
+        </ElementWrapper>
+        <p class="text-sm text-gray-400">
+          You can also use the daily synced static JSON files of the token list.
+        </p>
+      </div>
     </div>
   </VueWrapper>
 </template>
