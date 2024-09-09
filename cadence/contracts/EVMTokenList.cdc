@@ -60,9 +60,12 @@ access(all) contract EVMTokenList {
     ///
     access(all) resource interface IListViewer {
         // --- Read functions ---
+
         /// Check if the EVM Address is registered
         access(all)
         view fun isEVMAddressRegistered(_ evmContractAddressHex: String): Bool
+
+        // --- ERC20 functions ---
 
         /// Get the total number of registered ERC20 tokens
         access(all)
@@ -81,6 +84,8 @@ access(all) contract EVMTokenList {
         /// Borrow the Bridged Token's TokenList Entry
         access(all)
         view fun borrowFungibleTokenEntry(_ evmContractAddressHex: String): &{TokenList.FTEntryInterface}?
+
+        // --- ERC721 functions ---
 
         /// Get the total number of registered ERC721 tokens
         access(all)
@@ -114,9 +119,10 @@ access(all) contract EVMTokenList {
     /// Resource for the Token List Registry
     ///
     access(all) resource Registry: IListViewer {
-        // NFT Type => NFT Collection Entry
+        // EVM Address Hex => Bridged Token Identity
         access(self)
         let regsiteredErc20s: {String: FTViewUtils.FTIdentity}
+        // EVM Address Hex => Bridged Token Identity
         access(self)
         let regsiteredErc721s: {String: NFTViewUtils.NFTIdentity}
 
@@ -354,21 +360,78 @@ access(all) contract EVMTokenList {
             ?? panic("Could not borrow the Registry reference")
     }
 
+    /// Whether the EVM Address is registered
+    ///
+    access(all)
+    view fun isEVMAddressRegistered(_ evmContractAddressHex: String): Bool {
+        let registry = self.borrowRegistry()
+        return !registry.isEVMAddressRegistered(evmContractAddressHex)
+    }
+
     /// Whether the EVM Address is valid to register
     ///
     access(all)
     fun isValidToRegisterEVMAddress(_ evmContractAddressHex: String): Bool {
-        let registry = self.borrowRegistry()
-        return !registry.isEVMAddressRegistered(evmContractAddressHex)
+        let isRegistered = self.isEVMAddressRegistered(evmContractAddressHex)
+        if isRegistered {
+            return false
+        }
+        let isRequires = FlowEVMBridge.evmAddressRequiresOnboarding(EVM.addressFromString(evmContractAddressHex))
+        return isRequires != nil
     }
 
     /// Whether the Cadence Type is valid to register
     ///
     access(all)
-    fun isValidToRegisterCadenceType(_ ftOrNftType: Type): Bool {
+    view fun isValidToRegisterCadenceType(_ ftOrNftType: Type): Bool {
         let registry = self.borrowRegistry()
+        let isRequires = FlowEVMBridge.typeRequiresOnboarding(ftOrNftType)
+        if isRequires == nil {
+            return false
+        }
         let evmAddress = FlowEVMBridgeConfig.getEVMAddressAssociated(with: ftOrNftType)
         return evmAddress == nil || !registry.isEVMAddressRegistered(evmAddress!.toString())
+    }
+
+    /// Ensure the Cadence Asset is registered
+    ///
+    access(all)
+    fun ensureCadenceAssetRegistered(
+        _ address: Address,
+        _ contractName: String,
+        feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?
+    ) {
+        var isNFT: Bool? = nil
+        var ftOrNftType = FTViewUtils.buildFTVaultType(address, contractName)
+        if ftOrNftType != nil {
+            if TokenList.isValidToRegister(address, contractName) {
+                isNFT = false
+            }
+        } else {
+            ftOrNftType = NFTViewUtils.buildNFTType(address, contractName)
+            if ftOrNftType != nil && NFTList.isValidToRegister(address, contractName) {
+                isNFT = true
+            }
+        }
+        if isNFT != nil && ftOrNftType != nil && ftOrNftType!.isRecovered == false {
+            if self.isValidToRegisterCadenceType(ftOrNftType!) {
+                let registry = self.borrowRegistry()
+                registry.registerCadenceAsset(ftOrNftType!, feeProvider: feeProvider)
+            }
+        }
+    }
+
+    /// Ensure the EVM Asset is registered
+    ///
+    access(all)
+    fun ensureEVMAssetRegistered(
+        _ evmContractAddressHex: String,
+        feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?
+    ) {
+        if self.isValidToRegisterEVMAddress(evmContractAddressHex) {
+            let registry = self.borrowRegistry()
+            registry.registerEVMAsset(evmContractAddressHex, feeProvider: feeProvider)
+        }
     }
 
     /// The prefix for the paths
