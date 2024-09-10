@@ -20,6 +20,7 @@ export interface TokenPaths {
 
 export interface TokenStatusBasic extends TokenIdentity {
   isNFT: boolean;
+  isBridged: boolean;
   isRegistered?: boolean;
   isRegisteredWithNativeViewResolver?: boolean;
   isWithDisplay: boolean;

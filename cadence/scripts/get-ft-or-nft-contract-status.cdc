@@ -3,6 +3,7 @@ import "FungibleToken"
 import "NonFungibleToken"
 import "MetadataViews"
 import "FungibleTokenMetadataViews"
+import "FlowEVMBridgeConfig"
 import "ViewResolvers"
 import "FTViewUtils"
 import "TokenList"
@@ -94,6 +95,7 @@ fun main(
         address: addr,
         contractName: contractName,
         isNFT: isNFT,
+        isBridged: FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType!) != nil,
         isRegistered: isNFT
             ? NFTList.isNFTCollectionRegistered(addr, contractName)
             : TokenList.isFungibleTokenRegistered(addr, contractName),
@@ -119,6 +121,8 @@ access(all) struct TokenAssetStatus {
     access(all)
     let isNFT: Bool
     access(all)
+    let isBridged: Bool
+    access(all)
     let isRegistered: Bool
     access(all)
     let isRegisteredWithNativeViewResolver: Bool
@@ -137,6 +141,7 @@ access(all) struct TokenAssetStatus {
         address: Address,
         contractName: String,
         isNFT: Bool,
+        isBridged: Bool,
         isRegistered: Bool,
         isRegisteredWithNativeViewResolver: Bool,
         isWithDisplay: Bool,
@@ -148,6 +153,7 @@ access(all) struct TokenAssetStatus {
         self.address = address
         self.contractName = contractName
         self.isNFT = isNFT
+        self.isBridged = isBridged
         self.isRegistered = isRegistered
         self.isRegisteredWithNativeViewResolver = isRegisteredWithNativeViewResolver
         self.isWithDisplay = isWithDisplay
