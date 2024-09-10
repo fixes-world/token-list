@@ -55,6 +55,7 @@ export interface TokenDisplayWithSource {
 
 export interface TagableItem {
   identity: TokenStatusBasic;
+  evmAddress?: string;
   tags: string[];
 }
 

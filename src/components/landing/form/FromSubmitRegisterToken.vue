@@ -2,7 +2,7 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { registerStandardFT, updateViewResolver } from '@shared/flow/action/transactions';
+import { registerStandardAsset, updateViewResolver } from '@shared/flow/action/transactions';
 import type { TokenStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
@@ -56,7 +56,7 @@ async function onSubmit(): Promise<string> {
   if (props.token.isRegistered) {
     return await updateViewResolver(props.token)
   } else {
-    return await registerStandardFT(props.token)
+    return await registerStandardAsset(props.token)
   }
 }
 

@@ -2,7 +2,7 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { registerStandardNFT } from '@shared/flow/action/transactions';
+import { registerStandardAsset } from '@shared/flow/action/transactions';
 import type { NFTStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
@@ -53,7 +53,7 @@ async function onSubmit(): Promise<string> {
     emits('error', errStr)
     throw new Error(errStr)
   }
-  return await registerStandardNFT(props.token)
+  return await registerStandardAsset(props.token)
 }
 
 async function onSuccess() {
