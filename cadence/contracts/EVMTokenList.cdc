@@ -74,6 +74,10 @@ access(all) contract EVMTokenList {
         /// The method will copy the addresses to the result array
         access(all)
         fun getERC20Addresses(_ page: Int, _ size: Int): [EVM.EVMAddress]
+        /// Get the ERC20 addresses with pagination
+        /// The method will copy the addresses to the result array
+        access(all)
+        fun getERC20AddressesHex(_ page: Int, _ size: Int): [String]
         /// Get the ERC20 addresses by for each
         /// The method will call the function for each address
         access(all)
@@ -94,6 +98,10 @@ access(all) contract EVMTokenList {
         /// The method will copy the addresses to the result array
         access(all)
         fun getERC721Addresses(_ page: Int, _ size: Int): [EVM.EVMAddress]
+        /// Get the ERC721 addresses with pagination
+        /// The method will copy the addresses to the result array
+        access(all)
+        fun getERC721AddressesHex(_ page: Int, _ size: Int): [String]
         /// Get the ERC721 addresses by for each
         /// The method will call the function for each address
         access(all)
@@ -150,6 +158,14 @@ access(all) contract EVMTokenList {
         /// The method will copy the addresses to the result array
         access(all)
         fun getERC20Addresses(_ page: Int, _ size: Int): [EVM.EVMAddress] {
+            return self.getERC20AddressesHex(page, size)
+                .map(fun (key: String): EVM.EVMAddress { return EVM.addressFromString(key) })
+        }
+
+        /// Get the ERC20 addresses with pagination
+        /// The method will copy the addresses to the result array
+        access(all)
+        fun getERC20AddressesHex(_ page: Int, _ size: Int): [String] {
             pre {
                 page >= 0: "Invalid page"
                 size > 0: "Invalid size"
@@ -163,8 +179,7 @@ access(all) contract EVMTokenList {
             if end > max {
                 end = max
             }
-            let arr = self.regsiteredErc20s.keys.slice(from: start, upTo: end)
-            return arr.map(fun (key: String): EVM.EVMAddress { return EVM.addressFromString(key) })
+            return self.regsiteredErc20s.keys.slice(from: start, upTo: end)
         }
 
         /// Get the ERC20 addresses by for each
@@ -203,6 +218,14 @@ access(all) contract EVMTokenList {
         /// The method will copy the addresses to the result array
         access(all)
         fun getERC721Addresses(_ page: Int, _ size: Int): [EVM.EVMAddress] {
+            return self.getERC721AddressesHex(page, size)
+                .map(fun (key: String): EVM.EVMAddress { return EVM.addressFromString(key) })
+        }
+
+        /// Get the ERC721 addresses with pagination
+        /// The method will copy the addresses to the result array
+        access(all)
+        fun getERC721AddressesHex(_ page: Int, _ size: Int): [String] {
             pre {
                 page >= 0: "Invalid page"
                 size > 0: "Invalid size"
@@ -216,8 +239,7 @@ access(all) contract EVMTokenList {
             if end > max {
                 end = max
             }
-            let arr = self.regsiteredErc721s.keys.slice(from: start, upTo: end)
-            return arr.map(fun (key: String): EVM.EVMAddress { return EVM.addressFromString(key) })
+            return self.regsiteredErc721s.keys.slice(from: start, upTo: end)
         }
 
         /// Get the ERC721 addresses by for each
