@@ -9,6 +9,9 @@ access(all)
 fun main(
     evmContractAddress: String,
 ): EVMAssetStatus? {
+    if evmContractAddress.length != 42 || evmContractAddress.length != 40 {
+        return nil
+    }
     let addrNo0x = evmContractAddress.slice(from: 0, upTo: 2) == "0x"
             ? evmContractAddress.slice(from: 2, upTo: evmContractAddress.length)
             : evmContractAddress

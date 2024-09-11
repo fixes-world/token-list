@@ -31,6 +31,7 @@ function onInputAddress(value: { address: string, isEVM: boolean } | undefined) 
     currentAddress.value = undefined;
     return;
   }
+  console.log('Selected Address:', currentAddress.value, 'isEVM:', isCurrentAddressEVM.value)
   currentAddress.value = value.address;
   isCurrentAddressEVM.value = value.isEVM;
 }

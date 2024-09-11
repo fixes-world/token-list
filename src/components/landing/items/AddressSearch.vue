@@ -22,16 +22,16 @@ function onHandleKeyup(e: KeyboardEvent) {
   e.preventDefault();
 
   const address = addressSearching.value;
-  const flowRegExp = /0x[a-fA-F0-9]{16}/ig;
-  const evmRegExp = /0x[a-fA-F0-9]{40}/ig;
-  if (flowRegExp.test(address)) {
-    // Go to the next step
-    currentAddressPlaceHolder.value = props.placeHolder;
-    emits('input', { address, isEVM: false });
-  } else if (evmRegExp.test(address)) {
+  const flowRegExp = /^0x[a-fA-F0-9]{16}$/ig;
+  const evmRegExp = /^0x[a-fA-F0-9]{40}$/ig;
+  if (evmRegExp.test(address)) {
     // Go to the next step
     currentAddressPlaceHolder.value = props.placeHolder;
     emits('input', { address, isEVM: true });
+  } else if (flowRegExp.test(address)) {
+    // Go to the next step
+    currentAddressPlaceHolder.value = props.placeHolder;
+    emits('input', { address, isEVM: false });
   } else {
     addressSearching.value = '';
     currentAddressPlaceHolder.value = 'Invalid Address: please try again.';

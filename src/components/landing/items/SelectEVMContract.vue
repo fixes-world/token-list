@@ -48,6 +48,9 @@ async function reload() {
 }
 
 async function loadAssetContracts(addr: string) {
+  if (!addr) {
+    return;
+  }
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
