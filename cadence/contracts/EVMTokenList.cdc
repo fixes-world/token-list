@@ -293,7 +293,8 @@ access(all) contract EVMTokenList {
                 FlowEVMBridge.onboardByEVMAddress(address, feeProvider: feeProvider!)
                 // FIXME: Because the new deployed Cadence contracts can not be found in the same transaction
                 // So we just build the contract address and name here
-                contractAddr = FlowEVMBridge.account.address
+                let identifierSplit = FlowEVMBridge.getType().identifier.split(separator: ".")
+                contractAddr = Address.fromString("0x".concat(identifierSplit[1]))
                 let evmOnboardingValues = FlowEVMBridgeUtils.getEVMOnboardingValues(evmContractAddress: address)
                 contractName = evmOnboardingValues.cadenceContractName
                 isNFT = evmOnboardingValues.isERC721
@@ -467,8 +468,8 @@ access(all) contract EVMTokenList {
     init() {
         // Identifiers
         let identifier = NFTList.getPathPrefix()
-        self.registryStoragePath = StoragePath(identifier: identifier.concat("_Registry"))!
-        self.registryPublicPath = PublicPath(identifier: identifier.concat("_Registry"))!
+        self.registryStoragePath = StoragePath(identifier: identifier.concat("Registry"))!
+        self.registryPublicPath = PublicPath(identifier: identifier.concat("Registry"))!
 
         // Create the Token List Registry
         let registry <- create Registry()

@@ -1,10 +1,9 @@
 /**
 > Author: Fixes Lab <https://github.com/fixes-world/>
 
-# Token List - A on-chain list of Flow Standard Fungible Tokens (FTs).
+# TokenList Helper
 
-This is the basic contract of the Token List.
-It will be used to store the list of all the Flow Standard Fungible Tokens (FTs) that are available on the Flow blockchain.
+The utility contract to help query the FTs and NFTs from the TokenList and NFTList contracts.
 
 */
 import "MetadataViews"
