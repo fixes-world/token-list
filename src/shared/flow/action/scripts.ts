@@ -12,6 +12,7 @@ import type {
   TokenPaths,
   TokenQueryResult,
   TokenAssetStatus,
+  TagableItem,
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
@@ -38,6 +39,11 @@ import scQueryNFTListByAddress from "@cadence/scripts/nftlist/query-token-list-b
 // Scripts - FTs or NFTs
 import scGetFTsOrNFTsContracts from "@cadence/scripts/get-ft-or-nft-contracts.cdc?raw";
 import scGetFTorNFTContractStatus from "@cadence/scripts/get-ft-or-nft-contract-status.cdc?raw";
+// Scripts - EVM Bridged
+import scIsEVMAssetRegistered from "@cadence/scripts/is-evm-asset-registered.cdc?raw";
+import scGetEVMFTOrNFTContract from "@cadence/scripts/get-ft-or-nft-contract-by-evm.cdc?raw";
+import scQueryEVMBridgedFTList from "@cadence/scripts/query-evm-bridged-ft-list.cdc?raw";
+import scQueryEVMBridgedNFTList from "@cadence/scripts/query-evm-bridged-nft-list.cdc?raw";
 
 /** ---- Scripts ---- */
 
@@ -306,6 +312,18 @@ export async function queryTokenListByAddress(
   };
 }
 
+function sortTokenView(a: TagableItem, b: TagableItem) {
+  // Featured first, then Verified, then by contract name
+  if (a.tags.includes("Featured") && !b.tags.includes("Featured")) return -1;
+  else if (!a.tags.includes("Featured") && b.tags.includes("Featured"))
+    return 1;
+  else if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
+    return -1;
+  else if (!a.tags.includes("Verified") && b.tags.includes("Verified"))
+    return 1;
+  return a.identity.contractName.localeCompare(b.identity.contractName);
+}
+
 /**
  * Query token list
  */
@@ -328,16 +346,7 @@ export async function queryTokenList(
   );
   return {
     total: parseInt(ret.total),
-    list: ret.list.map(parseTokenView).sort((a, b) => {
-      // Featured first, then Verified, then by contract name
-      if (a.tags.includes("Featured") && !b.tags.includes("Featured"))
-        return -1;
-      if (!a.tags.includes("Featured") && b.tags.includes("Featured")) return 1;
-      if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
-        return -1;
-      if (!a.tags.includes("Verified") && b.tags.includes("Verified")) return 1;
-      return a.identity.contractName.localeCompare(b.identity.contractName);
-    }),
+    list: ret.list.map(parseTokenView).sort(sortTokenView),
   };
 }
 
@@ -488,15 +497,69 @@ export async function queryNFTList(
   );
   return {
     total: parseInt(ret.total),
-    list: ret.list.map(parseNFTCollectionView).sort((a, b) => {
-      // Featured first, then Verified, then by contract name
-      if (a.tags.includes("Featured") && !b.tags.includes("Featured"))
-        return -1;
-      if (!a.tags.includes("Featured") && b.tags.includes("Featured")) return 1;
-      if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
-        return -1;
-      if (!a.tags.includes("Verified") && b.tags.includes("Verified")) return 1;
-      return a.identity.contractName.localeCompare(b.identity.contractName);
-    }),
+    list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
+  };
+}
+
+export async function isEVMAssetRegistered(address: string): Promise<boolean> {
+  const flowServ = await getFlowInstance();
+  return await flowServ.executeScript(
+    scIsEVMAssetRegistered,
+    (arg, t) => [arg(address, t.String)],
+    false,
+  );
+}
+
+export async function getEVMFTOrNFTContract(
+  address: string,
+): Promise<TokenAssetStatus | null> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scGetEVMFTOrNFTContract,
+    (arg, t) => [arg(address, t.String)],
+    null,
+  );
+  return ret ? parseTokenContractStatus(ret) : null;
+}
+
+export async function queryEVMBridgedFTList(
+  page: number,
+  limit: number,
+  reviewer?: string,
+): Promise<TokenQueryResult> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scQueryEVMBridgedFTList,
+    (arg, t) => [
+      arg(page.toFixed(0), t.Int),
+      arg(limit.toFixed(0), t.Int),
+      arg(reviewer, t.Optional(t.Address)),
+    ],
+    { total: "0", list: [] },
+  );
+  return {
+    total: parseInt(ret.total),
+    list: ret.list.map(parseTokenView).sort(sortTokenView),
+  };
+}
+
+export async function queryEVMBridgedNFTList(
+  page: number,
+  limit: number,
+  reviewer?: string,
+): Promise<NFTListQueryResult> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scQueryEVMBridgedNFTList,
+    (arg, t) => [
+      arg(page.toFixed(0), t.Int),
+      arg(limit.toFixed(0), t.Int),
+      arg(reviewer, t.Optional(t.Address)),
+    ],
+    { total: "0", list: [] },
+  );
+  return {
+    total: parseInt(ret.total),
+    list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
   };
 }
