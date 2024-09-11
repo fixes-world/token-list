@@ -7,7 +7,7 @@ import {
 import { getContractNames, getAssetContractStatus, getAssetsContracts } from '@shared/flow/action/scripts'
 import type { TokenAssetStatus } from '@shared/flow/entities';
 
-import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
+import ItemNativeAssetStatus from '@components/items/ItemNativeAssetStatus.vue';
 
 const props = withDefaults(defineProps<{
   address?: string;
@@ -24,11 +24,11 @@ const emits = defineEmits<{
 // Reactive Variables
 
 const isLoadingData = ref(false);
-const ftContracts = ref<TokenAssetStatus[]>([]);
+const contracts = ref<TokenAssetStatus[]>([]);
 const allContractNames = ref<string[]>([]);
 
 const options = computed<SelectOption[]>(() => {
-  return ftContracts.value?.map((contract) => {
+  return contracts.value?.map((contract) => {
     let identifier = `${contract.address}.${contract.contractName}`
     return {
       label: identifier,
@@ -39,7 +39,7 @@ const options = computed<SelectOption[]>(() => {
 })
 
 const isDisabled = computed(() => {
-  return props.disabled || ftContracts.value?.length === 0
+  return props.disabled || contracts.value?.length === 0
 })
 
 const currentSelect = computed({
@@ -60,7 +60,7 @@ const currentSelect = computed({
 // Handlers Functions
 
 function getData(address: string, contractName: string): TokenAssetStatus | undefined {
-  return ftContracts.value?.find((contract) => {
+  return contracts.value?.find((contract) => {
     return contract.address === address && contract.contractName === contractName;
   });
 }
@@ -76,9 +76,9 @@ async function loadAssetContracts(addr: string) {
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
-  ftContracts.value = await getAssetsContracts(addr);
-  if (ftContracts.value.length > 0) {
-    allContractNames.value = ftContracts.value.map((contract) => contract.contractName);
+  contracts.value = await getAssetsContracts(addr);
+  if (contracts.value.length > 0) {
+    allContractNames.value = contracts.value.map((contract) => contract.contractName);
   } else {
     allContractNames.value = await getContractNames(addr);
   }
@@ -91,7 +91,7 @@ async function loadAssetStatus(addr: string, contractName: string) {
   isLoadingData.value = true;
   const status = await getAssetContractStatus(addr, contractName);
   if (status) {
-    ftContracts.value = [status]
+    contracts.value = [status]
   }
   isLoadingData.value = false;
 }
@@ -101,7 +101,7 @@ function renderLabel(option: SelectOption): VNodeChild {
     return h('span', {}, undefined)
   }
   const [address, contractName] = (option.label as string)?.split('.');
-  return h(ItemFungibleTokenStatus, {
+  return h(ItemNativeAssetStatus, {
     item: getData(address, contractName),
   })
 }
@@ -136,9 +136,9 @@ defineExpose({
       :height="6"
       round
     />
-    <template v-else-if="ftContracts.length === 0">
+    <template v-else-if="contracts.length === 0">
       <NEmpty
-        description="Failed to fetch FT Contracts automatically"
+        description="Failed to fetch FT/NFT Contracts automatically"
         class="my-6"
       />
       <template v-if="allContractNames.length > 0">
@@ -164,7 +164,7 @@ defineExpose({
       :options="options"
       :loading="isLoadingData"
       :disabled="isDisabled"
-      :placeholder="ftContracts.length === 0
+      :placeholder="contracts.length === 0
         ? 'No Fungible Token Contract Found'
         : 'Select Fungible Token'
         "

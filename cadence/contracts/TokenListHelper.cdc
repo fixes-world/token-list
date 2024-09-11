@@ -145,12 +145,13 @@ access(all) contract TokenListHelper {
                 receiverPath: data.vaultData.receiverPath,
             )
         }
-        if let evmAddr = FlowEVMBridgeConfig.getEVMAddressAssociated(with: identity.buildType()) {
-            let isEVMNative = FlowEVMBridgeUtils.isEVMNative(evmContractAddress: evmAddr)
+        let tokenType = identity.buildType()
+        if let evmAddr = FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType) {
+            let isCadenceNative = FlowEVMBridgeUtils.isCadenceNative(type: tokenType)
             return FTViewUtils.BridgedTokenView(
                 identity: identity,
                 evmAddress: "0x".concat(evmAddr.toString()),
-                decimals: !isEVMNative ? 8 : FlowEVMBridgeUtils.getTokenDecimals(evmContractAddress: evmAddr),
+                decimals: isCadenceNative ? 8 : FlowEVMBridgeUtils.getTokenDecimals(evmContractAddress: evmAddr),
                 tags: ftEntry.getTags(reviewer),
                 dataSource: source,
                 paths: paths,

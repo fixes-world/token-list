@@ -2,18 +2,16 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { registerStandardAsset, updateViewResolver } from '@shared/flow/action/transactions';
-import type { TokenAssetStatus } from '@shared/flow/entities';
+import { registerEVMAsset } from '@shared/flow/action/transactions';
+import type { EVMAssetStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
-  token: TokenAssetStatus,
-  isOnboardToBridge?: boolean,
+  token: EVMAssetStatus,
 }>(), {
-  isOnboardToBridge: false,
 });
 
 const emits = defineEmits<{
@@ -27,23 +25,15 @@ const acctName = useGlobalAccount()
 // Reactive Data
 
 const isDisabled = computed(() => {
-  return (props.token.isRegistered && props.token.isRegisteredWithNativeViewResolver)
-    || !props.token.isWithDisplay
-    || !props.token.isWithVaultData
+  return props.token.isRegistered
 })
 
 const disableReason = computed(() => {
   if (!acctName.value) {
     return "No account name"
   }
-  if (props.token.isRegistered && props.token.isRegisteredWithNativeViewResolver) {
+  if (props.token.isRegistered) {
     return "The asset is already registered"
-  }
-  if (!props.token.isWithDisplay) {
-    return "The asset is without display view"
-  }
-  if (!props.token.isWithVaultData) {
-    return "The asset is without vault data"
   }
   return undefined
 })
@@ -59,12 +49,7 @@ async function onSubmit(): Promise<string> {
     emits('error', errStr)
     throw new Error(errStr)
   }
-  // If token is already registered, update the view resolver
-  if (props.token.isRegistered) {
-    return await updateViewResolver(props.token)
-  } else {
-    return await registerStandardAsset(props.token, props.isOnboardToBridge)
-  }
+  return await registerEVMAsset(props.token.evmAddress)
 }
 
 async function onSuccess() {
@@ -97,7 +82,6 @@ async function onCancel() {
         <span class="i-carbon:list w-5 h-5" />
       </template>
       <span v-if="!token.isRegistered">Register to List</span>
-      <span v-else>Update View Resolver</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

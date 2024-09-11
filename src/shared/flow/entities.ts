@@ -27,6 +27,14 @@ export interface TokenStatusBasic extends TokenIdentity {
   isWithVaultData: boolean;
 }
 
+export interface EVMAssetStatus {
+  isNFT: boolean;
+  isBridged: boolean;
+  isRegistered: boolean;
+  evmAddress: string;
+  bridgedType?: TokenIdentity;
+}
+
 export interface AssetPaths {
   storage: string;
   public?: string;

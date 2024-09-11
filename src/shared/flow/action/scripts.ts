@@ -13,6 +13,7 @@ import type {
   TokenQueryResult,
   TokenAssetStatus,
   TagableItem,
+  EVMAssetStatus,
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
@@ -510,16 +511,31 @@ export async function isEVMAssetRegistered(address: string): Promise<boolean> {
   );
 }
 
+function parseEVMAssetContractStatus(obj: any): EVMAssetStatus {
+  return {
+    isNFT: obj.isNFT,
+    isBridged: obj.isBridged,
+    isRegistered: obj.isRegistered,
+    evmAddress: obj.evmAddress,
+    bridgedType: obj.bridgedAddress
+      ? {
+          address: obj.bridgedAddress,
+          contractName: obj.bridgedContractName,
+        }
+      : undefined,
+  };
+}
+
 export async function getEVMFTOrNFTContract(
   address: string,
-): Promise<TokenAssetStatus | null> {
+): Promise<EVMAssetStatus | undefined> {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
     scGetEVMFTOrNFTContract,
     (arg, t) => [arg(address, t.String)],
-    null,
+    undefined,
   );
-  return ret ? parseTokenContractStatus(ret) : null;
+  return ret ? parseEVMAssetContractStatus(ret) : undefined;
 }
 
 export async function queryEVMBridgedFTList(

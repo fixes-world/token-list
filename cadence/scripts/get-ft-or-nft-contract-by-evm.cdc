@@ -23,12 +23,20 @@ fun main(
 
     let isNFT = FlowEVMBridgeUtils.isERC721(evmContractAddress: acct)
 
+    var bridgedAddress: Address? = nil
+    var bridgedContractName: String? = nil
+    if let type = FlowEVMBridgeConfig.getTypeAssociated(with: acct) {
+        bridgedAddress = FlowEVMBridgeUtils.getContractAddress(fromType: type)
+        bridgedContractName = FlowEVMBridgeUtils.getContractName(fromType: type)
+    }
+
     return EVMAssetStatus(
         address: acct,
         isNFT: isNFT,
         isRegistered: isRegistered,
         isBridged: isRequires!,
-        bridgedType: FlowEVMBridgeConfig.getTypeAssociated(with: acct)
+        bridgedAddress: bridgedAddress,
+        bridgedContractName: bridgedContractName
     )
 }
 
@@ -42,19 +50,23 @@ access(all) struct EVMAssetStatus {
     access(all)
     let isBridged: Bool
     access(all)
-    let bridgedType: Type?
+    let bridgedAddress: Address?
+    access(all)
+    let bridgedContractName: String?
 
     init(
         address: EVM.EVMAddress,
         isNFT: Bool,
         isRegistered: Bool,
         isBridged: Bool,
-        bridgedType: Type?
+        bridgedAddress: Address?,
+        bridgedContractName: String?
     ) {
         self.evmAddress = address.toString()
         self.isNFT = isNFT
         self.isRegistered = isRegistered
         self.isBridged = isBridged
-        self.bridgedType = bridgedType
+        self.bridgedAddress = bridgedAddress
+        self.bridgedContractName = bridgedContractName
     }
 }
