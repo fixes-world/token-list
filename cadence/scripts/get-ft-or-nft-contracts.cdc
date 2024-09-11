@@ -94,15 +94,19 @@ fun main(
         let supportedViews = viewResolverDic[tokenType]?.getContractViews(resourceType: nil) ?? []
         let isNFT = tokenType.isSubtype(of: Type<@{NonFungibleToken.Collection}>())
         let publicPaths = publicPathsDic[tokenType] ?? {}
+        let isRegistered = isNFT
+            ? NFTList.isNFTCollectionRegistered(addr, contractName)
+            : TokenList.isFungibleTokenRegistered(addr, contractName)
+        let bridgedType = !isNFT
+            ? tokenType
+            : CompositeType("A.".concat(addrNo0x).concat(".").concat(contractName).concat(".NFT"))
         let status = TokenAssetStatus(
             address: addr,
             contractName: contractName,
             isNFT: isNFT,
-            isBridged: FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType) != nil,
-            isRegistered: isNFT
-                ? NFTList.isNFTCollectionRegistered(addr, contractName)
-                : TokenList.isFungibleTokenRegistered(addr, contractName),
-            isRegisteredWithNativeViewResolver: viewResolverDic[tokenType] != nil,
+            isBridged: FlowEVMBridgeConfig.getEVMAddressAssociated(with: bridgedType!) != nil,
+            isRegistered: isRegistered,
+            isRegisteredWithNativeViewResolver: isRegistered && viewResolverDic[tokenType] != nil,
             isWithDisplay: isNFT
                 ? supportedViews.contains(Type<MetadataViews.NFTCollectionDisplay>())
                 : supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),

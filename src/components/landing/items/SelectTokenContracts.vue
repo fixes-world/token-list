@@ -33,7 +33,7 @@ const options = computed<SelectOption[]>(() => {
     return {
       label: identifier,
       value: identifier,
-      disabled: contract.isRegisteredWithNativeViewResolver,
+      disabled: contract.isRegisteredWithNativeViewResolver && contract.isBridged,
     }
   }) || [];
 })
@@ -90,6 +90,7 @@ async function loadAssetStatus(addr: string, contractName: string) {
 
   isLoadingData.value = true;
   const status = await getAssetContractStatus(addr, contractName);
+  console.log('Loaded contract status:', status)
   if (status) {
     contracts.value = [status]
   }
@@ -142,7 +143,9 @@ defineExpose({
         class="my-6"
       />
       <template v-if="allContractNames.length > 0">
-        <p class="mb-2 text-gray-400 italic font-semibold">Try click the contract name to load again</p>
+        <p class="mb-2 text-gray-400 italic font-semibold">
+          Try click the contract name to load again
+        </p>
         <div class="flex flex-wrap items-center gap-2">
           <NTag
             v-for="name in allContractNames"
@@ -164,10 +167,7 @@ defineExpose({
       :options="options"
       :loading="isLoadingData"
       :disabled="isDisabled"
-      :placeholder="contracts.length === 0
-        ? 'No Fungible Token Contract Found'
-        : 'Select Fungible Token'
-        "
+      :placeholder="contracts.length === 0 ? 'No FT/NFT Contract Found' : 'Select FT/NFT Contract'"
       :render-label="renderLabel"
       :input-props="{ autocomplete: 'off' }"
       filterable

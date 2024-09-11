@@ -2,6 +2,7 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
+import { NCheckbox } from 'naive-ui';
 import { registerStandardAsset, updateViewResolver } from '@shared/flow/action/transactions';
 import type { TokenAssetStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
@@ -11,9 +12,7 @@ import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
   token: TokenAssetStatus,
-  isOnboardToBridge?: boolean,
 }>(), {
-  isOnboardToBridge: false,
 });
 
 const emits = defineEmits<{
@@ -26,10 +25,20 @@ const acctName = useGlobalAccount()
 
 // Reactive Data
 
-const isDisabled = computed(() => {
+const isOnboardToBridge = ref(false)
+
+const isBridgingStatusChanged = computed(() => {
+  return props.token.isRegistered && (!props.token.isBridged && isOnboardToBridge.value)
+})
+
+const isInvalid = computed(() => {
   return (props.token.isRegistered && props.token.isRegisteredWithNativeViewResolver)
     || !props.token.isWithDisplay
     || !props.token.isWithVaultData
+})
+
+const isDisabled = computed(() => {
+  return !isBridgingStatusChanged.value && isInvalid.value
 })
 
 const disableReason = computed(() => {
@@ -60,10 +69,10 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
   // If token is already registered, update the view resolver
-  if (props.token.isRegistered) {
+  if (props.token.isRegistered && !isBridgingStatusChanged.value) {
     return await updateViewResolver(props.token)
   } else {
-    return await registerStandardAsset(props.token, props.isOnboardToBridge)
+    return await registerStandardAsset(props.token, isOnboardToBridge.value)
   }
 }
 
@@ -77,6 +86,10 @@ async function onCancel() {
 
 // Watchers and Lifecycle
 
+watch(() => props.token, async (token) => {
+  isOnboardToBridge.value = token.isBridged
+}, { immediate: true })
+
 </script>
 
 <template>
@@ -84,6 +97,13 @@ async function onCancel() {
     <template #not-connected>
       Connect Wallet
     </template>
+    <NCheckbox
+      v-if="!props.token.isBridged"
+      v-model:checked="isOnboardToBridge"
+      class="mb-2"
+    >
+      Onboard to VM Bridge ( COST: 1 $FLOW )
+    </NCheckbox>
     <FlowSubmitTrxWidget
       :without-cancel="true"
       :w-full="true"
@@ -97,7 +117,7 @@ async function onCancel() {
         <span class="i-carbon:list w-5 h-5" />
       </template>
       <span v-if="!token.isRegistered">Register to List</span>
-      <span v-else>Update View Resolver</span>
+      <span v-else>Update Settings</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

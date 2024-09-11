@@ -25,35 +25,36 @@ fun main(
     let addrNo0x = addr.toString().slice(from: 2, upTo: addr.toString().length)
     log("Loading Contract: ".concat(contractName))
 
-    var tokenType = CompositeType("A.".concat(addrNo0x)
+    var resourceType = CompositeType("A.".concat(addrNo0x)
             .concat(".").concat(contractName)
             .concat(".Vault"))
-    if tokenType?.isRecovered == true {
+    if resourceType?.isRecovered == true {
         log("Failed to create CompositeType for ".concat(contractName))
         return nil
     }
-    if tokenType == nil {
-        tokenType = CompositeType("A.".concat(addrNo0x)
+    if resourceType == nil {
+        resourceType = CompositeType("A.".concat(addrNo0x)
             .concat(".").concat(contractName)
             .concat(".Collection"))
-        if tokenType?.isRecovered == true {
+        if resourceType?.isRecovered == true {
             log("Failed to create CompositeType for ".concat(contractName))
             return nil
         }
     }
-    if tokenType == nil {
+    if resourceType == nil {
         log("Failed to create CompositeType for ".concat(contractName))
         return nil
     }
 
     var contractViewResolver: &{ViewResolver}? = nil
-    if let ref = acct.contracts.borrow<&{FungibleToken}>(name: contractName) {
+    if acct.contracts.borrow<&{FungibleToken}>(name: contractName) != nil ||
+        acct.contracts.borrow<&{NonFungibleToken}>(name: contractName) != nil {
         // Borrow the view resolver for the contract
         if let viewResolver = ViewResolvers.borrowContractViewResolver(addr, contractName) {
             log("ViewResolver for ".concat(contractName).concat("is borrowed"))
             contractViewResolver = viewResolver
         }
-    }
+     }
     if contractViewResolver == nil {
         log("Failed to create CompositeType for ".concat(contractName))
         return nil
@@ -68,7 +69,7 @@ fun main(
         if type.isRecovered {
             return true
         }
-        if type.isSubtype(of: tokenType!) {
+        if type.isSubtype(of: resourceType!) {
             storagePath = path.toString()
             return false
         }
@@ -90,16 +91,20 @@ fun main(
     })
 
     let supportedViews = contractViewResolver!.getContractViews(resourceType: nil)
-    let isNFT = tokenType!.isSubtype(of: Type<@{NonFungibleToken.Collection}>())
+    let isNFT = resourceType!.isSubtype(of: Type<@{NonFungibleToken.Collection}>())
+    let isRegistered = isNFT
+        ? NFTList.isNFTCollectionRegistered(addr, contractName)
+        : TokenList.isFungibleTokenRegistered(addr, contractName)
+    let bridgedType = !isNFT
+        ? resourceType
+        : CompositeType("A.".concat(addrNo0x).concat(".").concat(contractName).concat(".NFT"))
     let status = TokenAssetStatus(
         address: addr,
         contractName: contractName,
         isNFT: isNFT,
-        isBridged: FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType!) != nil,
-        isRegistered: isNFT
-            ? NFTList.isNFTCollectionRegistered(addr, contractName)
-            : TokenList.isFungibleTokenRegistered(addr, contractName),
-        isRegisteredWithNativeViewResolver: contractViewResolver != nil,
+        isBridged: FlowEVMBridgeConfig.getEVMAddressAssociated(with: bridgedType!) != nil,
+        isRegistered: isRegistered,
+        isRegisteredWithNativeViewResolver: isRegistered && contractViewResolver != nil,
         isWithDisplay: isNFT
             ? supportedViews.contains(Type<MetadataViews.NFTCollectionDisplay>())
             : supportedViews.contains(Type<FungibleTokenMetadataViews.FTDisplay>()),

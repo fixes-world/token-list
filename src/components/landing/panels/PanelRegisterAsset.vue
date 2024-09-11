@@ -15,13 +15,13 @@ const contractsRef = ref<typeof SelectTokenContracts | null>(null)
 
 const currentAddress = ref<string | undefined>(undefined);
 const isCurrentAddressEVM = ref<boolean>(false);
-const currentFTContract = ref<TokenAssetStatus | undefined>(undefined)
+const currentNativeContract = ref<TokenAssetStatus | undefined>(undefined)
 const currentEVMContract = ref<EVMAssetStatus | undefined>(undefined)
 
 // Handlers Functions
 
 function refresh() {
-  currentFTContract.value = undefined;
+  currentNativeContract.value = undefined;
   currentEVMContract.value = undefined;
   contractsRef.value?.reload();
 }
@@ -63,7 +63,7 @@ onMounted(() => {
         v-if="!isCurrentAddressEVM"
         ref="contractsRef"
         :address="currentAddress"
-        v-model:current="currentFTContract"
+        v-model:current="currentNativeContract"
       />
       <SelectEVMContract
         v-else
@@ -72,8 +72,8 @@ onMounted(() => {
       />
     </ElementWrapper>
     <FromSubmitRegisterToken
-      v-if="currentFTContract"
-      :token="currentFTContract"
+      v-if="currentNativeContract"
+      :token="currentNativeContract"
       @success="refresh"
     />
     <FromSubmitRegisterEVMAsset

@@ -14,7 +14,7 @@ transaction(
     isOnboardToBridge: Bool
 ) {
     prepare(signer: auth(CopyValue, BorrowValue, IssueStorageCapabilityController, PublishCapability, SaveValue) &Account) {
-        if isOnboardToBridge {
+        if !isOnboardToBridge {
             if TokenList.isValidToRegister(address, contractName) {
                 TokenList.ensureFungibleTokenRegistered(address, contractName)
             } else if NFTList.isValidToRegister(address, contractName) {
