@@ -34,12 +34,20 @@ const isHighlight = computed(() => {
         {{ item.contractName }}
       </span>
       <NTag
-        v-if="item.isRegistered"
+        v-if="item.isNFT"
         size="tiny"
-        type="success"
+        type="info"
         round
       >
-        <span class="px-1">Registered</span>
+        <span class="px-1">NFT</span>
+      </NTag>
+      <NTag
+        v-if="item.isBridged"
+        size="tiny"
+        type="warning"
+        round
+      >
+        <span class="px-1">Bridged</span>
       </NTag>
       <ItemHintLabel :with-warning-icon="false">
         <NTag

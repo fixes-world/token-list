@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, inject, onMounted } from 'vue';
-import type { TokenStatus } from '@shared/flow/entities';
+import type { TokenAssetStatus } from '@shared/flow/entities';
 
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
@@ -12,7 +12,7 @@ import AddressSearch from '@components/landing/items/AddressSearch.vue';
 const contractsRef = ref<typeof SelectTokenContracts | null>(null)
 
 const currentAddress = ref<string | undefined>(undefined);
-const currentFTContract = ref<TokenStatus | undefined>(undefined)
+const currentFTContract = ref<TokenAssetStatus | undefined>(undefined)
 
 // Handlers Functions
 

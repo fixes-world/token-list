@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, inject, onMounted } from 'vue';
-import type { NFTStatus } from '@shared/flow/entities';
+import type { TokenAssetStatus } from '@shared/flow/entities';
 
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
-import SelectNFTContracts from '@components/landing/items/SelectNFTContracts.vue';
-import FromSubmitRegisterNFT from '@components/landing/form/FromSubmitRegisterNFT.vue';
+import SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
+import FromSubmitRegisterToken from '@components/landing/form/FromSubmitRegisterToken.vue';
 import AddressSearch from '@components/landing/items/AddressSearch.vue';
 
 // Reactive Variables
-const contractsRef = ref<typeof SelectNFTContracts | null>(null)
+const contractsRef = ref<typeof SelectTokenContracts | null>(null)
 
 const currentAddress = ref<string | undefined>(undefined);
-const currentNFTContract = ref<NFTStatus | undefined>(undefined)
+const currentNFTContract = ref<TokenAssetStatus | undefined>(undefined)
 
 // Handlers Functions
 
@@ -45,13 +45,13 @@ onMounted(() => {
           <ElementAddressBrowserLink :address="currentAddress" :short="false" />
         </span>
       </template>
-      <SelectNFTContracts
+      <SelectTokenContracts
         ref="contractsRef"
         :address="currentAddress"
         v-model:current="currentNFTContract"
       />
     </ElementWrapper>
-    <FromSubmitRegisterNFT
+    <FromSubmitRegisterToken
       v-if="currentNFTContract"
       :token="currentNFTContract"
       @success="refresh"

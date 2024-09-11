@@ -4,27 +4,27 @@ import {
   NSkeleton, NEmpty, NTag,
   NSelect, type SelectOption,
 } from 'naive-ui';
-import { getContractNames, getFTContracts, getFTContractStatus } from '@shared/flow/action/scripts'
-import type { TokenStatus } from '@shared/flow/entities';
+import { getContractNames, getAssetContractStatus, getAssetsContracts } from '@shared/flow/action/scripts'
+import type { TokenAssetStatus } from '@shared/flow/entities';
 
 import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
 
 const props = withDefaults(defineProps<{
   address?: string;
   disabled?: boolean;
-  current?: TokenStatus;
+  current?: TokenAssetStatus;
 }>(), {
   disabled: false,
 });
 
 const emits = defineEmits<{
-  (e: 'update:current', value?: TokenStatus): void;
+  (e: 'update:current', value?: TokenAssetStatus): void;
 }>();
 
 // Reactive Variables
 
 const isLoadingData = ref(false);
-const ftContracts = ref<TokenStatus[]>([]);
+const ftContracts = ref<TokenAssetStatus[]>([]);
 const allContractNames = ref<string[]>([]);
 
 const options = computed<SelectOption[]>(() => {
@@ -53,13 +53,13 @@ const currentSelect = computed({
       return;
     }
     const [address, contractName] = value.split('.');
-    emits('update:current', getFTData(address, contractName));
+    emits('update:current', getData(address, contractName));
   },
 });
 
 // Handlers Functions
 
-function getFTData(address: string, contractName: string): TokenStatus | undefined {
+function getData(address: string, contractName: string): TokenAssetStatus | undefined {
   return ftContracts.value?.find((contract) => {
     return contract.address === address && contract.contractName === contractName;
   });
@@ -69,14 +69,14 @@ async function reload() {
   if (!props.address) {
     return;
   }
-  await loadFTContracts(props.address);
+  await loadAssetContracts(props.address);
 }
 
-async function loadFTContracts(addr: string) {
+async function loadAssetContracts(addr: string) {
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
-  ftContracts.value = await getFTContracts(addr);
+  ftContracts.value = await getAssetsContracts(addr);
   if (ftContracts.value.length > 0) {
     allContractNames.value = ftContracts.value.map((contract) => contract.contractName);
   } else {
@@ -85,11 +85,11 @@ async function loadFTContracts(addr: string) {
   isLoadingData.value = false;
 }
 
-async function loadFTStatus(addr: string, contractName: string) {
+async function loadAssetStatus(addr: string, contractName: string) {
   console.log('Loading contract status:', addr, contractName)
 
   isLoadingData.value = true;
-  const status = await getFTContractStatus(addr, contractName);
+  const status = await getAssetContractStatus(addr, contractName);
   if (status) {
     ftContracts.value = [status]
   }
@@ -102,7 +102,7 @@ function renderLabel(option: SelectOption): VNodeChild {
   }
   const [address, contractName] = (option.label as string)?.split('.');
   return h(ItemFungibleTokenStatus, {
-    item: getFTData(address, contractName),
+    item: getData(address, contractName),
   })
 }
 
@@ -113,7 +113,7 @@ watch(() => props.address, async (address) => {
     return;
   }
 
-  await loadFTContracts(address);
+  await loadAssetContracts(address);
 }, { immediate: true });
 
 // Expose to parent component
@@ -150,7 +150,7 @@ defineExpose({
             size="small"
             round
             class="!cursor-pointer"
-            @click="loadFTStatus(address, name)"
+            @click="loadAssetStatus(address, name)"
           >
             {{ name }}
           </NTag>

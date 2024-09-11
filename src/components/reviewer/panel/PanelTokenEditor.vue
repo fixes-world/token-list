@@ -8,7 +8,7 @@ import {
   NSelect, type SelectOption,
 } from 'naive-ui';
 import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
-import { getFTContractStatus } from '@shared/flow/action/scripts';
+import { getAssetContractStatus } from '@shared/flow/action/scripts';
 import { useSendingTransaction } from '@components/shared'
 
 import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
@@ -112,9 +112,9 @@ async function loadFTStatus() {
   console.log("Loading FT: ", props.ft?.identity.address, props.ft?.identity.contractName)
   isLoadingFTStatus.value = true;
   showExtraVaultInput.value = false;
-  const status = await getFTContractStatus(props.ft?.identity.address, props.ft?.identity.contractName, extraVaultAddr.value);
-  if (status && status.vaultPath) {
-    formData.paths.vault = status.vaultPath ?? "";
+  const status = await getAssetContractStatus(props.ft?.identity.address, props.ft?.identity.contractName, extraVaultAddr.value);
+  if (status && status) {
+    formData.paths.vault = status.storage ?? "";
     for (let key in status.publicPaths) {
       if (key.includes("FungibleToken.Receiver")) {
         formData.paths.receiver = status.publicPaths[key];

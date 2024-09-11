@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, inject, watch, h, type VNodeChild, type VNode } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import type { Media, NFTCollectionDisplayDto, NFTPaths, StandardNFTCollectionView } from '@shared/flow/entities';
+import type { NFTCollectionDisplayDto, StandardNFTCollectionView } from '@shared/flow/entities';
 import { nftListMaintainerUpdateCustomizedDisplay } from '@shared/flow/action/transactions';
 import { useGlobalAccount } from '@components/shared'
 

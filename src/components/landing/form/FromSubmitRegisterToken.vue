@@ -3,16 +3,17 @@ import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
 import { registerStandardAsset, updateViewResolver } from '@shared/flow/action/transactions';
-import type { TokenStatus } from '@shared/flow/entities';
+import type { TokenAssetStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
-  token: TokenStatus
+  token: TokenAssetStatus,
+  isOnboardToBridge?: boolean,
 }>(), {
-  // No default value
+  isOnboardToBridge: false,
 });
 
 const emits = defineEmits<{
@@ -25,18 +26,19 @@ const acctName = useGlobalAccount()
 
 // Reactive Data
 
-const isValidData = computed(() => !props.token.isRegisteredWithNativeViewResolver && !isNotChanged.value)
-const isNotChanged = computed(() => props.token.isRegistered && !props.token.isRegisteredWithNativeViewResolver && (!props.token.isWithDisplay || !props.token.isWithVaultData))
+const isDisabled = computed(() => {
+  return props.token.isRegistered || !props.token.isWithDisplay || !props.token.isWithVaultData
+})
 
 const disableReason = computed(() => {
   if (!acctName.value) {
     return "No account name"
   }
-  if (isNotChanged.value) {
-    return "Registered, But still without ViewResolver"
+  if (!props.token.isWithDisplay) {
+    return "The asset is without display view"
   }
-  if (!isValidData.value) {
-    return "Token Already Registered with Display"
+  if (!props.token.isWithVaultData) {
+    return "The asset is without vault data"
   }
   return undefined
 })
@@ -56,7 +58,7 @@ async function onSubmit(): Promise<string> {
   if (props.token.isRegistered) {
     return await updateViewResolver(props.token)
   } else {
-    return await registerStandardAsset(props.token)
+    return await registerStandardAsset(props.token, props.isOnboardToBridge)
   }
 }
 
@@ -81,7 +83,7 @@ async function onCancel() {
       :without-cancel="true"
       :w-full="true"
       :method="onSubmit"
-      :disabled="!isValidData"
+      :disabled="isDisabled"
       :disabled-reason="disableReason"
       @success="onSuccess"
       @cancel="onCancel"

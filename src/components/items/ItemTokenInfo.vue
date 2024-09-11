@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, inject } from 'vue';
 import type { StandardTokenView } from '@shared/flow/entities';
-import { NTag } from 'naive-ui';
 
 import ElementAddressDisplay from '@components/items/cardElements/ElementAddressDisplay.vue';
 import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
