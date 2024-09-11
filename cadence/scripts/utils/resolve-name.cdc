@@ -14,21 +14,20 @@ fun main(
             return nil
         }
 
-        var flownsName = ""
+        var flownsName: String? = nil
 
-        let collectionCap = account.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)
-        let collection = collectionCap.borrow()!
-        let ids = collection.getIDs()
-
-        for id in ids {
-            let domain = collection.borrowDomain(id: id)!
-            let isDefault = domain.getText(key: "isDefault")
-            flownsName = domain.getDomainName()
-            if isDefault == "true" {
-                break
-            }
+        if let collection = account.capabilities.get<&Domains.Collection>(Domains.CollectionPublicPath).borrow() {
+            var counter = 0
+            collection.forEachID(fun (id: UInt64): Bool {
+                let domain = collection.borrowDomain(id: id)!
+                flownsName = domain.getDomainName()
+                counter = counter + 1
+                if domain.getText(key: "isDefault") == "true" || counter > 10 {
+                    return false
+                }
+                return true
+            })
         }
-
         return flownsName
     }
 }
