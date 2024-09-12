@@ -33,10 +33,6 @@ const currentContract = computed({
   },
 })
 
-const isDisabled = computed(() => {
-  return props.disabled || !currentContract.value
-})
-
 // Handlers Functions
 
 async function reload() {
@@ -63,7 +59,6 @@ watch(() => props.address, async (address) => {
   if (!address) {
     return;
   }
-
   await loadAssetContracts(address);
 }, { immediate: true });
 

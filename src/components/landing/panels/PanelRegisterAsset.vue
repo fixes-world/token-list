@@ -12,6 +12,7 @@ import FromSubmitRegisterEVMAsset from '@components/landing/form/FromSubmitRegis
 
 // Reactive Variables
 const contractsRef = ref<typeof SelectTokenContracts | null>(null)
+const evmContractRef = ref<typeof SelectEVMContract | null>(null)
 
 const currentAddress = ref<string | undefined>(undefined);
 const isCurrentAddressEVM = ref<boolean>(false);
@@ -23,8 +24,11 @@ const currentEVMContract = ref<EVMAssetStatus | undefined>(undefined)
 function refresh() {
   currentNativeContract.value = undefined;
   currentEVMContract.value = undefined;
+
   if (isCurrentAddressEVM.value) {
     contractsRef.value?.reload();
+  } else {
+    evmContractRef.value?.reload();
   }
 }
 
@@ -72,17 +76,18 @@ onMounted(() => {
       />
       <SelectEVMContract
         v-else
+        ref="evmContractRef"
         :address="currentAddress"
         v-model:current="currentEVMContract"
       />
     </ElementWrapper>
     <FromSubmitRegisterToken
-      v-if="currentNativeContract"
+      v-if="!isCurrentAddressEVM && currentNativeContract"
       :token="currentNativeContract"
       @success="refresh"
     />
     <FromSubmitRegisterEVMAsset
-      v-else-if="currentEVMContract"
+      v-else-if="isCurrentAddressEVM && currentEVMContract"
       :token="currentEVMContract"
       @success="refresh"
     />

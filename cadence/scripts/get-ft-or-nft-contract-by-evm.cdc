@@ -22,8 +22,6 @@ fun main(
         return nil
     }
 
-    let isRegistered = EVMTokenList.isEVMAddressRegistered(addrNo0x)
-
     let isNFT = FlowEVMBridgeUtils.isERC721(evmContractAddress: acct)
 
     var bridgedAddress: Address? = nil
@@ -36,7 +34,7 @@ fun main(
     return EVMAssetStatus(
         address: acct,
         isNFT: isNFT,
-        isRegistered: isRegistered,
+        isRegistered: EVMTokenList.isEVMAddressRegistered(addrNo0x),
         isBridged: isRequires == false,
         bridgedAddress: bridgedAddress,
         bridgedContractName: bridgedContractName
