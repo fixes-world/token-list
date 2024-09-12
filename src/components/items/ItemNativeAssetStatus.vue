@@ -30,16 +30,23 @@ const isHighlight = computed(() => {
       item.isRegistered ? 'i-carbon:checkmark-filled highlight' : 'i-carbon:radio-button text-gray-400 opacity-60'
     ]" />
     <div class="relative inline-flex flex-wrap items-center gap-1">
-      <span :class="['w-fit title-base text-sm', isHighlight ? 'highlight' : 'text-[var(--base-color)]']">
+      <span :class="['w-fit max-w-xs title-base text-sm truncate', isHighlight ? 'highlight' : 'text-[var(--base-color)]']">
         {{ item.contractName }}
       </span>
       <NTag
-        v-if="item.isRegistered"
         size="tiny"
-        type="success"
+        :type="item?.isNFT ? 'info' : 'primary'"
         round
       >
-        <span class="px-1">Registered</span>
+        <span class="px-1">{{ item.isNFT ? 'NFT' : "FT" }}</span>
+      </NTag>
+      <NTag
+        v-if="item.isBridged"
+        size="tiny"
+        type="warning"
+        round
+      >
+        <span class="px-1">Bridged</span>
       </NTag>
       <ItemHintLabel :with-warning-icon="false">
         <NTag

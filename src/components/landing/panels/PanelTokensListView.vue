@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { ref, computed, reactive, onMounted, watch, toRaw } from 'vue';
 
 import type { QueryResult, StandardTokenView, StandardNFTCollectionView } from '@shared/flow/entities';
-import { queryTokenList, queryNFTList } from '@shared/flow/action/scripts';
+import { queryTokenList, queryNFTList, queryEVMBridgedFTList, queryEVMBridgedNFTList } from '@shared/flow/action/scripts';
 import { FilterType } from '@shared/flow/enums';
 
 import ListWrapper from '@components/widgets/ListWrapper.vue';
@@ -12,10 +12,12 @@ import SearchFilter from '@components/landing/items/SearchFilter.vue';
 
 const props = withDefaults(defineProps<{
   isNft?: boolean,
+  isEvmOnly?: boolean,
   reviewer?: string,
   filterType?: FilterType,
 }>(), {
   isNft: false,
+  isEvmOnly: false,
   reviewer: undefined,
   filterType: FilterType.ALL,
 })
@@ -26,21 +28,15 @@ const currentPage = ref<number>(0)
 const filterName = ref<string>("")
 
 async function loadTokenList(page: number, size: number): Promise<QueryResult<StandardTokenView>> {
-  return await queryTokenList(
-    page,
-    size,
-    props.reviewer,
-    props.filterType
-  )
+  return props.isEvmOnly
+    ? await queryEVMBridgedFTList(page, size, props.reviewer)
+    : await queryTokenList(page, size, props.reviewer, props.filterType)
 }
 
 async function loadNFTList(page: number, size: number): Promise<QueryResult<StandardNFTCollectionView>> {
-  return await queryNFTList(
-    page,
-    size,
-    props.reviewer,
-    props.filterType
-  )
+  return props.isEvmOnly
+    ? await queryEVMBridgedNFTList(page, size, props.reviewer)
+    : await queryNFTList(page, size, props.reviewer, props.filterType)
 }
 
 async function loadMoreFunc(page: number, size: number) {
@@ -57,11 +53,11 @@ async function reload() {
 
 // Watchers and Lifecycle
 
-watch(() => props.reviewer, async (newVal, oldVal) => {
-  if (newVal !== oldVal) {
+watch(() => [props.reviewer, props.isEvmOnly, props.filterType], async (newVal, oldVal) => {
+  if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1] || newVal[2] !== oldVal[2]) {
     await reload()
   }
-})
+}, { deep: true })
 
 defineExpose({
   reload,

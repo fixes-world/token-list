@@ -12,7 +12,10 @@ export const GET: APIRoute = async ({ request }) => {
           limit: parseInt(query.get("limit") || "100"),
         }
       : undefined;
+  const isEVMOnly = query.get("evm") === "true";
   return new Response(
-    JSON.stringify(await queryNFTListUsingCache(undefined, filter, pagination)),
+    JSON.stringify(
+      await queryNFTListUsingCache(undefined, filter, isEVMOnly, pagination),
+    ),
   );
 };

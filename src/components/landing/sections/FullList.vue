@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, inject, onMounted } from 'vue';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import { NTabs, NTabPane } from 'naive-ui'
+import { NTabs, NTabPane, NSwitch } from 'naive-ui'
 
 import type { ReviewerInfo } from '@shared/flow/entities';
 
@@ -19,6 +19,7 @@ type TabType = 'jsonView' | 'listView'
 const currentTab = ref<TabType>('listView')
 
 const currentReviewer = ref<ReviewerInfo | undefined>(undefined)
+const isShowEvmOnly = ref<boolean>(false)
 
 const tabs = computed(() => {
   return [
@@ -62,6 +63,19 @@ onMounted(() => {
         :size="isOnPCBrowser ? 'large' : 'medium'"
         :justify-content="isOnPCBrowser ? undefined : 'space-evenly'"
       >
+        <template #suffix>
+          <NSwitch
+            size="small"
+            v-model:value="isShowEvmOnly"
+          >
+            <template #checked>
+              <span class="text-xs">EVM Only</span>
+            </template>
+            <template #unchecked>
+              <span class="text-xs">All Tokens</span>
+            </template>
+          </NSwitch>
+        </template>
         <NTabPane
           v-for="item of tabs"
           :key="item.key"
@@ -82,6 +96,7 @@ onMounted(() => {
             :is="item.component"
             class="max-h-[calc(100vh-24rem)]"
             :reviewer="currentReviewer?.address"
+            :is-evm-only="isShowEvmOnly"
           />
         </NTabPane>
       </NTabs>

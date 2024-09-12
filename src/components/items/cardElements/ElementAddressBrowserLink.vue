@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import appInfo from '@shared/config/info';
 
 import ElementAddressDisplay from '@components/items/cardElements/ElementAddressDisplay.vue';
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   address: string,
   short?: boolean,
   // notResolve?: boolean
@@ -13,10 +13,12 @@ withDefaults(defineProps<{
   // notResolve: true,
 })
 
+const isEVMAddress = computed(() => props.address && /0x[a-fA-F0-9]{40}/ig.test(props.address))
+
 function getAccountURL(addr: string) {
   const host = appInfo.network === 'testnet'
-    ? "https://testnet.flowdiver.io/account/"
-    : "https://www.flowdiver.io/account/"
+    ? (!isEVMAddress.value ? "https://testnet.flowdiver.io/account/" : "https://evm-testnet.flowscan.io/address/")
+    : (!isEVMAddress.value ? "https://www.flowdiver.io/account/" : "https://evm.flowscan.io/address/");
   return host + addr;
 }
 </script>

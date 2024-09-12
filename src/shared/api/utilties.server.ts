@@ -1,9 +1,11 @@
 import Exception from "@shared/exception";
 import {
-  queryTokenList,
   getReviewers,
   getNFTListReviewers,
+  queryTokenList,
   queryNFTList,
+  queryEVMBridgedFTList,
+  queryEVMBridgedNFTList,
 } from "@shared/flow/action/scripts";
 import type {
   ExportedNFTCollectionInfo,
@@ -109,11 +111,12 @@ const defaultKeywords = [
 export async function queryTokenListUsingCache(
   reviewer: string | undefined,
   filter: FilterType,
+  isEVMOnly: boolean,
   pagination?: { page: number; limit: number },
 ): Promise<TokenList> {
   const tokens = await queryTokenListGeneric(
     "token-list",
-    queryTokenList,
+    !isEVMOnly ? queryTokenList : queryEVMBridgedFTList,
     exportTokenInfo,
     reviewer,
     filter,
@@ -144,11 +147,12 @@ export async function queryTokenListUsingCache(
 export async function queryNFTListUsingCache(
   reviewer: string | undefined,
   filter: FilterType,
+  isEVMOnly: boolean,
   pagination?: { page: number; limit: number },
 ): Promise<NFTList> {
   const tokens = await queryTokenListGeneric(
     "nft-list",
-    queryNFTList,
+    !isEVMOnly ? queryNFTList : queryEVMBridgedNFTList,
     exportNFTCollectionInfo,
     reviewer,
     filter,
@@ -209,10 +213,19 @@ async function queryTokenListGeneric<T, R>(
 
   while (!isAllLoaded) {
     const tokenRequestKey = `${apiName}/?reviewer=${reviewer}&filter=${filter}&page=${currentPage}&limit=${currentLimit}`;
-    const ret = await executeOrLoadFromRedis(
-      tokenRequestKey,
-      queryListFunc.bind(null, currentPage, currentLimit, reviewer, filter),
-    );
+    const ret =
+      appInfo.network === "mainnet"
+        ? await executeOrLoadFromRedis(
+            tokenRequestKey,
+            queryListFunc.bind(
+              null,
+              currentPage,
+              currentLimit,
+              reviewer,
+              filter,
+            ),
+          )
+        : await queryListFunc(currentPage, currentLimit, reviewer, filter);
     if (ret.total === 0) {
       break;
     }

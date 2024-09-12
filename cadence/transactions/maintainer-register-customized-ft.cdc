@@ -9,7 +9,6 @@ transaction(
     storageIdentifier: String,
     receiverIdentifier: String,
     metadataIdentifier: String,
-    providerIdentifier: String,
     name: String,
     symbol: String,
     description: String?,
