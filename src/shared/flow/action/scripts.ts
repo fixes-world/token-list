@@ -46,6 +46,17 @@ import scGetEVMFTOrNFTContract from "@cadence/scripts/get-ft-or-nft-contract-by-
 import scQueryEVMBridgedFTList from "@cadence/scripts/query-evm-bridged-ft-list.cdc?raw";
 import scQueryEVMBridgedNFTList from "@cadence/scripts/query-evm-bridged-nft-list.cdc?raw";
 
+// Get the script source code
+export function getQueryListScript(isNFT: boolean, isEVM: boolean) {
+  return isNFT
+    ? isEVM
+      ? scQueryEVMBridgedNFTList
+      : scQueryNFTList
+    : isEVM
+      ? scQueryEVMBridgedFTList
+      : scQueryTokenList;
+}
+
 /** ---- Scripts ---- */
 
 /**
