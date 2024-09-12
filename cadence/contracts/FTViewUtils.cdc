@@ -147,9 +147,26 @@ access(all) contract FTViewUtils {
         }
     }
 
+    /// The struct interface for the Bridged Token View
+    access(all) struct interface IBridgedTokenView {
+        access(all)
+        let evmAddress: String
+    }
+
+    /// The interface for the Token View
+    access(all) struct interface ITokenView {
+        access(all)
+        let tags: [String]
+        access(all)
+        let dataSource: Address?
+
+        access(all)
+        view fun getIdentity(): {TokenIdentity}
+    }
+
     /// The struct for the Fungible Token List View
     ///
-    access(all) struct StandardTokenView {
+    access(all) struct StandardTokenView: ITokenView {
         access(all)
         let identity: FTIdentity
         access(all)
@@ -177,6 +194,53 @@ access(all) contract FTViewUtils {
             self.dataSource = dataSource
             self.paths = paths
             self.display = display
+        }
+
+        access(all)
+        view fun getIdentity(): {TokenIdentity} {
+            return self.identity
+        }
+    }
+
+    /// The struct for the Bridged Token View
+    ///
+    access(all) struct BridgedTokenView: ITokenView, IBridgedTokenView {
+        access(all)
+        let identity: FTIdentity
+        access(all)
+        let evmAddress: String
+        access(all)
+        let decimals: UInt8
+        access(all)
+        let tags: [String]
+        access(all)
+        let dataSource: Address?
+        access(all)
+        let paths: StandardTokenPaths?
+        access(all)
+        let display: FTDisplayWithSource?
+
+        view init(
+            identity: FTIdentity,
+            evmAddress: String,
+            decimals: UInt8,
+            tags: [String],
+            dataSource: Address?,
+            paths: StandardTokenPaths?,
+            display: FTDisplayWithSource?,
+        ) {
+            self.identity = identity
+            self.evmAddress = evmAddress
+            self.decimals = decimals
+            self.tags = tags
+            self.dataSource = dataSource
+            self.paths = paths
+            self.display = display
+        }
+
+        access(all)
+        view fun getIdentity(): {TokenIdentity} {
+            return self.identity
         }
     }
 

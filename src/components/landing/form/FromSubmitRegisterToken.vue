@@ -2,17 +2,17 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { registerStandardFT, updateViewResolver } from '@shared/flow/action/transactions';
-import type { TokenStatus } from '@shared/flow/entities';
+import { NCheckbox } from 'naive-ui';
+import { registerStandardAsset, updateViewResolver } from '@shared/flow/action/transactions';
+import type { TokenAssetStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
-  token: TokenStatus
+  token: TokenAssetStatus,
 }>(), {
-  // No default value
 });
 
 const emits = defineEmits<{
@@ -25,18 +25,34 @@ const acctName = useGlobalAccount()
 
 // Reactive Data
 
-const isValidData = computed(() => !props.token.isRegisteredWithNativeViewResolver && !isNotChanged.value)
-const isNotChanged = computed(() => props.token.isRegistered && !props.token.isRegisteredWithNativeViewResolver && (!props.token.isWithDisplay || !props.token.isWithVaultData))
+const isOnboardToBridge = ref(false)
+
+const isBridgingStatusChanged = computed(() => {
+  return props.token.isRegistered && (!props.token.isBridged && isOnboardToBridge.value)
+})
+
+const isInvalid = computed(() => {
+  return (props.token.isRegistered && props.token.isRegisteredWithNativeViewResolver)
+    || !props.token.isWithDisplay
+    || !props.token.isWithVaultData
+})
+
+const isDisabled = computed(() => {
+  return !isBridgingStatusChanged.value && isInvalid.value
+})
 
 const disableReason = computed(() => {
   if (!acctName.value) {
     return "No account name"
   }
-  if (isNotChanged.value) {
-    return "Registered, But still without ViewResolver"
+  if (props.token.isRegistered && props.token.isRegisteredWithNativeViewResolver) {
+    return "The asset is already registered"
   }
-  if (!isValidData.value) {
-    return "Token Already Registered with Display"
+  if (!props.token.isWithDisplay) {
+    return "The asset is without display view"
+  }
+  if (!props.token.isWithVaultData) {
+    return "The asset is without vault data"
   }
   return undefined
 })
@@ -53,10 +69,10 @@ async function onSubmit(): Promise<string> {
     throw new Error(errStr)
   }
   // If token is already registered, update the view resolver
-  if (props.token.isRegistered) {
+  if (props.token.isRegistered && !isBridgingStatusChanged.value) {
     return await updateViewResolver(props.token)
   } else {
-    return await registerStandardFT(props.token)
+    return await registerStandardAsset(props.token, isOnboardToBridge.value)
   }
 }
 
@@ -70,6 +86,10 @@ async function onCancel() {
 
 // Watchers and Lifecycle
 
+watch(() => props.token, async (token) => {
+  isOnboardToBridge.value = token.isBridged
+}, { immediate: true })
+
 </script>
 
 <template>
@@ -77,11 +97,18 @@ async function onCancel() {
     <template #not-connected>
       Connect Wallet
     </template>
+    <NCheckbox
+      v-if="!props.token.isBridged"
+      v-model:checked="isOnboardToBridge"
+      class="mb-2"
+    >
+      Onboard to VM Bridge ( COST: 1 $FLOW )
+    </NCheckbox>
     <FlowSubmitTrxWidget
       :without-cancel="true"
       :w-full="true"
       :method="onSubmit"
-      :disabled="!isValidData"
+      :disabled="isDisabled"
       :disabled-reason="disableReason"
       @success="onSuccess"
       @cancel="onCancel"
@@ -90,7 +117,7 @@ async function onCancel() {
         <span class="i-carbon:list w-5 h-5" />
       </template>
       <span v-if="!token.isRegistered">Register to List</span>
-      <span v-else>Update View Resolver</span>
+      <span v-else>Update Settings</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

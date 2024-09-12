@@ -3,8 +3,7 @@ import type {
   Media,
   NFTCollectionDisplay,
   NFTListQueryResult,
-  NFTPaths,
-  NFTStatus,
+  AssetPaths,
   ReviewerInfo,
   StandardNFTCollectionView,
   StandardTokenView,
@@ -12,7 +11,9 @@ import type {
   TokenIdentity,
   TokenPaths,
   TokenQueryResult,
-  TokenStatus,
+  TokenAssetStatus,
+  TagableItem,
+  EVMAssetStatus,
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
@@ -22,8 +23,6 @@ import scResolveName from "@cadence/scripts/utils/resolve-name.cdc?raw";
 import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
 // Scripts - FTs
 import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
-import scGetFTContracts from "@cadence/scripts/get-ft-contracts.cdc?raw";
-import scGetFTContractStatus from "@cadence/scripts/get-ft-contract-status.cdc?raw";
 import scGetReviewerInfo from "@cadence/scripts/get-reviewer-info.cdc?raw";
 import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
 import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
@@ -32,14 +31,20 @@ import scQueryTokenList from "@cadence/scripts/query-token-list.cdc?raw";
 import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-address.cdc?raw";
 // Scripts - NFTs
 import scIsNFTRegistered from "@cadence/scripts/nftlist/is-token-registered.cdc?raw";
-import scGetNFTContracts from "@cadence/scripts/nftlist/get-nft-contracts.cdc?raw";
-import scGetNFTContractStatus from "@cadence/scripts/nftlist/get-nft-contract-status.cdc?raw";
 import scGetNFTListReviewerInfo from "@cadence/scripts/nftlist/get-reviewer-info.cdc?raw";
 import scGetNFTListReviewers from "@cadence/scripts/nftlist/get-reviewers.cdc?raw";
 import scGetNFTListVeifiedReviewers from "@cadence/scripts/nftlist/get-verified-reviewers.cdc?raw";
 import scGetNFTListAddressReviewerStatus from "@cadence/scripts/nftlist/get-address-reviewer-status.cdc?raw";
 import scQueryNFTList from "@cadence/scripts/nftlist/query-token-list.cdc?raw";
 import scQueryNFTListByAddress from "@cadence/scripts/nftlist/query-token-list-by-address.cdc?raw";
+// Scripts - FTs or NFTs
+import scGetFTsOrNFTsContracts from "@cadence/scripts/get-ft-or-nft-contracts.cdc?raw";
+import scGetFTorNFTContractStatus from "@cadence/scripts/get-ft-or-nft-contract-status.cdc?raw";
+// Scripts - EVM Bridged
+import scIsEVMAssetRegistered from "@cadence/scripts/is-evm-asset-registered.cdc?raw";
+import scGetEVMFTOrNFTContract from "@cadence/scripts/get-ft-or-nft-contract-by-evm.cdc?raw";
+import scQueryEVMBridgedFTList from "@cadence/scripts/query-evm-bridged-ft-list.cdc?raw";
+import scQueryEVMBridgedNFTList from "@cadence/scripts/query-evm-bridged-nft-list.cdc?raw";
 
 /** ---- Scripts ---- */
 
@@ -71,7 +76,7 @@ export async function isTokenRegistered(ft: TokenIdentity): Promise<boolean> {
   );
 }
 
-function parseFTContractStatus(obj: any): TokenStatus {
+function parseTokenContractStatus(obj: any): TokenAssetStatus {
   const paths: Record<string, string> = {};
   // add alias for balance and receiver
   for (let key in obj.publicPaths) {
@@ -80,11 +85,14 @@ function parseFTContractStatus(obj: any): TokenStatus {
   return {
     address: obj.address,
     contractName: obj.contractName,
+    isNFT: obj.isNFT,
+    isBridged: obj.isBridged,
     isRegistered: obj.isRegistered,
     isRegisteredWithNativeViewResolver: obj.isRegisteredWithNativeViewResolver,
     isWithDisplay: obj.isWithDisplay,
     isWithVaultData: obj.isWithVaultData,
-    vaultPath: obj.vaultPath,
+    storage: obj.storagePath,
+    public: obj.publicPath,
     publicPaths: paths,
   };
 }
@@ -102,14 +110,16 @@ export async function getContractNames(address: string): Promise<string[]> {
 /**
  * Get the FT contracts
  */
-export async function getFTContracts(address: string): Promise<TokenStatus[]> {
+export async function getAssetsContracts(
+  address: string,
+): Promise<TokenAssetStatus[]> {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
-    scGetFTContracts,
+    scGetFTsOrNFTsContracts,
     (arg, t) => [arg(address, t.Address)],
     [],
   );
-  return ret.map(parseFTContractStatus);
+  return ret.map(parseTokenContractStatus);
 }
 
 /**
@@ -117,22 +127,22 @@ export async function getFTContracts(address: string): Promise<TokenStatus[]> {
  * @param address
  * @param contractName
  */
-export async function getFTContractStatus(
+export async function getAssetContractStatus(
   address: string,
   contractName: string,
-  extraVaultAddr: string | null = null,
-): Promise<TokenStatus | null> {
+  extraResAddr: string | null = null,
+): Promise<TokenAssetStatus | null> {
   const flowServ = await getFlowInstance();
   const ret = await flowServ.executeScript(
-    scGetFTContractStatus,
+    scGetFTorNFTContractStatus,
     (arg, t) => [
       arg(address, t.Address),
       arg(contractName, t.String),
-      arg(extraVaultAddr, t.Optional(t.Address)),
+      arg(extraResAddr, t.Optional(t.Address)),
     ],
     null,
   );
-  return ret ? parseFTContractStatus(ret) : null;
+  return ret ? parseTokenContractStatus(ret) : null;
 }
 
 /**
@@ -264,11 +274,14 @@ const parseTokenView = (obj: any): StandardTokenView => {
     identity: {
       address: obj.identity.address,
       contractName: obj.identity.contractName,
+      isNFT: false,
+      isBridged: !!obj.evmAddress,
       isWithDisplay: !!obj.display,
       isWithVaultData: !!obj.paths,
     },
-    decimals: parseInt(obj.decimals),
+    evmAddress: obj.evmAddress,
     tags: obj.tags,
+    decimals: parseInt(obj.decimals),
     dataSource: obj.dataSource,
     path: obj.paths ? parseTokenPaths(obj.paths) : undefined,
     display: obj.display
@@ -300,6 +313,18 @@ export async function queryTokenListByAddress(
   };
 }
 
+function sortTokenView(a: TagableItem, b: TagableItem) {
+  // Featured first, then Verified, then by contract name
+  if (a.tags.includes("Featured") && !b.tags.includes("Featured")) return -1;
+  else if (!a.tags.includes("Featured") && b.tags.includes("Featured"))
+    return 1;
+  else if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
+    return -1;
+  else if (!a.tags.includes("Verified") && b.tags.includes("Verified"))
+    return 1;
+  return a.identity.contractName.localeCompare(b.identity.contractName);
+}
+
 /**
  * Query token list
  */
@@ -322,16 +347,7 @@ export async function queryTokenList(
   );
   return {
     total: parseInt(ret.total),
-    list: ret.list.map(parseTokenView).sort((a, b) => {
-      // Featured first, then Verified, then by contract name
-      if (a.tags.includes("Featured") && !b.tags.includes("Featured"))
-        return -1;
-      if (!a.tags.includes("Featured") && b.tags.includes("Featured")) return 1;
-      if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
-        return -1;
-      if (!a.tags.includes("Verified") && b.tags.includes("Verified")) return 1;
-      return a.identity.contractName.localeCompare(b.identity.contractName);
-    }),
+    list: ret.list.map(parseTokenView).sort(sortTokenView),
   };
 }
 
@@ -344,46 +360,6 @@ export async function isNFTRegistered(id: TokenIdentity): Promise<boolean> {
     (arg, t) => [arg(id.address, t.Address), arg(id.contractName, t.String)],
     false,
   );
-}
-
-function parseNFTContractStatus(obj: any): NFTStatus {
-  return {
-    address: obj.address,
-    contractName: obj.contractName,
-    isRegistered: obj.isRegistered,
-    isWithDisplay: obj.isWithDisplay,
-    isWithVaultData: true,
-    storage: obj.storagePath,
-    public: obj.publicPath,
-  };
-}
-
-export async function getNFTContracts(address: string) {
-  const flowServ = await getFlowInstance();
-  const ret = await flowServ.executeScript(
-    scGetNFTContracts,
-    (arg, t) => [arg(address, t.Address)],
-    [],
-  );
-  return ret.map(parseNFTContractStatus);
-}
-
-export async function getNFTContractStatus(
-  address: string,
-  contractName: string,
-  collectionOwnerAddr: string | null = null,
-): Promise<NFTStatus | null> {
-  const flowServ = await getFlowInstance();
-  const ret = await flowServ.executeScript(
-    scGetNFTContractStatus,
-    (arg, t) => [
-      arg(address, t.Address),
-      arg(contractName, t.String),
-      arg(collectionOwnerAddr, t.Optional(t.Address)),
-    ],
-    null,
-  );
-  return ret ? parseNFTContractStatus(ret) : null;
 }
 
 export async function getNFTListReviewerInfo(address: string) {
@@ -454,7 +430,7 @@ const parseNFTCollectionDisplay = (obj: any): NFTCollectionDisplay => {
   };
 };
 
-const parseNFTCollectionPaths = (paths: any): NFTPaths => {
+const parseNFTCollectionPaths = (paths: any): AssetPaths => {
   return {
     storage: paths.storagePath
       ? `/${paths.storagePath.domain}/${paths.storagePath.identifier}`
@@ -470,10 +446,13 @@ function parseNFTCollectionView(obj: any): StandardNFTCollectionView {
     identity: {
       address: obj.identity.address,
       contractName: obj.identity.contractName,
+      isNFT: true,
+      isBridged: !!obj.evmAddress,
       isWithDisplay: !!obj.display,
       isWithVaultData: true,
     },
     tags: obj.tags,
+    evmAddress: obj.evmAddress,
     paths: parseNFTCollectionPaths(obj.paths),
     display: obj.display
       ? {
@@ -519,15 +498,84 @@ export async function queryNFTList(
   );
   return {
     total: parseInt(ret.total),
-    list: ret.list.map(parseNFTCollectionView).sort((a, b) => {
-      // Featured first, then Verified, then by contract name
-      if (a.tags.includes("Featured") && !b.tags.includes("Featured"))
-        return -1;
-      if (!a.tags.includes("Featured") && b.tags.includes("Featured")) return 1;
-      if (a.tags.includes("Verified") && !b.tags.includes("Verified"))
-        return -1;
-      if (!a.tags.includes("Verified") && b.tags.includes("Verified")) return 1;
-      return a.identity.contractName.localeCompare(b.identity.contractName);
-    }),
+    list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
+  };
+}
+
+export async function isEVMAssetRegistered(address: string): Promise<boolean> {
+  const flowServ = await getFlowInstance();
+  return await flowServ.executeScript(
+    scIsEVMAssetRegistered,
+    (arg, t) => [arg(address, t.String)],
+    false,
+  );
+}
+
+function parseEVMAssetContractStatus(obj: any): EVMAssetStatus {
+  return {
+    isNFT: obj.isNFT,
+    isBridged: obj.isBridged,
+    isRegistered: obj.isRegistered,
+    evmAddress: obj.evmAddress,
+    bridgedType: obj.bridgedAddress
+      ? {
+          address: obj.bridgedAddress,
+          contractName: obj.bridgedContractName,
+        }
+      : undefined,
+  };
+}
+
+export async function getEVMFTOrNFTContract(
+  address: string,
+): Promise<EVMAssetStatus | undefined> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scGetEVMFTOrNFTContract,
+    (arg, t) => [arg(address, t.String)],
+    undefined,
+  );
+  return ret ? parseEVMAssetContractStatus(ret) : undefined;
+}
+
+export async function queryEVMBridgedFTList(
+  page: number,
+  limit: number,
+  reviewer?: string,
+): Promise<TokenQueryResult> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scQueryEVMBridgedFTList,
+    (arg, t) => [
+      arg(page.toFixed(0), t.Int),
+      arg(limit.toFixed(0), t.Int),
+      arg(reviewer, t.Optional(t.Address)),
+    ],
+    { total: "0", list: [] },
+  );
+  return {
+    total: parseInt(ret.total),
+    list: ret.list.map(parseTokenView).sort(sortTokenView),
+  };
+}
+
+export async function queryEVMBridgedNFTList(
+  page: number,
+  limit: number,
+  reviewer?: string,
+): Promise<NFTListQueryResult> {
+  const flowServ = await getFlowInstance();
+  const ret = await flowServ.executeScript(
+    scQueryEVMBridgedNFTList,
+    (arg, t) => [
+      arg(page.toFixed(0), t.Int),
+      arg(limit.toFixed(0), t.Int),
+      arg(reviewer, t.Optional(t.Address)),
+    ],
+    { total: "0", list: [] },
+  );
+  return {
+    total: parseInt(ret.total),
+    list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
   };
 }

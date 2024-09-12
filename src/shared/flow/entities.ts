@@ -16,18 +16,31 @@ export interface TokenPaths {
   vault: string;
   balance: string;
   receiver: string;
-  provider?: string;
 }
 
 export interface TokenStatusBasic extends TokenIdentity {
+  isNFT: boolean;
+  isBridged: boolean;
   isRegistered?: boolean;
   isRegisteredWithNativeViewResolver?: boolean;
   isWithDisplay: boolean;
   isWithVaultData: boolean;
 }
 
-export interface TokenStatus extends TokenStatusBasic {
-  vaultPath?: string;
+export interface EVMAssetStatus {
+  isNFT: boolean;
+  isBridged: boolean;
+  isRegistered: boolean;
+  evmAddress: string;
+  bridgedType?: TokenIdentity;
+}
+
+export interface AssetPaths {
+  storage: string;
+  public?: string;
+}
+
+export interface TokenAssetStatus extends TokenStatusBasic, AssetPaths {
   publicPaths: Record<string, string>;
 }
 
@@ -50,6 +63,7 @@ export interface TokenDisplayWithSource {
 
 export interface TagableItem {
   identity: TokenStatusBasic;
+  evmAddress?: string;
   tags: string[];
 }
 
@@ -130,13 +144,6 @@ export interface TokenList {
   };
 }
 
-export interface NFTPaths {
-  storage: string;
-  public: string;
-}
-
-export interface NFTStatus extends TokenStatusBasic, NFTPaths {}
-
 export interface NFTCollectionDisplayBasic {
   name: string;
   description?: string;
@@ -161,7 +168,7 @@ export interface NFTCollectionDisplayWithSource {
 }
 
 export interface StandardNFTCollectionView extends TagableItem {
-  paths: NFTPaths;
+  paths: AssetPaths;
   display?: NFTCollectionDisplayWithSource;
 }
 
@@ -169,7 +176,7 @@ export type NFTListQueryResult = QueryResult<StandardNFTCollectionView>;
 
 export interface ExportedNFTCollectionInfo extends TokenIdentity {
   chainId: number;
-  path: NFTPaths;
+  path: AssetPaths;
   evmAddress?: string;
   name: string;
   description: string;

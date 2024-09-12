@@ -2,17 +2,16 @@
 import {
   inject, ref, computed, watch, onMounted, reactive, toRaw,
 } from 'vue';
-import { registerStandardNFT } from '@shared/flow/action/transactions';
-import type { NFTStatus } from '@shared/flow/entities';
+import { registerEVMAsset } from '@shared/flow/action/transactions';
+import type { EVMAssetStatus } from '@shared/flow/entities';
 import { useGlobalAccount } from '@components/shared';
 
 import EnsureConnected from '@components/flow/EnsureConnected.vue';
 import FlowSubmitTrxWidget from '@components/flow/FlowSubmitTrxWidget.vue';
 
 const props = withDefaults(defineProps<{
-  token: NFTStatus
+  token: EVMAssetStatus,
 }>(), {
-  // No default value
 });
 
 const emits = defineEmits<{
@@ -25,21 +24,18 @@ const acctName = useGlobalAccount()
 
 // Reactive Data
 
+const isDisabled = computed(() => {
+  return props.token.isRegistered
+})
+
 const disableReason = computed(() => {
   if (!acctName.value) {
     return "No account name"
   }
   if (props.token.isRegistered) {
-    return "Token Already Registered"
-  }
-  if (!props.token.isWithDisplay) {
-    return "No NFTCollectionData or NFTCollectionDisplay view"
+    return "The asset is already registered"
   }
   return undefined
-})
-
-const isDisabled = computed(() => {
-  return props.token.isRegistered || !props.token.isWithDisplay
 })
 
 // Handlers and Functions
@@ -53,7 +49,7 @@ async function onSubmit(): Promise<string> {
     emits('error', errStr)
     throw new Error(errStr)
   }
-  return await registerStandardNFT(props.token)
+  return await registerEVMAsset(props.token.evmAddress)
 }
 
 async function onSuccess() {
@@ -85,7 +81,7 @@ async function onCancel() {
       <template #icon>
         <span class="i-carbon:list w-5 h-5" />
       </template>
-      Register to List
+      <span v-if="!token.isRegistered">Register to List</span>
     </FlowSubmitTrxWidget>
   </EnsureConnected>
 </template>

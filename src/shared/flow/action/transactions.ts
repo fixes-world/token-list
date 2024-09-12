@@ -7,7 +7,6 @@ import type {
 import { getFlowInstance } from "../flow.service.factory";
 import type { EvaluationType } from "../enums";
 // Transactions - FTs
-import txRegisterStandardFT from "@cadence/transactions/register-standard-ft.cdc?raw";
 import txUpdateViewResolver from "@cadence/transactions/update-ft-view-resolver.cdc?raw";
 import txReviewerInit from "@cadence/transactions/reviewer-init.cdc?raw";
 import txReviewerPublishMaintainer from "@cadence/transactions/reviewer-publish-maintainer.cdc?raw";
@@ -17,27 +16,45 @@ import txMaintainerUpdateCustomizedFT from "@cadence/transactions/maintainer-upd
 import txMaintainerUpdateReviewerMetadata from "@cadence/transactions/maintainer-update-reviewer-metadata.cdc?raw";
 import txMaintainerReviewFT from "@cadence/transactions/maintainer-reivew-ft.cdc?raw";
 // Transactions - NFTs
-import txRegisterStandardNFT from "@cadence/transactions/nftlist/register-standard-nft.cdc?raw";
 import txNFTListReviewerInit from "@cadence/transactions/nftlist/reviewer-init.cdc?raw";
 import txNFTListReviewerPublishMaintainer from "@cadence/transactions/nftlist/reviewer-publish-maintainer.cdc?raw";
 import txNFTListMaintainerClaim from "@cadence/transactions/nftlist/maintainer-claim.cdc?raw";
 import txNFTListMaintainerUpdateReviewerMetadata from "@cadence/transactions/nftlist/maintainer-update-reviewer-metadata.cdc?raw";
 import txNFTListMaintainerUpdateCustomizedDisplay from "@cadence/transactions/nftlist/maintainer-update-customized-display.cdc?raw";
 import txNFTListMaintainerReviewNFT from "@cadence/transactions/nftlist/maintainer-reivew-nft.cdc?raw";
-
-/** ---- FTs Transactions ---- */
+// Transactions - Assets
+import txRegisterStandardAsset from "@cadence/transactions/register-standard-asset.cdc?raw";
+import txRegisterEVMAsset from "@cadence/transactions/register-evm-asset.cdc?raw";
 
 /**
- * Register a standard FT
- * @param ft The FT to register
+ * Register a standard Asset
  */
-export async function registerStandardFT(ft: TokenIdentity): Promise<string> {
+export async function registerStandardAsset(
+  token: TokenIdentity,
+  isOnboardToBridge: boolean = false,
+): Promise<string> {
   const flowSrv = await getFlowInstance();
-  return await flowSrv.sendTransaction(txRegisterStandardFT, (arg, t) => [
-    arg(ft.address, t.Address),
-    arg(ft.contractName, t.String),
+  return await flowSrv.sendTransaction(txRegisterStandardAsset, (arg, t) => [
+    arg(token.address, t.Address),
+    arg(token.contractName, t.String),
+    arg(isOnboardToBridge, t.Bool),
   ]);
 }
+
+/**
+ * Register an EVM Asset
+ */
+export async function registerEVMAsset(evmAddress: string): Promise<string> {
+  const flowSrv = await getFlowInstance();
+  const addrNo0x = evmAddress.startsWith("0x")
+    ? evmAddress.slice(2)
+    : evmAddress;
+  return await flowSrv.sendTransaction(txRegisterEVMAsset, (arg, t) => [
+    arg(addrNo0x, t.String),
+  ]);
+}
+
+/** ---- FTs Transactions ---- */
 
 /**
  * Update the view resolver
@@ -101,7 +118,6 @@ export async function maintainerRegisterCustomizedFT(
       arg(paths.vault.slice("/storage/".length), t.String),
       arg(paths.receiver.slice("/public/".length), t.String),
       arg(paths.balance.slice("/public/".length), t.String),
-      arg(paths.provider ?? ft.contractName + "_provider", t.String),
       arg(display.name, t.String),
       arg(display.symbol, t.String),
       arg(display.description ?? null, t.Optional(t.String)),
@@ -164,16 +180,6 @@ export async function maintainerReviewFT(
 }
 
 /** ---- NFTs Transactions ---- */
-
-export async function registerStandardNFT(
-  token: TokenIdentity,
-): Promise<string> {
-  const flowSrv = await getFlowInstance();
-  return await flowSrv.sendTransaction(txRegisterStandardNFT, (arg, t) => [
-    arg(token.address, t.Address),
-    arg(token.contractName, t.String),
-  ]);
-}
 
 export async function nftListReviewerInit(): Promise<string> {
   const flowSrv = await getFlowInstance();

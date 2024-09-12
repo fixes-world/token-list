@@ -78,7 +78,7 @@ export function exportTokenInfo(
     address: ft.identity.address,
     contractName: ft.identity.contractName,
     path: ft.path,
-    evmAddress: undefined, // TODO: add EVM address from View
+    evmAddress: ft.evmAddress,
     symbol: ft.display.display.symbol,
     name: ft.display.display.name,
     description: ft.display?.display?.description ?? "",
@@ -110,7 +110,7 @@ export function exportNFTCollectionInfo(
     address: nft.identity.address,
     contractName: nft.identity.contractName,
     path: nft.paths,
-    evmAddress: undefined, // TODO: add EVM address from View
+    evmAddress: nft.evmAddress,
     name: nft.display.display.name,
     description: nft.display?.display?.description ?? "",
     logoURI: nft.display.display.squareImage.uri,

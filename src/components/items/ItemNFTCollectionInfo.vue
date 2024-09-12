@@ -3,7 +3,7 @@ import { ref, computed, reactive, onMounted, inject } from 'vue';
 import type { StandardNFTCollectionView } from '@shared/flow/entities';
 
 import ElementAddressDisplay from '@components/items/cardElements/ElementAddressDisplay.vue';
-import ItemFungibleTokenStatus from '@components/items/ItemFungibleTokenStatus.vue';
+import ItemNativeAssetStatus from '@components/items/ItemNativeAssetStatus.vue';
 import TokenTag from '@components/items/tags/TokenTag.vue';
 import ItemMedia from '@components/items/ItemMedia.vue';
 
@@ -57,7 +57,7 @@ function onClick() {
         />
       </div>
       <div class="flex flex-wrap items-center gap-1">
-        <ItemFungibleTokenStatus :item="token.identity" />
+        <ItemNativeAssetStatus :item="token.identity" />
         <template v-if="token.tags.length > 0">
           <TokenTag
             v-for="tag in token.tags"

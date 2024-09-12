@@ -1374,6 +1374,35 @@ access(all) contract TokenList {
         return false
     }
 
+    /// Check if the NFT is valid to register
+    access(all)
+    fun isValidToRegister(_ address: Address, _ contractName: String): Bool {
+        if let contractRef = ViewResolvers.borrowContractViewResolver(address, contractName) {
+            let displayType = Type<FungibleTokenMetadataViews.FTDisplay>()
+            let dataType = Type<FungibleTokenMetadataViews.FTVaultData>()
+            let contractViews = contractRef.getContractViews(resourceType: nil)
+            if contractViews.contains(dataType) == false || contractViews.contains(displayType) == false {
+                return false
+            }
+            var convertedDisplayView: FungibleTokenMetadataViews.FTDisplay? = nil
+            var convertedDataView: FungibleTokenMetadataViews.FTVaultData? = nil
+            if let displayView = contractRef.resolveContractView(resourceType: nil, viewType: displayType) {
+                convertedDisplayView = displayView as? FungibleTokenMetadataViews.FTDisplay
+            } else {
+                return false
+            }
+            if let dataView = contractRef.resolveContractView(resourceType: nil, viewType: dataType) {
+                convertedDataView = dataView as? FungibleTokenMetadataViews.FTVaultData
+            } else {
+                return false
+            }
+            if convertedDisplayView != nil && convertedDataView != nil {
+                return true
+            }
+        }
+        return false
+    }
+
     /// Try to register a new Fungible Token, if already registered, then do nothing
     ///
     access(all)
