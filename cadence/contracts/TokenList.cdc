@@ -1407,7 +1407,7 @@ access(all) contract TokenList {
     ///
     access(all)
     fun ensureFungibleTokenRegistered(_ ftAddress: Address, _ ftContractName: String) {
-        if !self.isFungibleTokenRegistered(ftAddress, ftContractName) {
+        if !self.isFungibleTokenRegistered(ftAddress, ftContractName) && self.isValidToRegister(ftAddress, ftContractName) {
             let registry = self.borrowRegistry()
             registry.registerStandardFungibleToken(ftAddress, ftContractName)
         }

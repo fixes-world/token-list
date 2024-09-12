@@ -304,7 +304,7 @@ access(all) contract EVMTokenList {
             }
 
             // register the asset to the Token List
-            self._registerAsset(
+            self._tryRegisterAsset(
                 evmContractAddressHex,
                 contractAddr ?? panic("Contract address is required to register"),
                 contractName ?? panic("Contract name is required to register"),
@@ -334,7 +334,7 @@ access(all) contract EVMTokenList {
                 panic("Invalid Cadence Asset Type for the Type: ".concat(ftOrNftType.identifier))
             }
 
-            self._registerAsset(
+            self._tryRegisterAsset(
                 evmAddress?.toString() ?? panic("EVM Address is required to register"),
                 contractAddr,
                 contractName,
@@ -347,27 +347,36 @@ access(all) contract EVMTokenList {
         /// Register the EVM compatible asset to the Token List
         ///
         access(self)
-        fun _registerAsset(_ evmContractAddressHex: String, _ address: Address, _ contractName: String, _ isNFT: Bool) {
+        fun _tryRegisterAsset(_ evmContractAddressHex: String, _ address: Address, _ contractName: String, _ isNFT: Bool) {
+            var isRegistered = false
             if isNFT {
                 if self.regsiteredErc721s[evmContractAddressHex] != nil {
                     return
                 }
                 NFTList.ensureNFTCollectionRegistered(address, contractName)
-                self.regsiteredErc721s[evmContractAddressHex] = NFTViewUtils.NFTIdentity(address, contractName)
+                if NFTList.isNFTCollectionRegistered(address, contractName) {
+                    isRegistered = true
+                    self.regsiteredErc721s[evmContractAddressHex] = NFTViewUtils.NFTIdentity(address, contractName)
+                }
             } else {
                 if self.regsiteredErc20s[evmContractAddressHex] != nil {
                     return
                 }
                 TokenList.ensureFungibleTokenRegistered(address, contractName)
-                self.regsiteredErc20s[evmContractAddressHex] = FTViewUtils.FTIdentity(address, contractName)
+                if TokenList.isFungibleTokenRegistered(address, contractName) {
+                    isRegistered = true
+                    self.regsiteredErc20s[evmContractAddressHex] = FTViewUtils.FTIdentity(address, contractName)
+                }
             }
 
-            emit EVMBridgedAssetRegistered(
-                "0x".concat(evmContractAddressHex),
-                isNFT,
-                address,
-                contractName
-            )
+            if isRegistered {
+                emit EVMBridgedAssetRegistered(
+                    "0x".concat(evmContractAddressHex),
+                    isNFT,
+                    address,
+                    contractName
+                )
+            }
         }
     }
 
