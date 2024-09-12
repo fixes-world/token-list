@@ -209,10 +209,19 @@ async function queryTokenListGeneric<T, R>(
 
   while (!isAllLoaded) {
     const tokenRequestKey = `${apiName}/?reviewer=${reviewer}&filter=${filter}&page=${currentPage}&limit=${currentLimit}`;
-    const ret = await executeOrLoadFromRedis(
-      tokenRequestKey,
-      queryListFunc.bind(null, currentPage, currentLimit, reviewer, filter),
-    );
+    const ret =
+      appInfo.network === "mainnet"
+        ? await executeOrLoadFromRedis(
+            tokenRequestKey,
+            queryListFunc.bind(
+              null,
+              currentPage,
+              currentLimit,
+              reviewer,
+              filter,
+            ),
+          )
+        : await queryListFunc(currentPage, currentLimit, reviewer, filter);
     if (ret.total === 0) {
       break;
     }

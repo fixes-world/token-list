@@ -388,7 +388,7 @@ access(all) contract EVMTokenList {
     access(all)
     view fun isEVMAddressRegistered(_ evmContractAddressHex: String): Bool {
         let registry = self.borrowRegistry()
-        return !registry.isEVMAddressRegistered(evmContractAddressHex)
+        return registry.isEVMAddressRegistered(evmContractAddressHex)
     }
 
     /// Whether the EVM Address is valid to register

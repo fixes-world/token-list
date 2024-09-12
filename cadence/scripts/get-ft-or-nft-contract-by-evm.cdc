@@ -9,7 +9,7 @@ access(all)
 fun main(
     evmContractAddress: String,
 ): EVMAssetStatus? {
-    if evmContractAddress.length != 42 || evmContractAddress.length != 40 {
+    if evmContractAddress.length != 42 && evmContractAddress.length != 40 {
         return nil
     }
     let addrNo0x = evmContractAddress.slice(from: 0, upTo: 2) == "0x"
@@ -37,7 +37,7 @@ fun main(
         address: acct,
         isNFT: isNFT,
         isRegistered: isRegistered,
-        isBridged: isRequires!,
+        isBridged: isRequires == false,
         bridgedAddress: bridgedAddress,
         bridgedContractName: bridgedContractName
     )

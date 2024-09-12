@@ -23,17 +23,21 @@ const currentEVMContract = ref<EVMAssetStatus | undefined>(undefined)
 function refresh() {
   currentNativeContract.value = undefined;
   currentEVMContract.value = undefined;
-  contractsRef.value?.reload();
+  if (isCurrentAddressEVM.value) {
+    contractsRef.value?.reload();
+  }
 }
 
 function onInputAddress(value: { address: string, isEVM: boolean } | undefined) {
   if (!value) {
     currentAddress.value = undefined;
+    currentNativeContract.value = undefined;
+    currentEVMContract.value = undefined;
     return;
   }
-  console.log('Selected Address:', currentAddress.value, 'isEVM:', isCurrentAddressEVM.value)
   currentAddress.value = value.address;
   isCurrentAddressEVM.value = value.isEVM;
+  console.log('Selected Address:', value.address, 'isEVM:', value.isEVM)
 }
 
 onMounted(() => {

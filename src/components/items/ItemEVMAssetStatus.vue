@@ -29,12 +29,11 @@ const isHighlight = computed(() => props.item?.isRegistered);
         {{ item.isRegistered ? 'Registered' : 'Not Registered' }}
       </span>
       <NTag
-        v-if="item.isNFT"
         size="tiny"
         type="info"
         round
       >
-        <span class="px-1">NFT</span>
+        <span class="px-1">{{ item.isNFT ? "ERC721" : "ERC20" }}</span>
       </NTag>
       <NTag
         v-if="item.isBridged"
@@ -44,11 +43,13 @@ const isHighlight = computed(() => props.item?.isRegistered);
       >
         <span class="px-1">Bridged</span>
       </NTag>
-      <span
+      <div
         v-if="item.isBridged"
-        :class="['w-fit title-base text-sm', isHighlight ? 'highlight' : 'text-[var(--base-color)]']">
-        {{ `${item.bridgedType?.contractName}@${item.bridgedType?.address}` }}
-      </span>
+        :class="['w-fit space-x-1', isHighlight ? 'highlight' : 'text-[var(--base-color)]']"
+      >
+        <span class="title-base">{{ `${item.bridgedType?.contractName}` }}</span>
+        <span class="text-sm opacity-70">{{ `@${item.bridgedType?.address}` }}</span>
+      </div>
     </div>
   </div>
   <span v-else />

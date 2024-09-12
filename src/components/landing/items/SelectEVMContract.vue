@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, h, ref, inject, onMounted, watch, type VNodeChild, toRaw } from 'vue';
 import {
-  NSkeleton, NEmpty, NTag,
-  NSelect, type SelectOption,
+  NSkeleton, NEmpty,
 } from 'naive-ui';
 import { getEVMFTOrNFTContract } from '@shared/flow/action/scripts'
 import type { EVMAssetStatus } from '@shared/flow/entities';
@@ -54,7 +53,7 @@ async function loadAssetContracts(addr: string) {
   console.log('Loading contracts from Address:', addr)
 
   isLoadingData.value = true;
-  currentContract.value = await getEVMFTOrNFTContract(addr);
+  currentContract.value = await getEVMFTOrNFTContract(addr)
   isLoadingData.value = false;
 }
 
