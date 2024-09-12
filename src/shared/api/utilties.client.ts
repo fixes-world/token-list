@@ -10,6 +10,7 @@ import Exception from "@shared/exception";
 export async function queryTokenListByAPI(
   reviewer?: string,
   filter: FilterType = FilterType.ALL,
+  isEVMOnly: boolean = false,
   page?: number,
   limit?: number,
 ) {
@@ -22,6 +23,9 @@ export async function queryTokenListByAPI(
   } else {
     url += `?filter=${filter}`;
   }
+  if (isEVMOnly) {
+    url += "&evm=true";
+  }
   return await sendGetRequest(undefined, url);
 }
 
@@ -33,6 +37,7 @@ export async function queryTokenListByAPI(
 export async function queryNFTListByAPI(
   reviewer?: string,
   filter: FilterType = FilterType.ALL,
+  isEVMOnly: boolean = false,
   page?: number,
   limit?: number,
 ) {
@@ -44,6 +49,9 @@ export async function queryNFTListByAPI(
     url += `?page=${page}&limit=${limit}&filter=${filter}`;
   } else {
     url += `?filter=${filter}`;
+  }
+  if (isEVMOnly) {
+    url += "&evm=true";
   }
   return await sendGetRequest(undefined, url);
 }

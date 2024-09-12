@@ -12,9 +12,10 @@ export const GET: APIRoute = async ({ request }) => {
           limit: parseInt(query.get("limit") || "100"),
         }
       : undefined;
+  const isEVMOnly = query.get("evm") === "true";
   return new Response(
     JSON.stringify(
-      await queryTokenListUsingCache(undefined, filter, pagination),
+      await queryTokenListUsingCache(undefined, filter, isEVMOnly, pagination),
     ),
   );
 };

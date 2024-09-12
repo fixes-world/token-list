@@ -9,10 +9,12 @@ import CodeBlock from '@components/widgets/CodeBlock.vue';
 
 const props = withDefaults(defineProps<{
   isNft?: boolean,
+  isEvmOnly?: boolean,
   reviewer?: string,
   filterType?: FilterType,
 }>(), {
   isNft: false,
+  isEvmOnly: false,
   reviewer: undefined,
   filterType: FilterType.ALL,
 })
@@ -29,8 +31,8 @@ async function loadJsonView() {
   isFirstLoading.value = true
   try {
     tokenList.value = props.isNft
-      ? await queryNFTListByAPI(props.reviewer, props.filterType)
-      : await queryTokenListByAPI(props.reviewer, props.filterType)
+      ? await queryNFTListByAPI(props.reviewer, props.filterType, props.isEvmOnly)
+      : await queryTokenListByAPI(props.reviewer, props.filterType, props.isEvmOnly)
   } catch (e) {
     console.error(e)
     tokenList.value = null
@@ -38,11 +40,11 @@ async function loadJsonView() {
   isFirstLoading.value = false
 }
 
-watch(() => props, async (newVal, oldVal) => {
-  if (newVal.reviewer !== oldVal.reviewer || newVal.filterType !== oldVal.filterType || newVal.isNft !== oldVal.isNft) {
+watch(() => [props.reviewer, props.isEvmOnly, props.filterType], async (newVal, oldVal) => {
+  if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1] || newVal[2] !== oldVal[2]) {
     await loadJsonView()
   }
-})
+}, { deep: true })
 
 onMounted(async () => {
   await loadJsonView()
