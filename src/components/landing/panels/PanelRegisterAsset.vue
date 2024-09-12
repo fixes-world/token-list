@@ -25,7 +25,7 @@ function refresh() {
   currentNativeContract.value = undefined;
   currentEVMContract.value = undefined;
 
-  if (isCurrentAddressEVM.value) {
+  if (!isCurrentAddressEVM.value) {
     contractsRef.value?.reload();
   } else {
     evmContractRef.value?.reload();

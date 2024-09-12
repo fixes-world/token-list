@@ -305,7 +305,7 @@ access(all) contract EVMTokenList {
 
             // register the asset to the Token List
             self._tryRegisterAsset(
-                evmContractAddressHex,
+                address.toString(),
                 contractAddr ?? panic("Contract address is required to register"),
                 contractName ?? panic("Contract name is required to register"),
                 isNFT
@@ -404,11 +404,12 @@ access(all) contract EVMTokenList {
     ///
     access(all)
     fun isValidToRegisterEVMAddress(_ evmContractAddressHex: String): Bool {
-        let isRegistered = self.isEVMAddressRegistered(evmContractAddressHex)
+        let addr = EVM.addressFromString(evmContractAddressHex)
+        let isRegistered = self.isEVMAddressRegistered(addr.toString())
         if isRegistered {
             return false
         }
-        let isRequires = FlowEVMBridge.evmAddressRequiresOnboarding(EVM.addressFromString(evmContractAddressHex))
+        let isRequires = FlowEVMBridge.evmAddressRequiresOnboarding(addr)
         return isRequires != nil
     }
 
@@ -460,9 +461,10 @@ access(all) contract EVMTokenList {
         _ evmContractAddressHex: String,
         feeProvider: auth(FungibleToken.Withdraw) &{FungibleToken.Provider}?
     ) {
-        if self.isValidToRegisterEVMAddress(evmContractAddressHex) {
+        let addrHex = EVM.addressFromString(evmContractAddressHex).toString()
+        if self.isValidToRegisterEVMAddress(addrHex) {
             let registry = self.borrowRegistry()
-            registry.registerEVMAsset(evmContractAddressHex, feeProvider: feeProvider)
+            registry.registerEVMAsset(addrHex, feeProvider: feeProvider)
         }
     }
 

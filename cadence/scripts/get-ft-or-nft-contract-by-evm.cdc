@@ -34,7 +34,7 @@ fun main(
     return EVMAssetStatus(
         address: acct,
         isNFT: isNFT,
-        isRegistered: EVMTokenList.isEVMAddressRegistered(addrNo0x),
+        isRegistered: EVMTokenList.isEVMAddressRegistered(acct.toString()),
         isBridged: isRequires == false,
         bridgedAddress: bridgedAddress,
         bridgedContractName: bridgedContractName
