@@ -71,6 +71,7 @@ const rankOptions: SelectOption[] = [
   { value: EvaluationType.PENDING, label: "Pending" },
   { value: EvaluationType.VERIFIED, label: "Verified" },
   { value: EvaluationType.FEATURED, label: "Featured" },
+  { value: EvaluationType.BLOCKED, label: "Blocked" },
 ];
 
 // Handlers and Functions

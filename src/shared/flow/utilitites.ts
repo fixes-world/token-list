@@ -35,7 +35,10 @@ export function parseReviewData(item: TagableItem): {
     tags: [] as string[],
   };
   const tags = new Set(item?.tags ?? []);
-  if (tags.has("Featured")) {
+  if (tags.has("Blocked")) {
+    data.rank = EvaluationType.BLOCKED;
+    tags.delete("Blocked");
+  } else if (tags.has("Featured")) {
     data.rank = EvaluationType.FEATURED;
     tags.delete("Featured");
     tags.delete("Verified");

@@ -7,6 +7,7 @@ export enum EvaluationType {
   PENDING,
   VERIFIED,
   FEATURED,
+  BLOCKED,
 }
 
 ///   0 - All
@@ -14,10 +15,12 @@ export enum EvaluationType {
 ///   2 - Managed by Reviewer
 ///   3 - Verified by Reviewer
 ///   4 - Featured by Reviewer
+///   5 - Blocked by Reviewer
 export enum FilterType {
   ALL,
   REVIEWED,
   MANAGED,
   VERIFIED,
   FEATURED,
+  BLOCKED,
 }

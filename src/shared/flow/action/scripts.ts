@@ -333,6 +333,8 @@ function sortTokenView(a: TagableItem, b: TagableItem) {
     return -1;
   else if (!a.tags.includes("Verified") && b.tags.includes("Verified"))
     return 1;
+  else if (a.tags.includes("Blocked") && !b.tags.includes("Blocked")) return 1;
+  else if (!a.tags.includes("Blocked") && b.tags.includes("Blocked")) return -1;
   return a.identity.contractName.localeCompare(b.identity.contractName);
 }
 

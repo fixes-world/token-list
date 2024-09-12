@@ -154,7 +154,9 @@ access(all) contract TokenList {
                     let returnTags = reviewRef.getTags()
                     // Add extra tags based on the evaluation rank if the reviewer is the fallbackedReviewer
                     if reviewer == fallbackedReviewerAddr {
-                        if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue {
+                        if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.BLOCKED.rawValue {
+                            returnTags.insert(at: 0, "Blocked")
+                        } else if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue {
                             returnTags.insert(at: 0, "Featured")
                             returnTags.insert(at: 0, "Verified")
                         } else if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.VERIFIED.rawValue {
@@ -437,6 +439,8 @@ access(all) contract TokenList {
         access(all)
         view fun getVerifiedFTTypes(): [Type]
         access(all)
+        view fun getBlockedFTTypes(): [Type]
+        access(all)
         view fun borrowFTViewReader(_ tokenType: Type): &FTViewUtils.EditableFTView?
         access(all)
         view fun borrowFTDisplayReader(_ tokenType: Type): &{FTViewUtils.FTViewDisplayEditor}?
@@ -610,7 +614,7 @@ access(all) contract TokenList {
             var isUpdated = false
             for tag in tags {
                 // ingore the eval tags
-                if tag == "Verified" || tag == "Featured" || tag == "Pending" {
+                if tag == "Verified" || tag == "Featured" || tag == "Pending" || tag == "Blocked" {
                     continue
                 }
                 if ref.addTag(tag) {
@@ -786,6 +790,14 @@ access(all) contract TokenList {
             return self.reviewed.keys.filter(view fun(type: Type): Bool {
                 return reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.VERIFIED.rawValue
                     || reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue
+            })
+        }
+
+        access(all)
+        view fun getBlockedFTTypes(): [Type] {
+            let reviewedRef = &self.reviewed as &{Type: FTViewUtils.Evaluation}
+            return self.reviewed.keys.filter(view fun(type: Type): Bool {
+                return reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.BLOCKED.rawValue
             })
         }
 

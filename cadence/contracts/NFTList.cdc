@@ -138,7 +138,9 @@ access(all) contract NFTList {
                     let returnTags = reviewRef.getTags()
                     // Add extra tags based on the evaluation rank if the reviewer is the fallbackedReviewer
                     if reviewer == fallbackedReviewerAddr {
-                        if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue {
+                        if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.BLOCKED.rawValue {
+                            returnTags.insert(at: 0, "Blocked")
+                        } else if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue {
                             returnTags.insert(at: 0, "Featured")
                             returnTags.insert(at: 0, "Verified")
                         } else if reviewRef.evalRank.rawValue == FTViewUtils.Evaluation.VERIFIED.rawValue {
@@ -345,6 +347,8 @@ access(all) contract NFTList {
         access(all)
         view fun getVerifiedNFTTypes(): [Type]
         access(all)
+        view fun getBlockedNFTTypes(): [Type]
+        access(all)
         view fun borrowNFTCollectionDisplayReaderByNftType(_ nftType: Type): &NFTViewUtils.EditableNFTCollectionDisplay?
         access(all)
         view fun borrowNFTCollectionDisplayReader(
@@ -495,7 +499,7 @@ access(all) contract NFTList {
             var isUpdated = false
             for tag in tags {
                 // ingore the eval tags
-                if tag == "Verified" || tag == "Featured" || tag == "Pending" {
+                if tag == "Verified" || tag == "Featured" || tag == "Pending" || tag == "Blocked" {
                     continue
                 }
                 if ref.addTag(tag) {
@@ -609,6 +613,16 @@ access(all) contract NFTList {
             return self.reviewed.keys.filter(view fun(type: Type): Bool {
                 return reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.VERIFIED.rawValue
                     || reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.FEATURED.rawValue
+            })
+        }
+
+        /// Return all Non-Fungible Token Types with BLOCKED evaluation
+        ///
+        access(all)
+        view fun getBlockedNFTTypes(): [Type] {
+            let reviewedRef = &self.reviewed as &{Type: FTViewUtils.Evaluation}
+            return self.reviewed.keys.filter(view fun(type: Type): Bool {
+                return reviewedRef[type]?.rawValue == FTViewUtils.Evaluation.BLOCKED.rawValue
             })
         }
 
