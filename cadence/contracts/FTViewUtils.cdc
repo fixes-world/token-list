@@ -251,6 +251,7 @@ access(all) contract FTViewUtils {
         access(all) case PENDING
         access(all) case VERIFIED
         access(all) case FEATURED
+        access(all) case BLOCKED
     }
 
     /// The struct for the Review Comment

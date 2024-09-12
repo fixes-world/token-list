@@ -19,8 +19,12 @@ const isFeatured = computed(() => {
   return props.tag === 'Featured';
 });
 
+const isBlocked = computed(() => {
+  return props.tag === 'Blocked';
+});
+
 const isSystemTag = computed(() => {
-  return isPending.value || isVerified.value || isFeatured.value;
+  return isPending.value || isVerified.value || isFeatured.value || isBlocked.value;
 });
 
 </script>
@@ -29,7 +33,7 @@ const isSystemTag = computed(() => {
   <NTag
     size="tiny"
     round
-    :type="isFeatured ? 'warning' : isVerified ? 'success' : isPending ? 'default' : 'info'"
+    :type="isFeatured ? 'warning' : isVerified ? 'success' : isPending ? 'default' : isBlocked ? 'error' : 'info'"
     :bordered="false"
   >
     <ItemHintLabel
@@ -39,6 +43,7 @@ const isSystemTag = computed(() => {
       <span v-if="isPending" class="i-carbon:radar w-3 h-3" />
       <span v-else-if="isFeatured" class="i-carbon:star-filled w-3 h-3" />
       <span v-else-if="isVerified" class="i-carbon:checkmark-filled w-3 h-3" />
+      <span v-else-if="isBlocked" class="i-carbon:close-filled w-3 h-3" />
       <template #hint>
         {{ tag }}
       </template>

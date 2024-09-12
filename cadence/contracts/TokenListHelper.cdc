@@ -72,6 +72,9 @@ access(all) contract TokenListHelper {
                 } else if filterType == 4 {
                     // Featured by Reviewer
                     all = reviewerRef.getFeaturedFTTypes()
+                } else if filterType == 5 {
+                    // Blocked by Reviewer
+                    all = reviewerRef.getBlockedFTTypes()
                 }
                 totalAmt = all.length
                 if totalAmt == 0 || start >= totalAmt {
@@ -204,6 +207,9 @@ access(all) contract TokenListHelper {
                 } else if filterType == 4 {
                     // Featured by Reviewer
                     all = reviewerRef.getFeaturedNFTTypes()
+                } else if filterType == 5 {
+                    // Blocked by Reviewer
+                    all = reviewerRef.getBlockedNFTTypes()
                 }
                 totalAmt = all.length
                 if totalAmt == 0 || start >= totalAmt {

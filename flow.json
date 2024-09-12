@@ -94,7 +94,8 @@
 			"source": "testnet://35717efbbce11c74.Clock",
 			"hash": "e3439bc3222f1af910ccd512bfd92bed6694573886b106f96fd91f29833f187e",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"CrossVMNFT": {
@@ -117,14 +118,23 @@
 			"source": "testnet://82ec283f88a62e65.DapperUtilityCoin",
 			"hash": "b2fb77ca1a6e05bcf1497f1ef95e66916d8940e68ae6d98f67dfd6956aaba27c",
 			"aliases": {
-				"testnet": "82ec283f88a62e65"
+				"testnet": "82ec283f88a62e65",
+				"mainnet": "ead892083b3e2c6c"
 			}
 		},
 		"Debug": {
 			"source": "testnet://35717efbbce11c74.Debug",
 			"hash": "6c207969aa182d8fe156d823fea7764c83ca2045d0a25568e4e4ebae427e5443",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
+			}
+		},
+		"Domains": {
+			"source": "testnet://233eb012d34b0070.Domains",
+			"hash": "b2fb77ca1a6e05bcf1497f1ef95e66916d8940e68ae6d98f67dfd6956aaba27c",
+			"aliases": {
+				"mainnet": "233eb012d34b0070"
 			}
 		},
 		"EVM": {
@@ -141,22 +151,16 @@
 			"source": "testnet://35717efbbce11c74.FIND",
 			"hash": "7b9ccd7b9f7d47683038c7078fdc603c0625bef7523131cef25461fc03b66e2f",
 			"aliases": {
-				"mainnet": "097bafa4e0b48eef",
-				"testnet": "35717efbbce11c74"
-			}
-		},
-		"FUSD": {
-			"source": "testnet://e223d8a629e49c68.FUSD",
-			"hash": "eeaa629caec021340789e570538811bc70b533be0b3b611aa3fd513316074d21",
-			"aliases": {
-				"testnet": "e223d8a629e49c68"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"FindUtils": {
 			"source": "testnet://35717efbbce11c74.FindUtils",
 			"hash": "e0b535454f9c6e01a13d1a33da4d8fcfb32080b34184e864cf4e01def79e3d13",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"FlowEVMBridge": {
@@ -233,6 +237,13 @@
 				"mainnet": "1654653399040a61",
 				"previewnet": "4445e7ad11568276",
 				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FNSConfig": {
+			"source": "testnet://233eb012d34b0070.FNSConfig",
+			"hash": "b2fb77ca1a6e05bcf1497f1ef95e66916d8940e68ae6d98f67dfd6956aaba27c",
+			"aliases": {
+				"mainnet": "233eb012d34b0070"
 			}
 		},
 		"FungibleToken": {
@@ -335,41 +346,47 @@
 			"source": "testnet://2a9b59c3e2b72ee0.OracleConfig",
 			"hash": "48c252a858ce1c1fb44a377f338a4e558a70f1c22cecea9b7bf8cb74e9b16b79",
 			"aliases": {
-				"testnet": "2a9b59c3e2b72ee0"
+				"testnet": "2a9b59c3e2b72ee0",
+				"mainnet": "cec15c814971c1dc"
 			}
 		},
 		"OracleInterface": {
 			"source": "testnet://2a9b59c3e2b72ee0.OracleInterface",
 			"hash": "1ca66227b60dcf59e9d84404398c8151b1ff6395408094669ef1251c78ca2465",
 			"aliases": {
-				"testnet": "2a9b59c3e2b72ee0"
+				"testnet": "2a9b59c3e2b72ee0",
+				"mainnet": "cec15c814971c1dc"
 			}
 		},
 		"Profile": {
 			"source": "testnet://35717efbbce11c74.Profile",
 			"hash": "86e8466f4071cea24b790b48df47e27794163c95b2f8cf4abe41eec239dc976c",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"ProfileCache": {
 			"source": "testnet://35717efbbce11c74.ProfileCache",
 			"hash": "63766a043652ae9731320fd36697bc9a003c89176ad5326692763e2fe348f1d8",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"PublicPriceOracle": {
 			"source": "testnet://8232ce4a3aff4e94.PublicPriceOracle",
 			"hash": "7081beeff0e83346077e6b75ade19133cc36e0f75f7b61efc8db5e420ab7421c",
 			"aliases": {
-				"testnet": "8232ce4a3aff4e94"
+				"testnet": "8232ce4a3aff4e94",
+				"mainnet": "ec67451f8a58216a"
 			}
 		},
 		"ScopedFTProviders": {
 			"source": "testnet://31ad40c07a2a9788.ScopedFTProviders",
 			"hash": "f2eb9f86b561071aea67e665a6c03ac596ac6d8aa4125e3c79427c0fe2987ae6",
 			"aliases": {
+				"mainnet": "a340dc0a4ec828ab",
 				"testnet": "31ad40c07a2a9788"
 			}
 		},
@@ -377,7 +394,8 @@
 			"source": "testnet://35717efbbce11c74.Sender",
 			"hash": "cf37ac45beb10decfc889cda163fb927d8de927504b97dfe7f1e06edb3df59c0",
 			"aliases": {
-				"testnet": "35717efbbce11c74"
+				"testnet": "35717efbbce11c74",
+				"mainnet": "097bafa4e0b48eef"
 			}
 		},
 		"Serialize": {
