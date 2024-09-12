@@ -130,6 +130,13 @@
 				"mainnet": "097bafa4e0b48eef"
 			}
 		},
+		"Domains": {
+			"source": "testnet://233eb012d34b0070.Domains",
+			"hash": "b2fb77ca1a6e05bcf1497f1ef95e66916d8940e68ae6d98f67dfd6956aaba27c",
+			"aliases": {
+				"mainnet": "233eb012d34b0070"
+			}
+		},
 		"EVM": {
 			"source": "testnet://8c5303eaa26202d6.EVM",
 			"hash": "4eca716fbef22799fdf57de5d4af1e2e7a79a91b3f0a92db1a10ae4fe4cb13af",
@@ -230,6 +237,13 @@
 				"mainnet": "1654653399040a61",
 				"previewnet": "4445e7ad11568276",
 				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FNSConfig": {
+			"source": "testnet://233eb012d34b0070.FNSConfig",
+			"hash": "b2fb77ca1a6e05bcf1497f1ef95e66916d8940e68ae6d98f67dfd6956aaba27c",
+			"aliases": {
+				"mainnet": "233eb012d34b0070"
 			}
 		},
 		"FungibleToken": {
