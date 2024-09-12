@@ -92,8 +92,6 @@ onMounted(() => {
             aria-level="2"
             class="block lg:hidden font-semibold text-lg italic mx-2 mb-3 mt-1"
           >{{ item.label }}</h2>
-          {{ currentReviewer?.address }}
-          {{ isShowEvmOnly }}
           <component
             :is="item.component"
             class="max-h-[calc(100vh-24rem)]"
