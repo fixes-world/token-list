@@ -14,6 +14,7 @@ import "FungibleTokenMetadataViews"
 import "EVM"
 import "FlowEVMBridgeConfig"
 import "FlowEVMBridgeUtils"
+import "FlowToken"
 // TokenList Imports
 import "TokenList"
 import "NFTList"
@@ -126,7 +127,7 @@ access(all) contract TokenListHelper {
         // load token view
         for ftType in types {
             if let ftEntry = registry.borrowFungibleTokenEntry(ftType) {
-                list.append(self.buildFTView(ftEntry, reviewer))
+                list.append(self.buildFTView(ftEntry, reviewer, false))
             }
         }
         return list
@@ -136,6 +137,7 @@ access(all) contract TokenListHelper {
     fun buildFTView(
         _ ftEntry: &{TokenList.FTEntryInterface},
         _ reviewer: Address?,
+        _ prioritizeEVMData: Bool,
     ): {FTViewUtils.ITokenView} {
         let identity = ftEntry.getIdentity()
         var paths: FTViewUtils.StandardTokenPaths? = nil
@@ -150,11 +152,16 @@ access(all) contract TokenListHelper {
         }
         let tokenType = identity.buildType()
         if let evmAddr = FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType) {
-            let isCadenceNative = FlowEVMBridgeUtils.isCadenceNative(type: tokenType)
+            var decimals: UInt8 = 8
+            if prioritizeEVMData || FlowEVMBridgeUtils.isCadenceNative(type: tokenType) == false {
+                if FlowEVMBridgeUtils.isERC20(evmContractAddress: evmAddr) {
+                    decimals = FlowEVMBridgeUtils.getTokenDecimals(evmContractAddress: evmAddr)
+                }
+            }
             return FTViewUtils.BridgedTokenView(
                 identity: identity,
                 evmAddress: "0x".concat(evmAddr.toString()),
-                decimals: isCadenceNative ? 8 : FlowEVMBridgeUtils.getTokenDecimals(evmContractAddress: evmAddr),
+                decimals: decimals,
                 tags: ftEntry.getTags(reviewer),
                 dataSource: source,
                 paths: paths,
@@ -311,7 +318,7 @@ access(all) contract TokenListHelper {
         let addrs = registry.getERC20AddressesHex(page, size)
         for addr in addrs {
             if let entry = registry.borrowFungibleTokenEntry(addr) {
-                list.append(self.buildFTView(entry, reviewer))
+                list.append(self.buildFTView(entry, reviewer, true))
             }
         }
         return QueryResult(

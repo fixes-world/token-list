@@ -50,11 +50,17 @@ function onClick() {
       />
     </div>
     <div class="z-10 flex-auto flex flex-col items-start gap-1">
-      <div class="text-xs text-gray-400 italic font-semibold">
+      <div class="text-xs text-gray-400 italic font-semibold flex items-center gap-1">
         <ElementAddressDisplay
           :address="token.identity.address"
           :short="false"
         />
+        <div
+          v-if="token.evmAddress"
+          class="inline-block max-w-40 truncate"
+        >
+          / {{ token.evmAddress }}
+        </div>
       </div>
       <div class="flex flex-wrap items-center gap-1">
         <ItemNativeAssetStatus :item="token.identity" />
@@ -71,9 +77,9 @@ function onClick() {
       v-if="withDisplay && token.display?.display"
       class="z-10 flex-none flex items-center items-end gap-2 md:gap-4"
     >
-      <span class="title-base highlight text-xl truncate px-1">
+      <div class="title-base highlight text-xl truncate px-1 max-w-64">
         {{ token.display?.display?.name }}
-      </span>
+      </div>
       <ItemMedia
         :alt="`Square Image for ${token.display?.display?.name}`"
         :media="token.display.display.squareImage"
