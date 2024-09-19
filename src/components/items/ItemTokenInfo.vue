@@ -49,7 +49,7 @@ function onClick() {
         />
         <div
           v-if="token.evmAddress"
-          class="inline-block max-w-40 truncate"
+          :class="['inline-block truncate', withDisplay ? 'max-w-40' : 'max-w-16']"
         >
           / {{ token.evmAddress }}
         </div>
