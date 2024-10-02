@@ -112,6 +112,7 @@ export interface ExportedTokenInfo extends TokenIdentity {
   chainId: number;
   path: TokenPaths;
   evmAddress?: string;
+  flowAddress?: string;
   symbol: string;
   name: string;
   decimals: number;
@@ -177,6 +178,7 @@ export type NFTListQueryResult = QueryResult<StandardNFTCollectionView>;
 export interface ExportedNFTCollectionInfo extends TokenIdentity {
   chainId: number;
   path: AssetPaths;
+  flowAddress: string;
   evmAddress?: string;
   name: string;
   description: string;

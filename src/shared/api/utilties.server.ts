@@ -117,7 +117,7 @@ export async function queryTokenListUsingCache(
   const tokens = await queryTokenListGeneric(
     "token-list",
     !isEVMOnly ? queryTokenList : queryEVMBridgedFTList,
-    exportTokenInfo,
+    exportTokenInfo.bind(null, isEVMOnly),
     reviewer,
     filter,
     pagination,
@@ -153,7 +153,7 @@ export async function queryNFTListUsingCache(
   const tokens = await queryTokenListGeneric(
     "nft-list",
     !isEVMOnly ? queryNFTList : queryEVMBridgedNFTList,
-    exportNFTCollectionInfo,
+    exportNFTCollectionInfo.bind(null, isEVMOnly),
     reviewer,
     filter,
     pagination,
