@@ -58,6 +58,7 @@ export function parseReviewData(item: TagableItem): {
  * @param ft
  */
 export function exportTokenInfo(
+  isEVMList: boolean,
   ft: StandardTokenView,
 ): ExportedTokenInfo | undefined {
   if (ft.path === undefined) {
@@ -78,10 +79,11 @@ export function exportTokenInfo(
   }
   return {
     chainId: appInfo.chainId,
-    address: ft.identity.address,
+    address: isEVMList ? ft.evmAddress! : ft.identity.address,
     contractName: ft.identity.contractName,
     path: ft.path,
     evmAddress: ft.evmAddress,
+    flowAddress: ft.identity.address,
     symbol: ft.display.display.symbol,
     name: ft.display.display.name,
     description: ft.display?.display?.description ?? "",
@@ -93,6 +95,7 @@ export function exportTokenInfo(
 }
 
 export function exportNFTCollectionInfo(
+  isEVMList: boolean,
   nft: StandardNFTCollectionView,
 ): ExportedNFTCollectionInfo | undefined {
   if (nft.paths === undefined) {
@@ -110,10 +113,11 @@ export function exportNFTCollectionInfo(
   }
   return {
     chainId: appInfo.chainId,
-    address: nft.identity.address,
+    address: isEVMList ? nft.evmAddress! : nft.identity.address,
     contractName: nft.identity.contractName,
     path: nft.paths,
     evmAddress: nft.evmAddress,
+    flowAddress: nft.identity.address,
     name: nft.display.display.name,
     description: nft.display?.display?.description ?? "",
     logoURI: nft.display.display.squareImage.uri,
