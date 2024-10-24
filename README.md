@@ -17,6 +17,8 @@ This repo contains all contract and frontend code.
 | TokenList | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.TokenList) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.TokenList) |
 | NFTViewUtils | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.NFTViewUtils) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.NFTViewUtils) |
 | NFTList | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.NFTList) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.NFTList) |
+| EVMTokenList | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.EVMTokenList) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.EVMTokenList) |
+| TokenListHelper | [0xb86f928a1fa7798e](https://contractbrowser.com/A.b86f928a1fa7798e.TokenListHelper) | [0x15a918087ab12d86](https://contractbrowser.com/A.15a918087ab12d86.TokenListHelper) |
 
 ## 📦 Special Contract: BlackHole
 
