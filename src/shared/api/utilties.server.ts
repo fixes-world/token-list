@@ -116,8 +116,9 @@ export async function queryTokenListUsingCache(
 ): Promise<TokenList> {
   const tokens = await queryTokenListGeneric(
     "token-list",
+    isEVMOnly,
     !isEVMOnly ? queryTokenList : queryEVMBridgedFTList,
-    exportTokenInfo.bind(null, isEVMOnly),
+    exportTokenInfo,
     reviewer,
     filter,
     pagination,
@@ -152,8 +153,9 @@ export async function queryNFTListUsingCache(
 ): Promise<NFTList> {
   const tokens = await queryTokenListGeneric(
     "nft-list",
+    isEVMOnly,
     !isEVMOnly ? queryNFTList : queryEVMBridgedNFTList,
-    exportNFTCollectionInfo.bind(null, isEVMOnly),
+    exportNFTCollectionInfo,
     reviewer,
     filter,
     pagination,
@@ -180,13 +182,14 @@ export async function queryNFTListUsingCache(
 
 async function queryTokenListGeneric<T, R>(
   apiName: string,
+  isEVMOnly: boolean,
   queryListFunc: (
     page: number,
     limit: number,
     reviewer?: string,
     filter?: FilterType,
   ) => Promise<QueryResult<T>>,
-  parseTokenFunc: (token: T) => R,
+  parseTokenFunc: (isEVMList: boolean, token: T) => R,
   reviewer: string | undefined,
   filter: FilterType,
   pagination?: { page: number; limit: number },
@@ -203,7 +206,9 @@ async function queryTokenListGeneric<T, R>(
   }
 
   const isLoadAll = pagination === undefined;
-  const currentLimit = Math.min(Math.abs(pagination?.limit ?? 100), 1000);
+  const currentLimit = isEVMOnly
+    ? Math.min(Math.abs(pagination?.limit ?? 15), 30)
+    : Math.min(Math.abs(pagination?.limit ?? 50), 200);
 
   const tokens: R[] = [];
 
@@ -232,12 +237,19 @@ async function queryTokenListGeneric<T, R>(
     if (totalAmount === -1) {
       totalAmount = ret.total;
     }
-    tokens.push(...ret.list.map(parseTokenFunc).filter((x) => x !== undefined));
+    tokens.push(
+      ...ret.list
+        .map(parseTokenFunc.bind(null, isEVMOnly))
+        .filter((x) => x !== undefined),
+    );
     if (isLoadAll && ret.list.length !== 0) {
       currentPage += 1;
     } else {
       isAllLoaded = true;
     }
+  }
+  if (tokens.length === 0) {
+    throw new Exception(404, "No token found");
   }
   return tokens;
 }

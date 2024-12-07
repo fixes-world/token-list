@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 import UnoCSS from "unocss/astro";
 import vue from "@astrojs/vue";
 import svgLoader from "vite-svg-loader";
-import vercel from "@astrojs/vercel/serverless";
+import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
