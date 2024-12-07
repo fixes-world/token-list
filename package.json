@@ -4,7 +4,7 @@
   "type": "module",
   "description": "A website and endpoint for the on-chain list of Flow Standard Fungible Tokens (FTs)",
   "engines": {
-    "node": ">=18.0.0"
+		"node": ">=22.0.0"
   },
   "scripts": {
     "dev": "astro dev",
