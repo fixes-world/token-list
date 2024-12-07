@@ -1,6 +1,6 @@
 ---
 import "@assets/css/global.css";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import appInfo from "@shared/config/info";
 import Header from "@components/partials/Header.astro";
 import Footer from "@components/partials/Footer.astro";
@@ -54,7 +54,7 @@ const url = appInfo.url;
       content=`${url}/social.jpg?v=${appInfo.version}`
     />
     <meta name="generator" content={Astro.generator} />
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body>
     {isMaintainance ? <Maintenance /> : (
