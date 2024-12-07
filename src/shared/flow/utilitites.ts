@@ -91,6 +91,13 @@ export function exportTokenInfo(
     logoURI: ft.display.display.logos[0].uri,
     tags: ft.tags ?? [],
     extensions,
+    // Fix for Flow Wallet
+    flowIdentifier: isEVMList
+      ? `A.${ft.identity.address.slice(2)}.${ft.identity.contractName}.Vault`
+      : undefined,
+    website: isEVMList
+      ? `https://evm.flowscan.io/token/${ft.evmAddress!}`
+      : undefined,
   };
 }
 
@@ -124,5 +131,9 @@ export function exportNFTCollectionInfo(
     bannerURI: nft.display.display.bannerImage.uri,
     tags: nft.tags ?? [],
     extensions,
+    // Fix for Flow Wallet
+    flowIdentifier: isEVMList
+      ? `A.${nft.identity.address.slice(2)}.${nft.identity.contractName}.NFT`
+      : undefined,
   };
 }

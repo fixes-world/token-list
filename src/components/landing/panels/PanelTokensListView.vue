@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, watch, toRaw } from 'vue';
+import { ref, computed, reactive, onMounted, watch, toRaw, nextTick } from 'vue';
 
 import type { QueryResult, StandardTokenView, StandardNFTCollectionView } from '@shared/flow/entities';
 import { queryTokenList, queryNFTList, queryEVMBridgedFTList, queryEVMBridgedNFTList } from '@shared/flow/action/scripts';
@@ -55,7 +55,9 @@ async function reload() {
 
 watch(() => [props.reviewer, props.isEvmOnly, props.filterType], async (newVal, oldVal) => {
   if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1] || newVal[2] !== oldVal[2]) {
-    await reload()
+    nextTick(async () => {
+      await reload()
+    })
   }
 }, { deep: true })
 
@@ -70,6 +72,7 @@ defineExpose({
       ref="listWrapperRef"
       emptyMessage="No Token Found"
       v-model:page="currentPage"
+      :size="isEvmOnly ? 20 : 50"
       :loadMore="loadMoreFunc"
       :filter="filterName"
       :getItemName="token => {

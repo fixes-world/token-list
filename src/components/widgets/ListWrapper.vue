@@ -7,11 +7,13 @@ import type { QueryResult } from '@shared/flow/entities';
 const props = withDefaults(defineProps<{
   loadMore: (page: number, size: number) => Promise<QueryResult<any>>,
   page?: number,
+  size?: number,
   emptyMessage?: string,
   filter?: string,
   getItemName?: (item: any) => string,
 }>(), {
   page: 0,
+  size: 50,
   emptyMessage: 'No Item Found',
   filter: "",
   getItemName: (item: any) => item.name,
@@ -23,7 +25,6 @@ const emits = defineEmits<{
 
 const isFirstLoading = ref(false)
 const isLoading = ref(false)
-const loadingSize = ref(100)
 const hasMore = ref(false)
 
 const currentPage = computed<number>({
@@ -49,9 +50,9 @@ async function loadMore(forceFirst = false) {
   isLoading.value = true
   const results = await props.loadMore(
     forceFirst ? 0 : currentPage.value,
-    loadingSize.value,
+    props.size,
   )
-  hasMore.value = results.list.length === loadingSize.value && currentPage.value * loadingSize.value < results.total
+  hasMore.value = results.list.length === props.size && currentPage.value * props.size < results.total
   totalAmount.value = results.total
   // update last start rank
   if (results.list.length > 0) {

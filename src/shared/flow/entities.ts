@@ -120,6 +120,9 @@ export interface ExportedTokenInfo extends TokenIdentity {
   logoURI: string;
   tags: string[];
   extensions: Record<string, string>;
+  // Extra fields for compatibility
+  flowIdentifier?: string;
+  website?: string;
 }
 
 export interface TokenTag {
@@ -186,6 +189,8 @@ export interface ExportedNFTCollectionInfo extends TokenIdentity {
   bannerURI: string;
   tags: string[];
   extensions: Record<string, string>;
+  // Extra fields for compatibility
+  flowIdentifier?: string;
 }
 
 export interface NFTList {
