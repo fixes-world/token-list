@@ -22,7 +22,7 @@
     "Cadence"
   ],
   "dependencies": {
-    "@astrojs/vue": "^5.0.1",
+    "@astrojs/vue": "^5.0.4",
     "@onflow/fcl": "^1.13.1",
     "@onflow/fcl-wc": "5.0.2",
     "@vercel/analytics": "^1.4.1",
@@ -30,7 +30,7 @@
     "@vercel/kv": "^1.0.1",
     "@vueuse/components": "^10.11.1",
     "@vueuse/core": "^10.11.1",
-    "astro": "^5.0.3",
+    "astro": "^5.1.2",
     "dompurify": "^3.2.2",
     "highlight.js": "^11.10.0",
     "js-base64": "^3.7.7",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/vercel": "^8.0.0",
+    "@astrojs/vercel": "^8.0.1",
     "@babel/core": "^7.26.0",
     "@iconify-json/carbon": "^1.2.4",
     "@onflow/config": "^1.5.1",
