@@ -5,8 +5,8 @@ import type { EVMAssetStatus, TokenAssetStatus } from '@shared/flow/entities';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import AddressSearch from '@components/landing/items/AddressSearch.vue';
-import type SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
-import type SelectEVMContract from '../items/SelectEVMContract.vue';
+import SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
+import SelectEVMContract from '../items/SelectEVMContract.vue';
 import FromSubmitRegisterToken from '@components/landing/form/FromSubmitRegisterToken.vue';
 import FromSubmitRegisterEVMAsset from '@components/landing/form/FromSubmitRegisterEVMAsset.vue';
 
