@@ -5,8 +5,8 @@ import type { EVMAssetStatus, TokenAssetStatus } from '@shared/flow/entities';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
 import ElementAddressBrowserLink from '@components/items/cardElements/ElementAddressBrowserLink.vue';
 import AddressSearch from '@components/landing/items/AddressSearch.vue';
-import SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
-import SelectEVMContract from '../items/SelectEVMContract.vue';
+import type SelectTokenContracts from '@components/landing/items/SelectTokenContracts.vue';
+import type SelectEVMContract from '../items/SelectEVMContract.vue';
 import FromSubmitRegisterToken from '@components/landing/form/FromSubmitRegisterToken.vue';
 import FromSubmitRegisterEVMAsset from '@components/landing/form/FromSubmitRegisterEVMAsset.vue';
 
@@ -136,6 +136,9 @@ onMounted(() => {
           Non-Fungible Token - The contract must be a standard ERC721 contract.
         </li>
       </ul>
+      <p class="font-semibold opacity-70">
+        <span class="i-carbon:warning w-4 h-4" /> Registering to the VM Bridge(especially for EVM Assets) requires 1 $FLOW.
+      </p>
     </div>
   </div>
 </template>
