@@ -1,5 +1,6 @@
 {
-  "prettier.enable": true,
+  "biome.enabled": true,
+  "prettier.enable": false,
   "[vue]": {
     "editor.defaultFormatter": "Vue.volar"
   },

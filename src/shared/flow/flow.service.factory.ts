@@ -1,5 +1,5 @@
 import { FlowService } from "./flow.service";
-import flowJSON from "@flow.json" assert { type: "json" };
+import flowJSON from "@flow.json" with { type: "json" };
 
 let _instance: FlowService;
 export async function getFlowInstance(): Promise<FlowService> {

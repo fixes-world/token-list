@@ -13,6 +13,11 @@
 			"@layouts/*": ["src/layouts/*"]
 		},
 		"typeRoots": ["./node_modules/@types", "./src/types"]
-	},
+  },
+  "ts-node": {
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true,
+    "esm": true
+  },
 	"exclude": ["node_modules", "dist", "build", "public"]
 }
