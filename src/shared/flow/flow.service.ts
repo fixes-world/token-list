@@ -50,7 +50,7 @@ export class FlowService {
       case "mainnet":
         await cfg.put(
           "accessNode.api",
-          import.meta.env.PUBLIC_MAINNET_ENDPOINT ?? "https://mainnet.onflow.org",
+          import.meta?.env?.PUBLIC_MAINNET_ENDPOINT ?? "https://mainnet.onflow.org",
         );
         await cfg.put("discovery.wallet", "https://fcl-discovery.onflow.org/authn");
         await cfg.put("discovery.authn.endpoint", "https://fcl-discovery.onflow.org/api/authn");
