@@ -65,6 +65,7 @@ async function loadMore(forceFirst = false) {
 async function reload() {
   isFirstLoading.value = true
   list.splice(0, list.length)
+  currentPage.value = 0
   await loadMore(true)
   isFirstLoading.value = false
 }
