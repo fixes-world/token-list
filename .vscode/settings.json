@@ -1,5 +1,6 @@
 {
-  "prettier.enable": true,
+  "biome.enabled": true,
+  "prettier.enable": false,
   "[vue]": {
     "editor.defaultFormatter": "Vue.volar"
   },
@@ -7,6 +8,5 @@
   "html.format.wrapLineLength": 120,
   "html.format.preserveNewLines": true,
   "html.format.maxPreserveNewLines": 1,
-  "html.format.wrapAttributes": "force-expand-multiline",
-  "cadence.flowCommand": "flow"
+  "html.format.wrapAttributes": "force-expand-multiline"
 }

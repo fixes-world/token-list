@@ -84,11 +84,11 @@ export function exportTokenInfo(
     path: ft.path,
     evmAddress: ft.evmAddress,
     flowAddress: ft.identity.address,
-    symbol: ft.display.display.symbol,
+    symbol: ft.display.display.symbol ?? "UKN",
     name: ft.display.display.name,
     description: ft.display?.display?.description ?? "",
     decimals: ft.decimals,
-    logoURI: ft.display.display.logos[0].uri,
+    logoURI: ft.display?.display?.logos?.[0]?.uri ?? `https://placehold.co/128x128?text=${ft.display?.display?.symbol ?? "UKN"}`,
     tags: ft.tags ?? [],
     extensions,
     // Fix for Flow Wallet

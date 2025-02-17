@@ -75,9 +75,7 @@ defineExpose({
       :size="isEvmOnly ? 20 : 50"
       :loadMore="loadMoreFunc"
       :filter="filterName"
-      :getItemName="token => {
-        return token.display?.display?.symbol ?? token.identity.contractName
-      }"
+      :getItemName="token => `${token.display?.display?.symbol ?? ''}:${token.identity.contractName}`"
     >
       <template #header>
         <SearchFilter v-model:search="filterName" />

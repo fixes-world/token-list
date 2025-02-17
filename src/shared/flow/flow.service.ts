@@ -2,13 +2,13 @@ import * as fcl from "@onflow/fcl";
 import { init } from "@onflow/fcl-wc";
 import * as uuid from "uuid";
 import type { Account, TransactionStatus } from "@onflow/typedefs";
-import appInfo from "@shared/config/info";
+import appInfo from "../config/info";
 
 export type NetworkType = "mainnet" | "testnet" | "emulator";
 
 let isGloballyInited = false;
 let isGloballyWalletConnectInit = false;
-let globallyPromise: Promise<any> | null = null;
+let globallyPromise: Promise<unknown> | null = null;
 
 export class FlowService {
   public readonly network: NetworkType;
@@ -45,32 +45,19 @@ export class FlowService {
         datetime: new Date(),
       });
     });
-    await cfg.put(
-      "service.OpenID.scopes",
-      "email email_verified name zoneinfo",
-    );
+    await cfg.put("service.OpenID.scopes", "email email_verified name zoneinfo");
     switch (this.network) {
       case "mainnet":
         await cfg.put(
           "accessNode.api",
-          import.meta.env.PUBLIC_MAINNET_ENDPOINT ??
-            "https://mainnet.onflow.org",
+          import.meta.env.PUBLIC_MAINNET_ENDPOINT ?? "https://mainnet.onflow.org",
         );
-        await cfg.put(
-          "discovery.wallet",
-          "https://fcl-discovery.onflow.org/authn",
-        );
-        await cfg.put(
-          "discovery.authn.endpoint",
-          "https://fcl-discovery.onflow.org/api/authn",
-        );
+        await cfg.put("discovery.wallet", "https://fcl-discovery.onflow.org/authn");
+        await cfg.put("discovery.authn.endpoint", "https://fcl-discovery.onflow.org/api/authn");
         break;
       case "testnet":
         await cfg.put("accessNode.api", "https://testnet.onflow.org");
-        await cfg.put(
-          "discovery.wallet",
-          "https://fcl-discovery.onflow.org/testnet/authn",
-        );
+        await cfg.put("discovery.wallet", "https://fcl-discovery.onflow.org/testnet/authn");
         await cfg.put(
           "discovery.authn.endpoint",
           "https://fcl-discovery.onflow.org/api/testnet/authn",
@@ -190,9 +177,7 @@ export class FlowService {
           proposer: mainAuthz,
           payer: mainAuthz,
           authorizations:
-            (extraAuthz?.length ?? 0) === 0
-              ? [mainAuthz]
-              : [mainAuthz, ...extraAuthz!],
+            (extraAuthz?.length ?? 0) === 0 ? [mainAuthz] : [mainAuthz, ...extraAuthz!],
         });
       } else {
         transactionId = await fcl.mutate({
@@ -217,13 +202,9 @@ export class FlowService {
    */
   async watchTransaction(
     transactionId: string,
-    onStatusUpdated: (status: TransactionStatus) => void | undefined,
-    onSealed: (
-      txId: string,
-      status: TransactionStatus,
-      errorMsg?: string,
-    ) => void | undefined,
-    onErrorOccured?: (errorMsg: string) => void | undefined,
+    onStatusUpdated: (status: TransactionStatus) => undefined,
+    onSealed: (txId: string, status: TransactionStatus, errorMsg?: string) => undefined,
+    onErrorOccured?: (errorMsg: string) => undefined,
   ) {
     await this.ensureInited();
     const unsub = await fcl.tx(transactionId).subscribe((res) => {
@@ -239,11 +220,7 @@ export class FlowService {
         }
         // on sealed callback
         if (typeof onSealed === "function") {
-          onSealed(
-            transactionId,
-            res,
-            res.errorMessage ? res.errorMessage : undefined,
-          );
+          onSealed(transactionId, res, res.errorMessage ? res.errorMessage : undefined);
         }
       }
     });
@@ -253,9 +230,7 @@ export class FlowService {
   /**
    * Get transaction status
    */
-  async getTransactionStatus(
-    transactionId: string,
-  ): Promise<TransactionStatus> {
+  async getTransactionStatus(transactionId: string): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceExecuted();
   }
@@ -271,9 +246,7 @@ export class FlowService {
   /**
    * listen to the transaction status: once sealed
    */
-  async onceTransactionSealed(
-    transactionId: string,
-  ): Promise<TransactionStatus> {
+  async onceTransactionSealed(transactionId: string): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceSealed();
   }
@@ -293,11 +266,7 @@ export class FlowService {
   /**
    * Send script
    */
-  async executeScript<T>(
-    code: string,
-    args: fcl.ArgumentFunction,
-    defaultValue: T,
-  ): Promise<T> {
+  async executeScript<T>(code: string, args: fcl.ArgumentFunction, defaultValue: T): Promise<T> {
     await this.ensureInited();
     try {
       const queryResult = await fcl.query({
@@ -314,10 +283,7 @@ export class FlowService {
   /**
    * Verify account proof
    */
-  async verifyAccountProof(
-    appIdentifier: string,
-    opt: fcl.AccountProofData,
-  ): Promise<boolean> {
+  async verifyAccountProof(appIdentifier: string, opt: fcl.AccountProofData): Promise<boolean> {
     if (this.network === "emulator") return true;
     await this.ensureInited();
 
@@ -337,10 +303,7 @@ export class FlowService {
       {
         // use blocto adddres to avoid self-custodian
         // https://docs.blocto.app/blocto-sdk/javascript-sdk/flow/account-proof
-        fclCryptoContract:
-          this.network === "mainnet"
-            ? "0xdb6b70764af4ff68"
-            : "0x5b250a8a85b44a67",
+        fclCryptoContract: this.network === "mainnet" ? "0xdb6b70764af4ff68" : "0x5b250a8a85b44a67",
       },
     );
   }
