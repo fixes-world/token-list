@@ -4,104 +4,46 @@
     "enabled": true
   },
   "files": {
-    "ignoreUnknown": false,
+    "ignoreUnknown": true,
     "ignore": [
+      "**/.git/**",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/imports/**",
+      "**/build/**",
+      "**/tmp/**",
+      "**/coverage/**",
+      "**/.vercel/**",
+      "**/pnpm-lock.yaml",
+      "**/postman/**",
       "**/*.pkey",
       "**/*.pem",
-      "**/*.key",
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/coverage/**",
-      "**/.git/**",
-      "**/.vercel/**",
-      "**/build/**",
-      "**/pnpm-lock.yaml",
-      "**/postman/**"
+      "**/*.key"
     ]
   },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {
-        "noExplicitAny": "info",
-        "noImplicitAnyLet": "info",
-        "noArrayIndexKey": "warn",
-        "noPrototypeBuiltins": "warn",
-        "noDuplicateObjectKeys": "warn",
-        "noGlobalIsNan": "warn",
-        "noDuplicateFontNames": "warn",
-        "noSelfCompare": "warn",
-        "noDoubleEquals": "warn",
-        "noAssignInExpressions": "warn",
-        "noExportsInTest": "warn",
-        "noConstEnum": "warn",
-        "noEmptyInterface": "warn"
-      },
       "correctness": {
-        "noUnusedVariables": "error",
-        "noUnreachable": "warn",
-        "useExhaustiveDependencies": "warn",
-        "noSwitchDeclarations": "warn",
-        "noUnnecessaryContinue": "warn",
-        "noInnerDeclarations": "warn"
+        "noUnusedVariables": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "error"
       },
       "style": {
         "useConst": "warn",
-        "useTemplate": "warn",
-        "useImportType": "warn",
-        "useNodejsImportProtocol": "warn",
-        "noUselessElse": "warn",
-        "useSelfClosingElements": "warn",
-        "useNumberNamespace": "warn",
-        "noUnusedTemplateLiteral": "warn",
-        "noInferrableTypes": "warn",
-        "noNonNullAssertion": "warn",
-        "noParameterAssign": "warn",
-        "useDefaultParameterLast": "warn",
-        "useExponentiationOperator": "warn",
-        "noVar": "warn",
-        "useSingleVarDeclarator": "warn",
-        "useExportType": "warn"
-      },
-      "a11y": {
-        "useAltText": "warn",
-        "useFocusableInteractive": "warn",
-        "useMediaCaption": "warn",
-        "noSvgWithoutTitle": "warn",
-        "useKeyWithClickEvents": "warn"
-      },
-      "complexity": {
-        "noForEach": "warn",
-        "useOptionalChain": "warn",
-        "useArrowFunction": "warn",
-        "useFlatMap": "warn",
-        "useLiteralKeys": "warn",
-        "noBannedTypes": "warn",
-        "noStaticOnlyClass": "warn",
-        "noThisInStatic": "warn",
-        "noUselessConstructor": "warn",
-        "noUselessTernary": "warn",
-        "noUselessSwitchCase": "warn",
-        "noUselessCatch": "warn"
-      },
-      "performance": {
-        "noDelete": "warn",
-        "noAccumulatingSpread": "warn"
-      },
-      "nursery": {
-        "useSortedClasses": "warn"
+        "useImportType": "off"
       }
     }
   },
   "formatter": {
     "enabled": true,
-    "useEditorconfig": true,
     "formatWithErrors": true,
     "indentStyle": "space",
+    "indentWidth": 2,
     "lineWidth": 100,
     "ignore": [
-      "**/*.json",
       "**/*.css"
     ]
   },
@@ -112,11 +54,6 @@
     "formatter": {
       "quoteStyle": "double",
       "semicolons": "always"
-    }
-  },
-  "json": {
-    "formatter": {
-      "enabled": false
     }
   },
   "overrides": [
