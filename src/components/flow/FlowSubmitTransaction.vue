@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { NButton, useDialog } from 'naive-ui';
+import { transactionExecutedKey, useNetworkCorrect } from "@components/shared";
 import type { TransactionStatus } from "@onflow/typedefs";
-import { useNetworkCorrect } from "@components/shared";
-import { ClientNotificationError } from '@shared/exception.client';
+import Exception from "@shared/exception";
+import { ClientNotificationError } from "@shared/exception.client";
+import { NButton, useDialog, useMessage } from "naive-ui";
+import { computed, onUnmounted, ref } from "vue";
 
-import FlowWaitTransaction from './FlowWaitTransaction.vue';
-
-const isNetworkCorrect = useNetworkCorrect();
+import { useEventBus } from "@vueuse/core";
+import FlowWaitTransaction from "./FlowWaitTransaction.vue";
 
 const props = withDefaults(
   defineProps<{
     method: (e: MouseEvent) => Promise<string | null>;
-    type?: 'default' | 'tertiary' | 'primary' | 'success' | 'info' | 'warning' | 'error',
-    size?: 'tiny' | 'small' | 'medium' | 'large',
+    type?: "default" | "tertiary" | "primary" | "success" | "info" | "warning" | "error";
+    size?: "tiny" | "small" | "medium" | "large";
     content?: string;
     action?: string;
     disabled?: boolean;
@@ -23,33 +23,39 @@ const props = withDefaults(
   }>(),
   {
     content: "Submit",
-    type: 'primary',
-    size: 'large',
-    action: '',
+    type: "primary",
+    size: "large",
+    action: "",
     disabled: false,
     hideSendingError: true,
     hideButton: false,
     hideTrx: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
-  (e: 'sent', txid: string | null): void;
+  (e: "sent", txid: string | null): void;
+  (e: "finalized", tx: TransactionStatus): void;
   (e: "sealed", tx: TransactionStatus): void;
-  (e: 'success'): void;
+  (e: "success"): void;
   (e: "error", message: string | null): void;
   (e: "reset"): void;
 }>();
 
+const isNetworkCorrect = useNetworkCorrect();
 const dialog = useDialog();
+const uiMessage = useMessage();
+const txExecutedBus = useEventBus(transactionExecutedKey);
+
 const txid = ref<string | null>(null);
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
+const isFinalized = ref<boolean | undefined>(undefined);
 const isSealed = ref<boolean | undefined>(undefined);
 
-const isBusy = computed(() => isLoading.value || isSealed.value === false);
+const isBusy = computed(() => isLoading.value || isFinalized.value === false);
 const isSubmitTxDisabled = computed(() => !isNetworkCorrect.value || isBusy.value);
-const disabledReason = computed(() => !isNetworkCorrect.value ? "Network Incorrect" : undefined);
+const disabledReason = computed(() => (!isNetworkCorrect.value ? "Network Incorrect" : undefined));
 
 async function startTransaction(e: MouseEvent) {
   e.preventDefault();
@@ -57,62 +63,81 @@ async function startTransaction(e: MouseEvent) {
 
   isLoading.value = true;
   errorMessage.value = null;
+  isFinalized.value = false;
   isSealed.value = false;
   try {
     txid.value = await props.method(e);
     emit("sent", txid.value);
   } catch (err: any) {
+    isFinalized.value = true;
     isSealed.value = true;
     console.error(err);
     // Popup error message for client notification error
-    if (err instanceof ClientNotificationError) {
+    if (err instanceof ClientNotificationError || err instanceof Exception) {
       dialog.error({
         title: "Transaction Error",
         content: err.message,
-      })
+      });
     }
     // Display error message
     if (!props.hideSendingError) {
       const msg = String(err.reason ?? err.message ?? "rejected");
-      errorMessage.value = msg.length > 60 ? msg.slice(0, 60) + "..." : msg;
+      errorMessage.value = msg.length > 60 ? `${msg.slice(0, 60)}...` : msg;
     }
     emit("error", errorMessage.value);
   }
   isLoading.value = false;
 }
 
-function onSealed(trxId: string, tx: TransactionStatus) {
-  isSealed.value = true;
+function onFinalized(txId: string, tx: TransactionStatus) {
+  emit("finalized", tx);
   if (!tx.errorMessage) {
-    emit("success")
+    emit("success");
   }
+  txExecutedBus.emit(txId);
+  isFinalized.value = true;
+}
+
+function onSealed(trxId: string, tx: TransactionStatus) {
   emit("sealed", tx);
+  isSealed.value = true;
+
   // avoid no closed
   setTimeout(() => {
     if (txid.value) {
-      resetComponent()
+      resetComponent();
     }
   }, 5000);
 }
 
 function onError(msg: string) {
-  errorMessage.value = msg
+  errorMessage.value = msg;
+  uiMessage.error(`Transaction Error: ${msg.slice(0, 150)}`);
   emit("error", msg);
 }
 
 function resetComponent() {
-  emit("reset")
+  emit("reset");
+
+  cleanUp();
+}
+
+function cleanUp() {
   txid.value = null;
   errorMessage.value = null;
+  isFinalized.value = undefined;
   isSealed.value = undefined;
 }
+
+onUnmounted(() => {
+  cleanUp();
+});
 
 // expose members
 defineExpose({
   resetComponent: ref(resetComponent),
   startTransaction: ref(startTransaction),
   isLoading,
-  isSealed
 });
 </script>
 
@@ -131,7 +156,7 @@ defineExpose({
         Disabled
       </slot>
     </NButton>
-    <template v-else-if="!hideButton && (!txid || !isSealed)">
+    <template v-else-if="!hideButton && (!txid || !isFinalized)">
       <NButton
         role="button"
         strong
@@ -155,15 +180,9 @@ defineExpose({
           {{ content }}
         </slot>
       </NButton>
-      <p
-        v-if="errorMessage"
-        class="w-full max-h-20 overflow-y-scroll px-4 mb-0 text-xs"
-      >
-        {{ errorMessage }}
-      </p>
     </template>
     <slot
-      v-if="!hideButton && (txid && isSealed)"
+      v-if="!hideButton && (txid && isFinalized)"
       name="next"
     >
       <NButton
@@ -172,18 +191,20 @@ defineExpose({
         round
         :size="size"
         style="width: 100%;"
-        :type="type"
+        :type="!isSealed ? 'warning' : type"
+        :disabled="!isSealed"
         ghost
         @click.stop.prevent="resetComponent"
       >
-        Close
+        {{ !isSealed ? "Sealing..." : "Close" }}
       </NButton>
     </slot>
     <Teleport to="body">
       <FlowWaitTransaction
         v-if="txid"
         :hidden="hideTrx"
-        :txid="txid"
+        :txid="txid ?? undefined"
+        @finalized="onFinalized"
         @sealed="onSealed"
         @error="onError"
         @close="resetComponent"

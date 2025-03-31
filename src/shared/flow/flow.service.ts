@@ -161,6 +161,7 @@ export class FlowService {
   /**
    * General method of sending transaction
    */
+
   async sendTransaction(
     code: string,
     args: fcl.ArgumentFunction,
@@ -187,7 +188,7 @@ export class FlowService {
       }
       console.log("Tx Sent:", transactionId);
       return transactionId;
-    } catch (e: any) {
+    } catch (e) {
       console.error("Tx Error:", e);
       throw e;
     }
@@ -200,27 +201,40 @@ export class FlowService {
    * @param onStatusUpdated
    * @param onErrorOccured
    */
+
   async watchTransaction(
     transactionId: string,
     onStatusUpdated: (status: TransactionStatus) => undefined,
+    onFinalized: (txId: string, status: TransactionStatus, errorMsg?: string) => undefined,
     onSealed: (txId: string, status: TransactionStatus, errorMsg?: string) => undefined,
     onErrorOccured?: (errorMsg: string) => undefined,
   ) {
     await this.ensureInited();
+    let isErrorSent = false;
+    let isFinalizedSent = false;
     const unsub = await fcl.tx(transactionId).subscribe((res) => {
       if (onStatusUpdated) {
         onStatusUpdated(res);
       }
 
-      if (res.status === 4) {
-        // sealed
-        unsub();
-        if (res.errorMessage && onErrorOccured) {
-          onErrorOccured(res.errorMessage);
+      if (res.status >= 3) {
+        if (!isFinalizedSent && typeof onFinalized === "function") {
+          onFinalized(transactionId, res, res.errorMessage ? res.errorMessage : undefined);
+          isFinalizedSent = true;
         }
-        // on sealed callback
-        if (typeof onSealed === "function") {
-          onSealed(transactionId, res, res.errorMessage ? res.errorMessage : undefined);
+
+        if (res.errorMessage && !isErrorSent && typeof onErrorOccured === "function") {
+          onErrorOccured(res.errorMessage);
+          isErrorSent = true;
+        }
+
+        if (res.status >= 4) {
+          // sealed
+          unsub();
+          // on sealed callback
+          if (typeof onSealed === "function") {
+            onSealed(transactionId, res, res.errorMessage ? res.errorMessage : undefined);
+          }
         }
       }
     });
@@ -230,6 +244,7 @@ export class FlowService {
   /**
    * Get transaction status
    */
+
   async getTransactionStatus(transactionId: string): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceExecuted();
@@ -238,6 +253,7 @@ export class FlowService {
   /**
    * Get chain id
    */
+
   async getChainId() {
     await this.ensureInited();
     return await fcl.getChainId();
@@ -246,6 +262,7 @@ export class FlowService {
   /**
    * listen to the transaction status: once sealed
    */
+
   async onceTransactionSealed(transactionId: string): Promise<TransactionStatus> {
     await this.ensureInited();
     return await fcl.tx(transactionId).onceSealed();
@@ -255,6 +272,7 @@ export class FlowService {
    * Get block object
    * @param blockId
    */
+
   async getBlockHeaderObject(blockId: string): Promise<fcl.BlockHeaderObject> {
     await this.ensureInited();
     return await fcl
@@ -266,6 +284,7 @@ export class FlowService {
   /**
    * Send script
    */
+
   async executeScript<T>(code: string, args: fcl.ArgumentFunction, defaultValue: T): Promise<T> {
     await this.ensureInited();
     try {
@@ -283,6 +302,7 @@ export class FlowService {
   /**
    * Verify account proof
    */
+
   async verifyAccountProof(appIdentifier: string, opt: fcl.AccountProofData): Promise<boolean> {
     if (this.network === "emulator") return true;
     await this.ensureInited();

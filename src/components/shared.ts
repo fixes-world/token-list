@@ -76,3 +76,5 @@ export function updateGlobalAccount(addr?: string) {
 // ---------------- Constants ----------------
 
 export const logoutKey: EventBusKey<{ address: string }> = Symbol("logout");
+
+export const transactionExecutedKey: EventBusKey<string> = Symbol("onTransactionExecuted");
