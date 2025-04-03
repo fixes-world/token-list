@@ -20,7 +20,7 @@ transaction(
         /// ---------- Reviewer Initialization: End ----------
 
         assert(
-            acct.storage.check<&TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath),
+            acct.storage.check<@TokenList.FungibleTokenReviewer>(from: TokenList.reviewerStoragePath),
             message: "Missing the reviewer capability"
         )
 
