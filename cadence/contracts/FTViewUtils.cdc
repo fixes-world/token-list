@@ -579,7 +579,7 @@ access(all) contract FTViewUtils {
 
         access(all)
         view fun getSymbol(): String {
-            return self.metadata["symbol"] ?? "NONE"
+            return self.metadata["symbol"] ?? self.metadata["name"] ?? "NONE"
         }
 
         access(all)
