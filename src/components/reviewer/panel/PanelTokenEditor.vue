@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { ref, reactive, computed, inject, watch, h, type VNodeChild, toRaw } from 'vue'
+import { useSendingTransaction } from '@components/shared'
+import { getAssetContractStatus } from '@shared/flow/action/scripts';
+import type { CustomizedTokenDto, Media, SocialKeyPair, StandardTokenView, TokenPaths } from '@shared/flow/entities';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import {
-  NSkeleton, NEmpty,
-  NGrid, NGridItem, NFormItemGi, NForm, type FormInst, type FormRules,
-  NInput, NButton, NDynamicInput,
-  NSelect, type SelectOption,
+  type FormInst, type FormRules, NButton, NDynamicInput, NEmpty, NForm, NFormItemGi,
+  NGrid, NGridItem,
+  NInput,
+  NSelect,
+  NSkeleton, type SelectOption,
 } from 'naive-ui';
-import type { StandardTokenView, Media, CustomizedTokenDto, SocialKeyPair, TokenPaths } from '@shared/flow/entities';
-import { getAssetContractStatus } from '@shared/flow/action/scripts';
-import { useSendingTransaction } from '@components/shared'
+import { type VNodeChild, computed, h, inject, reactive, ref, toRaw, watch } from 'vue'
 
-import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
-import ImageUploader from '@components/widgets/ImageUploader.vue';
 import ElementWrapper from '@components/items/cardElements/ElementWrapper.vue';
+import PanelCardWrapper from '@components/partials/PanelCardWrapper.vue';
 import FormSubmitCustomizeFT from '@components/reviewer/form/FormSubmitCustomizeFT.vue';
+import ImageUploader from '@components/widgets/ImageUploader.vue';
 
 const props = withDefaults(defineProps<{
   ft?: StandardTokenView,
@@ -22,9 +23,7 @@ const props = withDefaults(defineProps<{
   ft: undefined,
 })
 
-const emits = defineEmits<{
-  (e: 'refresh'): void
-}>();
+const emits = defineEmits<(e: 'refresh') => void>();
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isNotMobile = breakpoints.greaterOrEqual('md')
@@ -66,7 +65,7 @@ const rules = ref<FormRules>({
     logo: { required: true, message: 'Token Icon is required', trigger: ['change', 'blur'] },
     symbol: [
       { required: true, message: 'Symbol is required', trigger: 'blur' },
-      { type: 'string', pattern: /^[A-Za-z][A-Za-z0-9\._]{1,9}$/, message: 'Please Enter 2~8 Letters.', trigger: ['input', 'blur'] },
+      { type: 'string', pattern: /^[A-Za-z][A-Za-z0-9\._]{1,16}$/, message: 'Please Enter 2~15 Letters.', trigger: ['input', 'blur'] },
     ],
     name: [
       { required: true, message: 'Name is required', trigger: 'blur' },
