@@ -284,7 +284,7 @@ access(all) contract TokenList {
                         source = addr
                         retFTDisplay = FungibleTokenMetadataViews.FTDisplay(
                             name: ftDisplayRef.getName() ?? retFTDisplay?.name ?? "Unkonwn",
-                            symbol: ftDisplayRef.getSymbol(),
+                            symbol: ftDisplayRef.getSymbol() ?? retFTDisplay?.symbol ?? "NONE",
                             description: ftDisplayRef.getDescription() ?? retFTDisplay?.description ?? "No Description",
                             externalURL: ftDisplayRef.getExternalURL() ?? retFTDisplay?.externalURL ?? MetadataViews.ExternalURL("https://fixes.world"),
                             logos: ftDisplayRef.getLogos(),

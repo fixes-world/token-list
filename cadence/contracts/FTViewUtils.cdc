@@ -442,7 +442,7 @@ access(all) contract FTViewUtils {
         let identity: FTIdentity
         // ----- FT Display -----
         access(all)
-        view fun getSymbol(): String
+        view fun getSymbol(): String?
         access(all)
         view fun getName(): String?
         access(all)
@@ -460,7 +460,7 @@ access(all) contract FTViewUtils {
         fun getFTDisplay(): FungibleTokenMetadataViews.FTDisplay {
             return FungibleTokenMetadataViews.FTDisplay(
                 name: self.getName() ?? "Unknown Token",
-                symbol: self.getSymbol(),
+                symbol: self.getSymbol() ?? "NONE",
                 description: self.getDescription() ?? "No Description",
                 externalURL: self.getExternalURL() ?? MetadataViews.ExternalURL("https://fixes.world"),
                 logos: self.getLogos(),
@@ -578,8 +578,8 @@ access(all) contract FTViewUtils {
         /** ---- Implement the EditableFTViewDisplayInterface ---- */
 
         access(all)
-        view fun getSymbol(): String {
-            return self.metadata["symbol"] ?? self.metadata["name"] ?? "NONE"
+        view fun getSymbol(): String? {
+            return self.metadata["symbol"]
         }
 
         access(all)
@@ -627,7 +627,7 @@ access(all) contract FTViewUtils {
             }
             // add default icon
             if medias.length == 0 {
-                let ticker = self.getSymbol()
+                let ticker = self.getSymbol() ?? self.getName() ?? "NONE"
                 let tickNameSize = 80 + (10 - ticker.length > 0 ? 10 - ticker.length : 0) * 12
                 let svgStr = "data:image/svg+xml;utf8,"
                     .concat("%3Csvg%20xmlns%3D%5C%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%5C%22%20viewBox%3D%5C%22-256%20-256%20512%20512%5C%22%20width%3D%5C%22512%5C%22%20height%3D%5C%22512%5C%22%3E")
@@ -811,7 +811,7 @@ access(all) contract FTViewUtils {
         /** ---- Implement the FTViewDisplayInterface ---- */
 
         access(all)
-        view fun getSymbol(): String {
+        view fun getSymbol(): String? {
             return self.display.getSymbol()
         }
 
