@@ -1,50 +1,50 @@
+import scGetAddressReviewerStatus from "@cadence/scripts/get-address-reviewer-status.cdc?raw";
+import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
+import scGetEVMFTOrNFTContract from "@cadence/scripts/get-ft-or-nft-contract-by-evm.cdc?raw";
+import scGetFTorNFTContractStatus from "@cadence/scripts/get-ft-or-nft-contract-status.cdc?raw";
+// Scripts - FTs or NFTs
+import scGetFTsOrNFTsContracts from "@cadence/scripts/get-ft-or-nft-contracts.cdc?raw";
+import scGetReviewerInfo from "@cadence/scripts/get-reviewer-info.cdc?raw";
+import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
+import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
+// Scripts - EVM Bridged
+import scIsEVMAssetRegistered from "@cadence/scripts/is-evm-asset-registered.cdc?raw";
+// Scripts - FTs
+import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
+import scGetNFTListAddressReviewerStatus from "@cadence/scripts/nftlist/get-address-reviewer-status.cdc?raw";
+import scGetNFTListReviewerInfo from "@cadence/scripts/nftlist/get-reviewer-info.cdc?raw";
+import scGetNFTListReviewers from "@cadence/scripts/nftlist/get-reviewers.cdc?raw";
+import scGetNFTListVeifiedReviewers from "@cadence/scripts/nftlist/get-verified-reviewers.cdc?raw";
+// Scripts - NFTs
+import scIsNFTRegistered from "@cadence/scripts/nftlist/is-token-registered.cdc?raw";
+import scQueryNFTList from "@cadence/scripts/nftlist/query-token-list.cdc?raw";
+import scQueryNFTListByAddress from "@cadence/scripts/nftlist/query-token-list-by-address.cdc?raw";
+import scQueryEVMBridgedFTList from "@cadence/scripts/query-evm-bridged-ft-list.cdc?raw";
+import scQueryEVMBridgedNFTList from "@cadence/scripts/query-evm-bridged-nft-list.cdc?raw";
+import scQueryTokenList from "@cadence/scripts/query-token-list.cdc?raw";
+import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-address.cdc?raw";
+// Scripts - Utils
+import scResolveName from "@cadence/scripts/utils/resolve-name.cdc?raw";
 import type {
   AddressStatus,
+  AssetPaths,
+  EVMAssetStatus,
   Media,
   NFTCollectionDisplay,
   NFTListQueryResult,
-  AssetPaths,
   ReviewerInfo,
   StandardNFTCollectionView,
   StandardTokenView,
+  TagableItem,
+  TokenAssetStatus,
   TokenDisplay,
   TokenIdentity,
   TokenPaths,
   TokenQueryResult,
-  TokenAssetStatus,
-  TagableItem,
-  EVMAssetStatus,
 } from "@shared/flow/entities";
 import { FilterType } from "@shared/flow/enums";
 // import type { FlowService } from "../flow.service";
 import { getFlowInstance } from "../flow.service.factory";
-// Scripts - Utils
-import scResolveName from "@cadence/scripts/utils/resolve-name.cdc?raw";
-import scGetContractNames from "@cadence/scripts/get-contract-names.cdc?raw";
-// Scripts - FTs
-import scIsTokenRegistered from "@cadence/scripts/is-token-registered.cdc?raw";
-import scGetReviewerInfo from "@cadence/scripts/get-reviewer-info.cdc?raw";
-import scGetReviewers from "@cadence/scripts/get-reviewers.cdc?raw";
-import scGetVeifiedReviewers from "@cadence/scripts/get-verified-reviewers.cdc?raw";
-import scGetAddressReviewerStatus from "@cadence/scripts/get-address-reviewer-status.cdc?raw";
-import scQueryTokenList from "@cadence/scripts/query-token-list.cdc?raw";
-import scQueryTokenListByAddress from "@cadence/scripts/query-token-list-by-address.cdc?raw";
-// Scripts - NFTs
-import scIsNFTRegistered from "@cadence/scripts/nftlist/is-token-registered.cdc?raw";
-import scGetNFTListReviewerInfo from "@cadence/scripts/nftlist/get-reviewer-info.cdc?raw";
-import scGetNFTListReviewers from "@cadence/scripts/nftlist/get-reviewers.cdc?raw";
-import scGetNFTListVeifiedReviewers from "@cadence/scripts/nftlist/get-verified-reviewers.cdc?raw";
-import scGetNFTListAddressReviewerStatus from "@cadence/scripts/nftlist/get-address-reviewer-status.cdc?raw";
-import scQueryNFTList from "@cadence/scripts/nftlist/query-token-list.cdc?raw";
-import scQueryNFTListByAddress from "@cadence/scripts/nftlist/query-token-list-by-address.cdc?raw";
-// Scripts - FTs or NFTs
-import scGetFTsOrNFTsContracts from "@cadence/scripts/get-ft-or-nft-contracts.cdc?raw";
-import scGetFTorNFTContractStatus from "@cadence/scripts/get-ft-or-nft-contract-status.cdc?raw";
-// Scripts - EVM Bridged
-import scIsEVMAssetRegistered from "@cadence/scripts/is-evm-asset-registered.cdc?raw";
-import scGetEVMFTOrNFTContract from "@cadence/scripts/get-ft-or-nft-contract-by-evm.cdc?raw";
-import scQueryEVMBridgedFTList from "@cadence/scripts/query-evm-bridged-ft-list.cdc?raw";
-import scQueryEVMBridgedNFTList from "@cadence/scripts/query-evm-bridged-nft-list.cdc?raw";
 
 // Get the script source code
 export function getQueryListScript(isNFT: boolean, isEVM: boolean) {
@@ -90,7 +90,7 @@ export async function isTokenRegistered(ft: TokenIdentity): Promise<boolean> {
 function parseTokenContractStatus(obj: any): TokenAssetStatus {
   const paths: Record<string, string> = {};
   // add alias for balance and receiver
-  for (let key in obj.publicPaths) {
+  for (const key in obj.publicPaths) {
     paths[key] = obj.publicPaths[key];
   }
   return {
@@ -183,9 +183,9 @@ const parseReviewer = (obj: any): ReviewerInfo => {
     verified: obj.verified ?? false,
     name: obj.name,
     url: obj.url,
-    managedTokenAmt: parseInt(obj.managedTokenAmt),
-    reviewedTokenAmt: parseInt(obj.reviewedTokenAmt),
-    customziedTokenAmt: parseInt(obj.customziedTokenAmt),
+    managedTokenAmt: parseInt(obj.managedTokenAmt, 10),
+    reviewedTokenAmt: parseInt(obj.reviewedTokenAmt, 10),
+    customziedTokenAmt: parseInt(obj.customziedTokenAmt, 10),
   };
 };
 
@@ -292,7 +292,7 @@ const parseTokenView = (obj: any): StandardTokenView => {
     },
     evmAddress: obj.evmAddress,
     tags: obj.tags,
-    decimals: parseInt(obj.decimals),
+    decimals: parseInt(obj.decimals, 10),
     dataSource: obj.dataSource,
     path: obj.paths ? parseTokenPaths(obj.paths) : undefined,
     display: obj.display
@@ -319,7 +319,7 @@ export async function queryTokenListByAddress(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseTokenView),
   };
 }
@@ -359,7 +359,7 @@ export async function queryTokenList(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseTokenView).sort(sortTokenView),
   };
 }
@@ -487,7 +487,7 @@ export async function queryNFTListByAddress(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseNFTCollectionView),
   };
 }
@@ -510,7 +510,7 @@ export async function queryNFTList(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
   };
 }
@@ -567,7 +567,7 @@ export async function queryEVMBridgedFTList(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseTokenView).sort(sortTokenView),
   };
 }
@@ -588,7 +588,7 @@ export async function queryEVMBridgedNFTList(
     { total: "0", list: [] },
   );
   return {
-    total: parseInt(ret.total),
+    total: parseInt(ret.total, 10),
     list: ret.list.map(parseNFTCollectionView).sort(sortTokenView),
   };
 }
