@@ -1,5 +1,5 @@
-import type { APIRoute } from "astro";
 import { generateQiniuUploadToken } from "@shared/api/utilties.server";
+import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async () => {
   const token = generateQiniuUploadToken();
