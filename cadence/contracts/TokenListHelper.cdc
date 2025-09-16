@@ -154,7 +154,7 @@ access(all) contract TokenListHelper {
         if let evmAddr = FlowEVMBridgeConfig.getEVMAddressAssociated(with: tokenType) {
             var decimals: UInt8 = 8
             if prioritizeEVMData || FlowEVMBridgeUtils.isCadenceNative(type: tokenType) == false {
-                if FlowEVMBridgeUtils.isERC20(evmContractAddress: evmAddr) {
+                if prioritizeEVMData && FlowEVMBridgeUtils.isERC20(evmContractAddress: evmAddr) {
                     decimals = FlowEVMBridgeUtils.getTokenDecimals(evmContractAddress: evmAddr)
                 }
             }
