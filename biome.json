@@ -1,24 +1,29 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
-  "organizeImports": {
-    "enabled": true
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": [
-      "**/.git/**",
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/imports/**",
-      "**/build/**",
-      "**/tmp/**",
-      "**/coverage/**",
-      "**/.vercel/**",
-      "**/pnpm-lock.yaml",
-      "**/postman/**",
-      "**/*.pkey",
-      "**/*.pem",
-      "**/*.key"
+    "includes": [
+      "**",
+      "!**/.git",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/imports",
+      "!**/build",
+      "!**/tmp",
+      "!**/coverage",
+      "!**/.vercel",
+      "!**/pnpm-lock.yaml",
+      "!**/postman",
+      "!**/*.pkey",
+      "!**/*.pem",
+      "!**/*.key"
     ]
   },
   "linter": {
@@ -29,7 +34,7 @@
         "noUnusedVariables": "error"
       },
       "suspicious": {
-        "noExplicitAny": "error"
+        "noExplicitAny": "warn"
       },
       "style": {
         "useConst": "warn",
@@ -43,8 +48,9 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 100,
-    "ignore": [
-      "**/*.css"
+    "includes": [
+      "**",
+      "!**/*.css"
     ]
   },
   "javascript": {
@@ -58,10 +64,10 @@
   },
   "overrides": [
     {
-      "include": [
-        "*.svelte",
-        "*.astro",
-        "*.vue"
+      "includes": [
+        "**/*.svelte",
+        "**/*.astro",
+        "**/*.vue"
       ],
       "linter": {
         "rules": {

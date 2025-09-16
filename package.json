@@ -43,7 +43,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/vercel": "^8.2.3",
-    "@biomejs/biome": "2.1.2",
+    "@biomejs/biome": "2.2.4",
     "@iconify-json/carbon": "^1.2.4",
     "@onflow/config": "1.5.2",
     "@onflow/typedefs": "1.6.0",
